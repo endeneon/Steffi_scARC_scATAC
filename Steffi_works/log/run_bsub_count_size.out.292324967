@@ -1,0 +1,63 @@
+Sender: LSF System <lsfadmin@noderome192>
+Subject: Job 292324967: <run_bsub_count_size> in cluster <hpcf_research_cluster> Done
+
+Job <run_bsub_count_size> was submitted from host <splprhpc12> by user <szhang37> in cluster <hpcf_research_cluster> at Thu Jun 11 01:01:25 2026
+Job was executed on host(s) <3*noderome192>, in queue <standard>, as user <szhang37> in cluster <hpcf_research_cluster> at Thu Jun 11 01:01:27 2026
+                            <11*noderome137>
+                            <6*noderome212>
+</home/szhang37> was used as the home directory.
+</home/szhang37/CAB_workspace/pulled_git_repos/Multiome_main/Steffi_works> was used as the working directory.
+Started at Thu Jun 11 01:01:27 2026
+Terminated at Thu Jun 11 01:09:57 2026
+Results reported at Thu Jun 11 01:09:57 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#! /bin/bash
+
+mkdir -p log
+#BSUB -n 20
+#BSUB -R "rusage[mem=20G]"
+
+#BSUB -q "standard"
+#BSUB -J "run_bsub_count_size"
+
+#BSUB -o log/run_bsub_count_size.out.%J
+#BSUB -e log/err.%J
+
+module load conda3/202402
+conda activate /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/standalone_conda_envs/r45_py312_scARC
+
+working_dir="/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
+cd $working_dir || exit 1
+
+Rscript ./read_vcf_and_sampling.R
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   494.00 sec.
+    Max Memory :                                 905 MB
+    Average Memory :                             799.59 MB
+    Total Requested Memory :                     409600.00 MB
+    Delta Memory :                               408695.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                12
+    Run time :                                   510 sec.
+    Turnaround time :                            512 sec.
+
+The output (if any) follows:
+
+[1] "Running under Rscript, use plan(multicore)"
+[1] TRUE
+
+
+PS:
+
+Read file <log/err.292324967> for stderr output of this job.
+
