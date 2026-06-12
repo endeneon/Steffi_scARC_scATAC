@@ -50,7 +50,11 @@ setwd(working_dir)
 # determine if R is running in RSTUDIO or POSITRON, and set the future plan accordingly
 # Manual set
 Sys.setenv(VSCODE = "1")
-if (Sys.getenv("RSTUDIO") == "1" | Sys.getenv("POSITRON") == "1" | Sys.getenv("VSCODE") == "1") {
+if (
+  Sys.getenv("RSTUDIO") == "1" |
+    Sys.getenv("POSITRON") == "1" |
+    Sys.getenv("VSCODE") == "1"
+) {
   print("Running under RStudio IDE, use plan(multisession)")
   session_plan <- "multisession"
 } else {
@@ -191,7 +195,10 @@ merged_normalised_df$norm_altCount <-
 merged_normalised_df$norm_sumCount <-
   merged_normalised_df$norm_refCount + merged_normalised_df$norm_altCount
 
-sum(merged_normalised_df$norm_refCount >= 2 & merged_normalised_df$norm_altCount >= 2) # 75479
+sum(
+  merged_normalised_df$norm_refCount >= 2 &
+    merged_normalised_df$norm_altCount >= 2
+) # 75479
 mean(merged_normalised_df$norm_sumCount) # 13.84079
 median(merged_normalised_df$norm_sumCount) # 3
 
@@ -225,12 +232,14 @@ merged_normalised_df$pVal <-
     merged_normalised_df$norm_refCount,
     merged_normalised_df$norm_altCount
   )
-merged_normalised_df$percRef <- 
-merged_normalised_df$norm_refCount / merged_normalised_df$norm_sumCount
+merged_normalised_df$percRef <-
+  merged_normalised_df$norm_refCount / merged_normalised_df$norm_sumCount
 
 merged_normalised_df$adjPVal <-
- p.adjust(
-  merged_normalised_df$pVal, method = "fdr")
+  p.adjust(
+    merged_normalised_df$pVal,
+    method = "fdr"
+  )
 
 merged_normalised_df <-
   merged_normalised_df[
@@ -252,7 +261,8 @@ ASoC_df <-
       merged_normalised_df$percRef,
       merged_normalised_df$pVal,
       merged_normalised_df$adjPVal
-    ))
+    )
+  )
 colnames(ASoC_df) <-
   c(
     "chromosome",
@@ -411,7 +421,8 @@ manhattan_track_list <-
         range = manhattan_plot_gr[keep],
         data = manhattan_gr$negLogAdjPVal[keep],
         name = "-log10(adjPVal)",
-        col = chrom_colours[i],,
+        col = chrom_colours[i],
+        ,
         cex = 0.5,
         type = "p"
       )
@@ -474,15 +485,15 @@ Gviz::plotTracks(
   lty.baseline = 2,
   lwd.baseline = 1,
   sizes = c(5, 0.5),
-  title.width = 1,          # shrink the left title strip
+  title.width = 1, # shrink the left title strip
   background.title = "white", # remove the grey background
-  col.title = "black",        # black title text
-  fontcolor.title = "black",  # black track-name font
-  col.axis = "black",         # black axis lines and tick marks
-  fontcolor.axis = "black",  # black axis tick labels
+  col.title = "black", # black title text
+  fontcolor.title = "black", # black track-name font
+  col.axis = "black", # black axis lines and tick marks
+  fontcolor.axis = "black", # black axis tick labels
   # rotation.title = 0,       # horizontal track-title labels
-  cex.axis = 1.2,            # font size of y-axis tick labels
-  cex.title = 1.2            # font size of y-axis track title
+  cex.axis = 1.2, # font size of y-axis tick labels
+  cex.title = 1.2 # font size of y-axis track title
 )
 
 # volcano-style plot with EnhancedVolcano ####
@@ -524,14 +535,15 @@ EnhancedVolcano::EnhancedVolcano(
   ylab = "-log10(pVal)",
   xlim = c(0, 1),
   pointSize = ifelse(
-    EnhancedVolcano_df$pVal < 0.05 & 
-    (EnhancedVolcano_df$percRef < 0.4 | 
-    EnhancedVolcano_df$percRef > 0.6),
-    0.5, 
-    0.2), # larger points for significant variants
+    EnhancedVolcano_df$pVal < 0.05 &
+      (EnhancedVolcano_df$percRef < 0.4 |
+        EnhancedVolcano_df$percRef > 0.6),
+    0.5,
+    0.2
+  ), # larger points for significant variants
   pCutoff = 0.05,
-  FCcutoff = Inf,            # disable the symmetric (around 0) FC cutoff lines
-  vline = c(0.4, 0.5, 0.6),     # custom vertical x-axis cutoff lines
+  FCcutoff = Inf, # disable the symmetric (around 0) FC cutoff lines
+  vline = c(0.4, 0.5, 0.6), # custom vertical x-axis cutoff lines
   vlineCol = "black",
   vlineType = c("dashed", "solid", "dashed"),
   colCustom = volcano_colours,
@@ -542,8 +554,7 @@ EnhancedVolcano::EnhancedVolcano(
   # legendJustification = "left",  # left-align the stacked legend under the title
   legendLabSize = 10,
   legendIconSize = 3
-) + ggplot2::guides(
-  colour = ggplot2::guide_legend(ncol = 1)  # keep items vertically stacked
-)
-
-
+) +
+  ggplot2::guides(
+    colour = ggplot2::guide_legend(ncol = 1) # keep items vertically stacked
+  )
