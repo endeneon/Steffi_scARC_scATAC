@@ -101,10 +101,13 @@ ASoC_output_dir <-
 data_dir <-
   "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/data_dir"
 
+# define the count pattern to be tested
+count_pattern <- "*_CR"
+
 df_tsv_list <-
   list.files(
     path = ASoC_output_dir,
-    pattern = "*.tsv.gz$",
+    pattern = paste0(count_pattern, ".tsv.gz$"),
     recursive = T,
     full.names = T
   )
@@ -189,7 +192,7 @@ tsv_list_4_match <-
       pattern = "/",
       i = -1
     ) %>%
-      str_remove(pattern = ".tsv.gz$") %>%
+      str_remove(pattern = paste0(count_pattern, ".tsv.gz$")) %>%
       str_remove(pattern = "_ASE.*$")
   )
 

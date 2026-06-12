@@ -42,7 +42,7 @@
 
 # determine if R is running in RSTUDIO or POSITRON, and set the future plan accordingly
 if (Sys.getenv("RSTUDIO") == "1" | Sys.getenv("POSITRON") == "1") {
-  print("Running under RStudio IDE, use plan(multisession)")
+  print("Running under IDE, use plan(multisession)")
   session_plan <- "multisession"
 } else {
   print("Running under Rscript, use plan(multicore)")

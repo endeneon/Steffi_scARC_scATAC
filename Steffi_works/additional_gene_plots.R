@@ -140,7 +140,8 @@ module_list <-
     )
   )
 
-scCustomize::DimPlot_scCustom(seurat_obj_2_plot,
+scCustomize::DimPlot_scCustom(
+  seurat_obj_2_plot,
   reduction = "umap.cca",
   group.by = "RNA_snn_res.0.1",
   colors_use = DiscretePalette(
@@ -168,7 +169,9 @@ for (module_name in names(module_list)) {
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]
+      ],
       features = module_list[[1]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -201,7 +204,9 @@ for (module_name in names(module_list)) {
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]
+      ],
       features = module_list[[1]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -284,16 +289,16 @@ for (module_name in names(module_list)) {
       pt.size = 0,
       split.by = "orig.ident"
     ) &
-      labs(
-        title = str_remove(
-          colnames(seurat_obj_2_plot@meta.data)[[11]],
-          "_ModuleScore_?\\d+"
-        )
-      ) &
-      theme(
-        text = element_text(family = "sans"),
-        axis.text.x = element_text(angle = 0, hjust = 0)
+    labs(
+      title = str_remove(
+        colnames(seurat_obj_2_plot@meta.data)[[11]],
+        "_ModuleScore_?\\d+"
       )
+    ) &
+    theme(
+      text = element_text(family = "sans"),
+      axis.text.x = element_text(angle = 0, hjust = 0)
+    )
   seurat_obj_2_plot_tmp <- seurat_obj_2_plot
   seurat_obj_2_plot_tmp$cluster_ident <-
     str_c(
@@ -340,7 +345,9 @@ for (module_name in names(module_list)) {
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]
+      ],
       features = module_list[[2]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -373,7 +380,9 @@ for (module_name in names(module_list)) {
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]
+      ],
       features = module_list[[2]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -456,16 +465,16 @@ for (module_name in names(module_list)) {
       pt.size = 0,
       split.by = "orig.ident"
     ) &
-      labs(
-        title = str_remove(
-          colnames(seurat_obj_2_plot@meta.data)[[12]],
-          "_ModuleScore_?\\d+"
-        )
-      ) &
-      theme(
-        text = element_text(family = "sans"),
-        axis.text.x = element_text(angle = 0, hjust = 0)
+    labs(
+      title = str_remove(
+        colnames(seurat_obj_2_plot@meta.data)[[12]],
+        "_ModuleScore_?\\d+"
       )
+    ) &
+    theme(
+      text = element_text(family = "sans"),
+      axis.text.x = element_text(angle = 0, hjust = 0)
+    )
   seurat_obj_2_plot_tmp <- seurat_obj_2_plot
   seurat_obj_2_plot_tmp$cluster_ident <-
     str_c(
@@ -512,7 +521,9 @@ for (module_name in names(module_list)) {
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]
+      ],
       features = module_list[[3]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -545,7 +556,9 @@ for (module_name in names(module_list)) {
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]
+      ],
       features = module_list[[3]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -637,16 +650,16 @@ for (module_name in names(module_list)) {
       pt.size = 0,
       split.by = "orig.ident"
     ) &
-      labs(
-        title = str_remove(
-          colnames(seurat_obj_2_plot@meta.data)[[13]],
-          "_ModuleScore_?\\d+"
-        )
-      ) &
-      theme(
-        text = element_text(family = "sans"),
-        axis.text.x = element_text(angle = 0, hjust = 0)
+    labs(
+      title = str_remove(
+        colnames(seurat_obj_2_plot@meta.data)[[13]],
+        "_ModuleScore_?\\d+"
       )
+    ) &
+    theme(
+      text = element_text(family = "sans"),
+      axis.text.x = element_text(angle = 0, hjust = 0)
+    )
   seurat_obj_2_plot_tmp <- seurat_obj_2_plot
   seurat_obj_2_plot_tmp$cluster_ident <-
     str_c(
@@ -721,7 +734,9 @@ colnames(seurat_obj_2_plot@meta.data)
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]
+      ],
       features = module_list[[1]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -754,7 +769,9 @@ colnames(seurat_obj_2_plot@meta.data)
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]
+      ],
       features = module_list[[1]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -846,16 +863,16 @@ colnames(seurat_obj_2_plot@meta.data)
       pt.size = 0,
       split.by = "orig.ident"
     ) &
-      labs(
-        title = str_remove(
-          colnames(seurat_obj_2_plot@meta.data)[[69]],
-          "_ModuleScore_?\\d+"
-        )
-      ) &
-      theme(
-        text = element_text(family = "sans"),
-        axis.text.x = element_text(angle = 0, hjust = 0)
+    labs(
+      title = str_remove(
+        colnames(seurat_obj_2_plot@meta.data)[[69]],
+        "_ModuleScore_?\\d+"
       )
+    ) &
+    theme(
+      text = element_text(family = "sans"),
+      axis.text.x = element_text(angle = 0, hjust = 0)
+    )
   seurat_obj_2_plot_tmp <- seurat_obj_2_plot
   seurat_obj_2_plot_tmp$cluster_ident <-
     str_c(
@@ -902,7 +919,9 @@ colnames(seurat_obj_2_plot@meta.data)
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]
+      ],
       features = module_list[[2]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -935,7 +954,9 @@ colnames(seurat_obj_2_plot@meta.data)
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]
+      ],
       features = module_list[[2]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -1027,16 +1048,16 @@ colnames(seurat_obj_2_plot@meta.data)
       pt.size = 0,
       split.by = "orig.ident"
     ) &
-      labs(
-        title = str_remove(
-          colnames(seurat_obj_2_plot@meta.data)[[70]],
-          "_ModuleScore_?\\d+"
-        )
-      ) &
-      theme(
-        text = element_text(family = "sans"),
-        axis.text.x = element_text(angle = 0, hjust = 0)
+    labs(
+      title = str_remove(
+        colnames(seurat_obj_2_plot@meta.data)[[70]],
+        "_ModuleScore_?\\d+"
       )
+    ) &
+    theme(
+      text = element_text(family = "sans"),
+      axis.text.x = element_text(angle = 0, hjust = 0)
+    )
   seurat_obj_2_plot_tmp <- seurat_obj_2_plot
   seurat_obj_2_plot_tmp$cluster_ident <-
     str_c(
@@ -1084,7 +1105,9 @@ colnames(seurat_obj_2_plot@meta.data)
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[1]
+      ],
       features = module_list[[3]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -1117,7 +1140,9 @@ colnames(seurat_obj_2_plot@meta.data)
 {
   p_featureplot_genes <-
     scCustomize::FeaturePlot_scCustom(
-      seurat_obj_2_plot[, seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]],
+      seurat_obj_2_plot[,
+        seurat_obj_2_plot$orig.ident == unique(seurat_obj_2_plot$orig.ident)[2]
+      ],
       features = module_list[[3]], # SCF
       colors_use = viridisLite::viridis(
         n = 200,
@@ -1209,16 +1234,16 @@ colnames(seurat_obj_2_plot@meta.data)
       pt.size = 0,
       split.by = "orig.ident"
     ) &
-      labs(
-        title = str_remove(
-          colnames(seurat_obj_2_plot@meta.data)[[71]],
-          "_ModuleScore_?\\d+"
-        )
-      ) &
-      theme(
-        text = element_text(family = "sans"),
-        axis.text.x = element_text(angle = 0, hjust = 0)
+    labs(
+      title = str_remove(
+        colnames(seurat_obj_2_plot@meta.data)[[71]],
+        "_ModuleScore_?\\d+"
       )
+    ) &
+    theme(
+      text = element_text(family = "sans"),
+      axis.text.x = element_text(angle = 0, hjust = 0)
+    )
   seurat_obj_2_plot_tmp <- seurat_obj_2_plot
   seurat_obj_2_plot_tmp$cluster_ident <-
     str_c(
@@ -1265,7 +1290,8 @@ colnames(seurat_obj_2_plot@meta.data)
 ## load mouse liver ref, Fabres et al. 2020
 {
   mouse_liver_ref <-
-    qs_read("../D6_Male_R_analysis/ref_mouse_liver_final_version.qs2",
+    qs_read(
+      "../D6_Male_R_analysis/ref_mouse_liver_final_version.qs2",
       nthreads = 8
     )
   seurat_mouse_liver_ref <-
@@ -1287,10 +1313,12 @@ colnames(seurat_obj_2_plot@meta.data)
 }
 
 singleR_return_annot_from_scratch <-
-  function(seurat_obj,
-           ref_sce = NULL,
-           transfer_label = "",
-           de_method = "wilcox") {
+  function(
+    seurat_obj,
+    ref_sce = NULL,
+    transfer_label = "",
+    de_method = "wilcox"
+  ) {
     if (!(class(seurat_obj[["RNA"]]) == "Assay5")) {
       seurat_obj <-
         scCustomize::Convert_Assay(
@@ -1332,8 +1360,10 @@ sce_predicted_label <-
   )
 
 colnames(seurat_obj_2_plot)
-sum(duplicated(str_split(colnames(seurat_obj_2_plot),
-  pattern = "_", simplify = T
+sum(duplicated(str_split(
+  colnames(seurat_obj_2_plot),
+  pattern = "_",
+  simplify = T
 )[, 1]))
 ncol(seurat_obj_2_plot)
 rownames(sce_predicted_label)
@@ -1358,12 +1388,17 @@ names(cell_ontology_palette) <-
 predicted.cell_type__ontology_label <-
   unique(seurat_obj_2_plot$singleR.predicted.ident)
 predicted.cell_type__ontology_palette <-
-  cell_ontology_palette[names(cell_ontology_palette) %in% predicted.cell_type__ontology_label]
+  cell_ontology_palette[
+    names(cell_ontology_palette) %in% predicted.cell_type__ontology_label
+  ]
 names(predicted.cell_type__ontology_palette)
 predicted.cell_type__ontology_palette <-
-  predicted.cell_type__ontology_palette[order(names(predicted.cell_type__ontology_palette))]
+  predicted.cell_type__ontology_palette[order(names(
+    predicted.cell_type__ontology_palette
+  ))]
 
-scCustomize::DimPlot_scCustom(seurat_obj_2_plot,
+scCustomize::DimPlot_scCustom(
+  seurat_obj_2_plot,
   reduction = "umap.harmony",
   group.by = "singleR.predicted.ident",
   shuffle = T,

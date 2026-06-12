@@ -1,7 +1,6 @@
 #! /usr/bin/env Rscript
 
 # init ####
-
 {
   library(BiocParallel)
   library(parallel)
@@ -31,7 +30,10 @@
 
   library(Gviz)
 
-  if (Sys.getenv("VSCODE") == "1") {
+  if (
+    (Sys.getenv("TERM_PROGRAM") == "vscode") && (Sys.getenv("POSITRON") != "1")
+  ) {
+    print("Running under VSCode, load languageserver, showtext, httpgd")
     library(languageserver)
     library(showtext)
     library(httpgd)
@@ -43,19 +45,24 @@
   }
 }
 
+
+# use this conda env
+# /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/standalone_conda_envs/r45_py312_scARC
+
 # set working dir
 working_dir = "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
 setwd(working_dir)
 
 # determine if R is running in RSTUDIO or POSITRON, and set the future plan accordingly
 # Manual set
-Sys.setenv(VSCODE = "1")
+# Sys.setenv(VSCODE = "1")
 if (
-  Sys.getenv("RSTUDIO") == "1" |
-    Sys.getenv("POSITRON") == "1" |
-    Sys.getenv("VSCODE") == "1"
+  Sys.getenv("RSTUDIO") == "1" ||
+    Sys.getenv("POSITRON") == "1" ||
+    Sys.getenv("VSCODE") == "1" ||
+    Sys.getenv("TERM_PROGRAM") == "vscode"
 ) {
-  print("Running under RStudio IDE, use plan(multisession)")
+  print("Running under IDE, use plan(multisession)")
   session_plan <- "multisession"
 } else {
   print("Running under Rscript, use plan(multicore)")
@@ -122,15 +129,15 @@ main_tsv_bam_table <-
   )
 
 # only take round after added up all reads
-hist(main_tsv_bam_table$mapped_dedup_records, breaks = 5)
-mean(main_tsv_bam_table$mapped_dedup_records)
-median(main_tsv_bam_table$mapped_dedup_records)
+# hist(main_tsv_bam_table$mapped_dedup_records, breaks = 5)
+# mean(main_tsv_bam_table$mapped_dedup_records)
+# median(main_tsv_bam_table$mapped_dedup_records)
 
 main_tsv_bam_table$median_inverse_size <-
   median(main_tsv_bam_table$mapped_dedup_records) /
   main_tsv_bam_table$mapped_dedup_records
-mean(main_tsv_bam_table$median_inverse_size) # 1.039025
-mean(main_tsv_bam_table$inverse_size) # 1.409165, use this one
+# mean(main_tsv_bam_table$median_inverse_size) # 1.039025
+# mean(main_tsv_bam_table$inverse_size) # 1.409165, use this one
 
 normalised_df_tsv_list <-
   lapply(
@@ -195,28 +202,28 @@ merged_normalised_df$norm_altCount <-
 merged_normalised_df$norm_sumCount <-
   merged_normalised_df$norm_refCount + merged_normalised_df$norm_altCount
 
-sum(
-  merged_normalised_df$norm_refCount >= 2 &
-    merged_normalised_df$norm_altCount >= 2
-) # 75479
-mean(merged_normalised_df$norm_sumCount) # 13.84079
-median(merged_normalised_df$norm_sumCount) # 3
+# sum(
+#   merged_normalised_df$norm_refCount >= 2 &
+#     merged_normalised_df$norm_altCount >= 2
+# ) # 75479
+# mean(merged_normalised_df$norm_sumCount) # 13.84079
+# median(merged_normalised_df$norm_sumCount) # 3
 
 merged_normalised_df <-
   merged_normalised_df[
     merged_normalised_df$norm_refCount >= 2 &
       merged_normalised_df$norm_altCount >= 2,
   ]
-mean(merged_normalised_df$norm_sumCount) # 34.46173
-median(merged_normalised_df$norm_sumCount) # 12
-hist(merged_normalised_df$norm_sumCount, breaks = 500, xlim = c(0, 100)) # most have low counts, but some have very high counts (up to 400+)
+# mean(merged_normalised_df$norm_sumCount) # 34.46173
+# median(merged_normalised_df$norm_sumCount) # 12
+# hist(merged_normalised_df$norm_sumCount, breaks = 500, xlim = c(0, 100)) # most have low counts, but some have very high counts (up to 400+)
 
 merged_normalised_df <-
   merged_normalised_df[
     merged_normalised_df$norm_sumCount >= 10,
   ]
-mean(merged_normalised_df$norm_sumCount) # 54.13875
-median(merged_normalised_df$norm_sumCount) # 24
+# mean(merged_normalised_df$norm_sumCount) # 54.13875
+# median(merged_normalised_df$norm_sumCount) # 24
 
 merged_normalised_df$pVal <-
   mapply(
@@ -234,6 +241,11 @@ merged_normalised_df$pVal <-
   )
 merged_normalised_df$percRef <-
   merged_normalised_df$norm_refCount / merged_normalised_df$norm_sumCount
+sum(merged_normalised_df$percRef > 0.5) # 14901
+merged_normalised_df$percAlt <-
+  merged_normalised_df$norm_altCount / merged_normalised_df$norm_sumCount
+sum(merged_normalised_df$percAlt > 0.5) # 26083
+
 
 merged_normalised_df$adjPVal <-
   p.adjust(
@@ -259,6 +271,7 @@ ASoC_df <-
       merged_normalised_df$norm_altCount,
       merged_normalised_df$norm_sumCount,
       merged_normalised_df$percRef,
+      merged_normalised_df$percAlt,
       merged_normalised_df$pVal,
       merged_normalised_df$adjPVal
     )
@@ -274,6 +287,7 @@ colnames(ASoC_df) <-
     "norm_altCount",
     "norm_sumCount",
     "percRef",
+    "percAlt",
     "pVal",
     "adjPVal"
   )
