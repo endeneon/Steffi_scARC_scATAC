@@ -237,7 +237,7 @@ read_tsv_gz_file <-
         refCount > 0,
         altCount > 0
       ) |>
-      dplyr::select(1:6)
+      dplyr::select(1:7)
     return(as.data.frame(df_raw))
   }
 
@@ -264,48 +264,5 @@ qs_save(
 qs_save(
   main_tsv_bam_table,
   file = file.path(data_dir, "main_tsv_bam_table.qs2"),
-  nthreads = 8
-)
-
-normalised_df_tsv_list <-
-  lapply(
-    names(tsv_df_list),
-    function(sample_id) {
-      df <- tsv_df_list[[sample_id]]
-      df$inverse_size <- main_tsv_bam_table$inverse_size[
-        main_tsv_bam_table$sample_id == sample_id
-      ]
-      df$norm_refCount <- round(df$refCount * df$inverse_size)
-      df$norm_altCount <- round(df$altCount * df$inverse_size)
-      # df$norm_totalCount <-
-      #   df$norm_refCount +
-      #   df$norm_altCount
-      df$one_line_index <- paste0(
-        df$contig,
-        ":",
-        df$position,
-        ":",
-        df$variantID,
-        ":",
-        df$refAllele,
-        ":",
-        df$altAllele
-      )
-      df_2_return <-
-        df[,
-          c(
-            "one_line_index",
-            "norm_refCount",
-            "norm_altCount"
-          )
-        ]
-      return(df_2_return)
-    }
-  )
-names(normalised_df_tsv_list) <-
-  names(tsv_df_list)
-qs_save(
-  normalised_df_tsv_list,
-  file = file.path(data_dir, "normalised_df_tsv_list.qs2"),
   nthreads = 8
 )
