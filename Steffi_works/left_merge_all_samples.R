@@ -301,6 +301,25 @@ qs_save(
   nthreads = 4
 )
 
+# ASoC_df <-
+# qs_read(
+#   file.path(
+#     data_dir,
+#     "ASoC_df.qs2"
+#   ),
+#   nthreads = 4
+# )
+# write.table(
+#   ASoC_df,
+#   file.path(
+#     data_dir,
+#     "ASoC_df.tsv"
+#   ),
+#   sep = "\t",
+#   quote = FALSE,
+#   row.names = FALSE
+# )
+
 # coerce ASoC_df into a GRangesList, one element per chromosome ####
 # coerce metadata columns back to their proper types (cbind made all character)
 ASoC_df$position <- as.integer(ASoC_df$position)

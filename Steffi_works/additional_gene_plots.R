@@ -1,5 +1,6 @@
 #! /usr/bin/env Rscript
 
+# use conda activate /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/standalone_conda_envs/r45_py312_scARC
 # init ####
 
 {
