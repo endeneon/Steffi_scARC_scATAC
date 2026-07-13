@@ -1,0 +1,2066 @@
+
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----'|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+Logging With ArchR!
+
+Start Time : 2026-07-13 00:53:18.556376
+
+------- ArchR Info
+
+ArchRThreads = 16
+ArchRGenome = Hg38
+
+------- System Info
+
+Computer OS = unix
+Total Cores = 64
+
+------- Session Info
+
+R version 4.3.0 (2023-04-21)
+Platform: x86_64-conda-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux 8.10 (Ootpa)
+
+Matrix products: default
+BLAS/LAPACK: /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/Anaconda/miniconda3/envs/jwen_scRNA_singCellaR/lib/libopenblasp-r0.3.30.so;  LAPACK version 3.12.0
+
+Random number generation:
+ RNG:     L'Ecuyer-CMRG 
+ Normal:  Inversion 
+ Sample:  Rejection 
+ 
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+time zone: America/Chicago
+tzcode source: system (glibc)
+
+attached base packages:
+ [1] parallel  stats4    grid      stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
+
+other attached packages:
+ [1] httpgd_1.3.1                            
+ [2] showtext_0.9-7                          
+ [3] showtextdb_3.0                          
+ [4] sysfonts_0.8.9                          
+ [5] languageserver_0.3.16                   
+ [6] BSgenome.Hsapiens.UCSC.hg38_1.4.5       
+ [7] BSgenome_1.70.1                         
+ [8] rtracklayer_1.62.0                      
+ [9] BiocIO_1.12.0                           
+[10] Biostrings_2.70.1                       
+[11] XVector_0.42.0                          
+[12] org.Hs.eg.db_3.18.0                     
+[13] TxDb.Hsapiens.UCSC.hg38.knownGene_3.18.0
+[14] GenomicFeatures_1.54.1                  
+[15] AnnotationDbi_1.64.1                    
+[16] fs_1.6.6                                
+[17] qs2_0.1.5                               
+[18] snow_0.4-4                              
+[19] doFuture_1.1.2                          
+[20] doParallel_1.0.17                       
+[21] iterators_1.0.14                        
+[22] foreach_1.5.2                           
+[23] BiocParallel_1.36.0                     
+[24] future_1.67.0                           
+[25] rhdf5_2.46.1                            
+[26] SummarizedExperiment_1.32.0             
+[27] Biobase_2.62.0                          
+[28] RcppArmadillo_14.6.3-1                  
+[29] Rcpp_1.1.0                              
+[30] Matrix_1.6-5                            
+[31] GenomicRanges_1.54.1                    
+[32] GenomeInfoDb_1.38.1                     
+[33] IRanges_2.36.0                          
+[34] S4Vectors_0.40.2                        
+[35] BiocGenerics_0.48.1                     
+[36] sparseMatrixStats_1.14.0                
+[37] MatrixGenerics_1.14.0                   
+[38] matrixStats_1.5.0                       
+[39] data.table_1.17.8                       
+[40] stringr_1.5.1                           
+[41] plyr_1.8.9                              
+[42] magrittr_2.0.3                          
+[43] gtable_0.3.6                            
+[44] gtools_3.9.5                            
+[45] gridExtra_2.3                           
+[46] devtools_2.4.5                          
+[47] usethis_3.1.0                           
+[48] ArchR_1.0.3                             
+[49] gplots_3.2.0                            
+[50] Seurat_5.3.0                            
+[51] SeuratObject_5.1.0                      
+[52] sp_2.2-0                                
+[53] ggplot2_3.5.2                           
+
+loaded via a namespace (and not attached):
+  [1] spatstat.sparse_3.1-0    bitops_1.0-9             httr_1.4.7              
+  [4] RColorBrewer_1.1-3       profvis_0.4.0            tools_4.3.0             
+  [7] sctransform_0.4.2        R6_2.6.1                 lazyeval_0.2.2          
+ [10] uwot_0.2.3               rhdf5filters_1.14.1      urlchecker_1.0.1        
+ [13] withr_3.0.2              prettyunits_1.2.0        progressr_0.15.1        
+ [16] cli_3.6.5                Cairo_1.6-1              spatstat.explore_3.5-2  
+ [19] fastDummies_1.7.5        spatstat.data_3.1-8      ggridges_0.5.6          
+ [22] pbapply_1.7-4            Rsamtools_2.18.0         systemfonts_1.2.3       
+ [25] dichromat_2.0-0.1        parallelly_1.45.1        sessioninfo_1.2.3       
+ [28] RSQLite_2.4.3            generics_0.1.4           ica_1.0-3               
+ [31] spatstat.random_3.4-1    dplyr_1.1.4              abind_1.4-5             
+ [34] lifecycle_1.0.4          yaml_2.3.10              SparseArray_1.2.2       
+ [37] BiocFileCache_2.10.1     Rtsne_0.17               blob_1.2.4              
+ [40] promises_1.3.3           crayon_1.5.3             miniUI_0.1.2            
+ [43] lattice_0.22-7           cowplot_1.2.0            KEGGREST_1.42.0         
+ [46] pillar_1.11.0            rjson_0.2.23             future.apply_1.20.0     
+ [49] codetools_0.2-20         glue_1.8.0               spatstat.univar_3.1-4   
+ [52] remotes_2.5.0            vctrs_0.6.5              png_0.1-8               
+ [55] spam_2.11-1              cachem_1.1.0             S4Arrays_1.2.0          
+ [58] mime_0.13                survival_3.8-3           ellipsis_0.3.2          
+ [61] fitdistrplus_1.2-4       ROCR_1.0-11              nlme_3.1-168            
+ [64] bit64_4.6.0-1            progress_1.2.3           filelock_1.0.3          
+ [67] RcppAnnoy_0.0.22         irlba_2.3.5.1            KernSmooth_2.23-26      
+ [70] colorspace_2.1-1         DBI_1.2.3                tidyselect_1.2.1        
+ [73] processx_3.8.6           bit_4.6.0                compiler_4.3.0          
+ [76] curl_7.0.0               xml2_1.5.1               DelayedArray_0.28.0     
+ [79] plotly_4.11.0            stringfish_0.17.0        scales_1.4.0            
+ [82] caTools_1.18.3           lmtest_0.9-40            callr_3.7.6             
+ [85] rappdirs_0.3.3           digest_0.6.37            goftest_1.2-3           
+ [88] spatstat.utils_3.1-5     htmltools_0.5.8.1        pkgconfig_2.0.3         
+ [91] dbplyr_2.5.0             fastmap_1.2.0            rlang_1.1.6             
+ [94] htmlwidgets_1.6.4        shiny_1.11.1             farver_2.1.2            
+ [97] zoo_1.8-14               jsonlite_2.0.0           RCurl_1.98-1.12         
+[100] GenomeInfoDbData_1.2.11  dotCall64_1.2            patchwork_1.3.1         
+[103] Rhdf5lib_1.24.0          reticulate_1.43.0        stringi_1.7.12          
+[106] zlibbioc_1.48.0          MASS_7.3-60.0.1          pkgbuild_1.4.8          
+[109] listenv_0.9.1            ggrepel_0.9.6            deldir_2.0-4            
+[112] splines_4.3.0            tensor_1.5.1             hms_1.1.3               
+[115] ps_1.9.1                 igraph_1.5.1             spatstat.geom_3.5-0     
+[118] RcppHNSW_0.6.0           reshape2_1.4.4           biomaRt_2.58.0          
+[121] pkgload_1.4.0            XML_3.99-0.15            RcppParallel_5.1.9      
+[124] httpuv_1.6.16            RANN_2.6.2               tidyr_1.3.1             
+[127] purrr_1.1.0              polyclip_1.10-7          scattermore_1.2         
+[130] xtable_1.8-4             restfulr_0.0.15          RSpectra_0.16-2         
+[133] later_1.4.2              viridisLite_0.4.2        tibble_3.3.0            
+[136] memoise_2.0.1            GenomicAlignments_1.38.0 cluster_2.1.8.1         
+[139] globals_0.18.0          
+
+
+------- Log Info
+
+
+2026-07-13 00:53:18.827415 : getMatrixFromProject Input-Parameters, Class = list
+
+getMatrixFromProject Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromProject Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromProject Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromProject Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromProject Input-Parameters$verbose: length = 1
+[1] TRUE
+
+
+getMatrixFromProject Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromProject Input-Parameters$threads: length = 1
+[1] 16
+
+
+getMatrixFromProject Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:22.581766 : Reading GeneExpressionMatrix : X__13t(1 of 19), 0.071 mins elapsed.
+2026-07-13 00:53:22.61638 : Reading GeneExpressionMatrix : X__20t(2 of 19), 0.072 mins elapsed.
+2026-07-13 00:53:22.653282 : Reading GeneExpressionMatrix : X__3t(3 of 19), 0.073 mins elapsed.
+
+2026-07-13 00:53:22.66379 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__20t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__20t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 7784
+[1] "X__20t#AAGCCTGTCAAAGGCA-1" "X__20t#CCGTTTGGTCATGAGC-1"
+[3] "X__20t#GAGCAAATCCTGGTGA-1" "X__20t#GAGCAAATCGTTTCCA-1"
+[5] "X__20t#CTGCTCCCAGCCAGTT-1" "X__20t#GACAATACAGTTTACG-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:22.680382 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__13t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__13t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 19667
+[1] "X__13t#GTCATCACACCTACGG-1" "X__13t#GTAGGCGAGGCGGATG-1"
+[3] "X__13t#ACCTTGCTCCCTCGCA-1" "X__13t#ACCTTGCTCGTTATAG-1"
+[5] "X__13t#CGAGCTGGTCAATACG-1" "X__13t#GGTGAGGTCAGAAACG-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:22.685906 : Reading GeneExpressionMatrix : X__1t(4 of 19), 0.073 mins elapsed.
+2026-07-13 00:53:22.720339 : Reading GeneExpressionMatrix : X__22t(5 of 19), 0.074 mins elapsed.
+
+2026-07-13 00:53:22.742463 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__3t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__3t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 19837
+[1] "X__3t#TGGGCATGTGGTTAGC-1" "X__3t#TATCGCGAGTGTTGTA-1"
+[3] "X__3t#AAGCCACGTAAATTGC-1" "X__3t#GATGGACAGCCTGTTC-1"
+[5] "X__3t#TATTAGGTCGCAGGCT-1" "X__3t#CTTCTCAAGTAAACCC-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:22.754798 : Reading GeneExpressionMatrix : X__19t(6 of 19), 0.074 mins elapsed.
+
+2026-07-13 00:53:22.75709 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__1t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__1t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 17846
+[1] "X__1t#AGTGGACAGCCGCAGT-1" "X__1t#ATCACAATCACGCCAA-1"
+[3] "X__1t#ACCAGCTCATTAAGTC-1" "X__1t#TATTAGCCAGCACCAT-1"
+[5] "X__1t#GTAGCGCTCCTCACTA-1" "X__1t#CAAGGCCTCACTTCAT-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:22.788728 : Reading GeneExpressionMatrix : X__18t(7 of 19), 0.075 mins elapsed.
+
+2026-07-13 00:53:22.802668 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__22t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__22t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 15661
+[1] "X__22t#TTGCTTTAGGCTACAT-1" "X__22t#TCACATAAGGAGCATA-1"
+[3] "X__22t#TTATTGCTCGGGCCAT-1" "X__22t#GATTCCTGTCTAACCT-1"
+[5] "X__22t#GACCGAACAGTTATCG-1" "X__22t#GCGATATTCGCTAGAT-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:22.822114 : Reading GeneExpressionMatrix : X__17t(8 of 19), 0.075 mins elapsed.
+
+2026-07-13 00:53:22.827508 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__19t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__19t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 11712
+[1] "X__19t#AAGACCAAGGTAAGGC-1" "X__19t#TTGCGAGTCGAGGTGG-1"
+[3] "X__19t#CTCCTAATCGGTCAAT-1" "X__19t#GATGCTTAGGCTGGCT-1"
+[5] "X__19t#TTAGGCGTCCGCCTAT-1" "X__19t#CGCTCAGCATCATGGC-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:22.853597 : Reading GeneExpressionMatrix : X__15t(9 of 19), 0.076 mins elapsed.
+
+2026-07-13 00:53:22.871068 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__18t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__18t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 12914
+[1] "X__18t#TAGCGGCTCGATTCTT-1" "X__18t#CTAATTGAGTAAGTGG-1"
+[3] "X__18t#TGGTCATAGCGCTCAA-1" "X__18t#CATTATCTCGGCCATA-1"
+[5] "X__18t#GGCCTTAAGCACCACA-1" "X__18t#CCGCTAAAGCCTGATG-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:22.879823 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__17t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__17t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+2026-07-13 00:53:22.882216 : Reading GeneExpressionMatrix : X__pt22pre(10 of 19), 0.076 mins elapsed.
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 11844
+[1] "X__17t#ACCAAGTTCTTGCAAA-1" "X__17t#CTGATCACAATACTGT-1"
+[3] "X__17t#GGTACTTAGCTATGAC-1" "X__17t#CTCCGGACAATTATGC-1"
+[5] "X__17t#CTTCACTCAACGTGCT-1" "X__17t#GTTGGAGCAATTGAGA-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:22.910731 : Reading GeneExpressionMatrix : X__pt29pre(11 of 19), 0.077 mins elapsed.
+2026-07-13 00:53:22.939356 : Reading GeneExpressionMatrix : X__16t(12 of 19), 0.077 mins elapsed.
+2026-07-13 00:53:22.969652 : Reading GeneExpressionMatrix : X__11t(13 of 19), 0.078 mins elapsed.
+
+2026-07-13 00:53:22.973598 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__15t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__15t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 11742
+[1] "X__15t#GGGTTTCCAGCCTGCA-1" "X__15t#GTTCGCGCATAAAGCA-1"
+[3] "X__15t#GGTGAGGTCACAGCCA-1" "X__15t#CCGATGCAGCCTGTGA-1"
+[5] "X__15t#TAGCTAGGTTACATCC-1" "X__15t#GAACCAGCAAATATCC-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:22.984053 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__pt29pre 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__pt29pre.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 10677
+[1] "X__pt29pre#GCTGGTTCAACCTGGT-1" "X__pt29pre#TCACTGACAATAACCT-1"
+[3] "X__pt29pre#ATGAATGCACCTCAGG-1" "X__pt29pre#CTCTAGCTCATGTTTC-1"
+[5] "X__pt29pre#GCCTGAGGTTACGCGG-1" "X__pt29pre#AACAGGATCAATCTCT-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:22.989552 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__16t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__16t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 6805
+[1] "X__16t#ACCAAGTTCTTAGCGG-1" "X__16t#CCTATAGCACACTAAT-1"
+[3] "X__16t#TCCTGTTCAAGTAAGC-1" "X__16t#CGCTAATAGTCAATTG-1"
+[5] "X__16t#CGTCCTAGTAGGTGTC-1" "X__16t#AGTCAAGAGCTTTGTT-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:22.998467 : getMatrixFromArrow Input-Parameters, Class = list
+2026-07-13 00:53:22.998321 : Reading GeneExpressionMatrix : X__pt30pre(14 of 19), 0.078 mins elapsed.
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__pt22pre 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__pt22pre.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 14243
+[1] "X__pt22pre#CTAGCTGAGAATCTCA-1" "X__pt22pre#GCACTAAGTAATCCCT-1"
+[3] "X__pt22pre#GGCCAACTCTCCTCTT-1" "X__pt22pre#ACCTTGCTCATCCTAT-1"
+[5] "X__pt22pre#GCAGCTATCCATAATG-1" "X__pt22pre#TCCTTTACACTGACCG-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:23.026988 : Reading GeneExpressionMatrix : X__7t(15 of 19), 0.079 mins elapsed.
+
+2026-07-13 00:53:23.045119 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__11t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__11t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 10518
+[1] "X__11t#CAATCGCCACAACAGG-1" "X__11t#TCGTTTCCAATGCCCG-1"
+[3] "X__11t#GGCATTAGTTGTTGGA-1" "X__11t#CCATCATGTTAACGAT-1"
+[5] "X__11t#CTAAATGTCTTGAGGT-1" "X__11t#AGTTACTCAGGATGGC-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:23.050873 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__pt30pre 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__pt30pre.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 6064
+[1] "X__pt30pre#ATGAAGCCAGCACGAA-1" "X__pt30pre#ACAGTATGTGCCGCAA-1"
+[3] "X__pt30pre#TGAGAACCATGTTTGG-1" "X__pt30pre#TGGTTGAGTGCACGCA-1"
+[5] "X__pt30pre#AAAGCCCGTTAACGGC-1" "X__pt30pre#TTTGTGAAGTTGGGCC-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:23.057889 : Reading GeneExpressionMatrix : X__12t(16 of 19), 0.079 mins elapsed.
+
+2026-07-13 00:53:23.09138 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__7t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__7t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 6308
+[1] "X__7t#ATGTTTGAGCTATGAC-1" "X__7t#ACGAATCTCCAACTGG-1"
+[3] "X__7t#CATATCGCAGCACGTT-1" "X__7t#TCCATTGTCATTAGTG-1"
+[5] "X__7t#TTGGATATCCTTGAGG-1" "X__7t#CAAGACAAGCCTGAGC-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:23.113512 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__12t 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__12t.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 6077
+[1] "X__12t#GTCCATTGTTAAGTGT-1" "X__12t#GTACTTCGTTTAAAGC-1"
+[3] "X__12t#GGGTTATTCCTGAATA-1" "X__12t#TGTGCGCAGGTTTGAC-1"
+[5] "X__12t#TTTCTTGCACGAATCC-1" "X__12t#TTGGCTGAGCGGTTAT-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:23.740647 : featureDF X__19t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+
+2026-07-13 00:53:23.742684 : featureDF X__16t, Class = DFrame
+
+2026-07-13 00:53:23.743565 : featureDF X__20t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+DataFrame with 35292 rows and 6 columns
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3              chr1 seqnames         3       idx     65418     start     69055       end       OR4F5        name         3    strand
+4    
+          chr1    <Rle>         4 <integer>     91104 <integer>     91105 <integer>  AL627309.3 <character>         3 <integer>
+5    
+1         chr1     chr1         5         1    120931     29553    133723     30267  AL627309.1 MIR1302-2HG         3         3
+...  
+2          ...     chr1         2       ...     36080       ...     36081       ...     FAM138A         ...         3       ...
+3    
+35288     chr1     chr9         3      1314     65418 137618812     69055 137618820       OR4F5  ARRDC1-AS1         3         3
+4    
+35289     chr1     chr9         4      1315     91104 137618991     91105 137788811  AL627309.3       EHMT1         3         3
+5    
+35290     chr1     chr9         5      1316    120931 137876692    133723 137892570  AL627309.1  AL772363.1         3         3
+...  
+35291      ...     chr9       ...      1317       ... 137877781       ... 137877934         ...     CACNA1B       ...         3
+35288
+35292     chr9     chr9      1314 137618812      1318 137618820 138203324  ARRDC1-AS1 138203325         3  AL954642.1
+35289         3     chr9
+      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+
+2026-07-13 00:53:23.778995 : Getting GeneExpressionMatrix from ArrowFile : X__19t.arrow, 0.016 mins elapsed.
+2026-07-13 00:53:23.783371 : Getting GeneExpressionMatrix from ArrowFile : X__20t.arrow, 0.019 mins elapsed.
+2026-07-13 00:53:23.783879 : Getting GeneExpressionMatrix from ArrowFile : X__16t.arrow, 0.013 mins elapsed.
+
+2026-07-13 00:53:23.835284 : featureDF X__3t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+
+2026-07-13 00:53:23.862522 : featureDF X__1t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+
+2026-07-13 00:53:23.866455 : featureDF X__22t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+
+2026-07-13 00:53:23.876983 : featureDF X__13t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+2026-07-13 00:53:23.881733 : Getting GeneExpressionMatrix from ArrowFile : X__3t.arrow, 0.019 mins elapsed.
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:23.898409 : Getting GeneExpressionMatrix from ArrowFile : X__1t.arrow, 0.019 mins elapsed.
+2026-07-13 00:53:23.901992 : Getting GeneExpressionMatrix from ArrowFile : X__22t.arrow, 0.018 mins elapsed.
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+
+2026-07-13 00:53:23.90892 : featureDF X__7t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+2026-07-13 00:53:23.913804 : Getting GeneExpressionMatrix from ArrowFile : X__13t.arrow, 0.021 mins elapsed.
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:23.943182 : Getting GeneExpressionMatrix from ArrowFile : X__7t.arrow, 0.014 mins elapsed.
+
+2026-07-13 00:53:24.022884 : featureDF X__15t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:24.055393 : Getting GeneExpressionMatrix from ArrowFile : X__15t.arrow, 0.018 mins elapsed.
+
+2026-07-13 00:53:24.065621 : featureDF X__pt22pre, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:24.098945 : Getting GeneExpressionMatrix from ArrowFile : X__pt22pre.arrow, 0.018 mins elapsed.
+
+2026-07-13 00:53:24.11162 : featureDF X__11t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+
+2026-07-13 00:53:24.113554 : featureDF X__12t, Class = DFrame
+
+2026-07-13 00:53:24.114328 : featureDF X__18t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+DataFrame with 35292 rows and 6 columns
+
+2026-07-13 00:53:24.125348 : featureDF X__17t, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+
+2026-07-13 00:53:24.127344 : featureDF X__pt29pre, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+
+2026-07-13 00:53:24.130793 : featureDF X__pt30pre, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+      seqnames       idx     start
+       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:24.144989 : Getting GeneExpressionMatrix from ArrowFile : X__11t.arrow, 0.018 mins elapsed.
+2026-07-13 00:53:24.147249 : Getting GeneExpressionMatrix from ArrowFile : X__12t.arrow, 0.017 mins elapsed.
+2026-07-13 00:53:24.147979 : Getting GeneExpressionMatrix from ArrowFile : X__18t.arrow, 0.021 mins elapsed.
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:24.160649 : Getting GeneExpressionMatrix from ArrowFile : X__17t.arrow, 0.021 mins elapsed.
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:24.163074 : Getting GeneExpressionMatrix from ArrowFile : X__pt29pre.arrow, 0.02 mins elapsed.
+2026-07-13 00:53:24.171993 : Getting GeneExpressionMatrix from ArrowFile : X__pt30pre.arrow, 0.019 mins elapsed.
+
+2026-07-13 00:53:32.132885 : mat X__16t, Class = dgCMatrix
+mat X__16t: nRows = 35292, nCols = 6805
+mat X__16t: NonZeroEntries = 7343228, EntryRange = [ 0.196066898025606 , 4763.94849785408 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__16t#ACCAAGTTCTTAGCGG-1 X__16t#CCTATAGCACACTAAT-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__16t#TCCTGTTCAAGTAAGC-1 X__16t#CGCTAATAGTCAATTG-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__16t#CGTCCTAGTAGGTGTC-1
+[1,]                         .
+[2,]                         .
+[3,]                         .
+[4,]                         .
+[5,]                         .
+
+
+2026-07-13 00:53:32.30062 : Organizing SE GeneExpressionMatrix from ArrowFile : X__16t.arrow, 0.155 mins elapsed.
+
+2026-07-13 00:53:33.149344 : se X__16t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 6805 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(6805): X__16t#ACCAAGTTCTTAGCGG-1 X__16t#CCTATAGCACACTAAT-1 ...
+  X__16t#CTTGTAAAGCGTGCAC-1 X__16t#CGGGTCTAGGCGCACT-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:33.154716 : Completed GeneExpressionMatrix : X__16t(12 of 19), 0.248 mins elapsed.
+
+2026-07-13 00:53:33.349373 : mat X__7t, Class = dgCMatrix
+mat X__7t: nRows = 35292, nCols = 6308
+
+2026-07-13 00:53:33.634213 : mat X__pt30pre, Class = dgCMatrix
+mat X__pt30pre: nRows = 35292, nCols = 6064
+mat X__pt30pre: NonZeroEntries = 12577389, EntryRange = [ 0.102279817123687 , 3318.82480957563 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__pt30pre#ATGAAGCCAGCACGAA-1 X__pt30pre#ACAGTATGTGCCGCAA-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt30pre#TGAGAACCATGTTTGG-1 X__pt30pre#TGGTTGAGTGCACGCA-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt30pre#AAAGCCCGTTAACGGC-1
+[1,]                             .
+[2,]                             .
+[3,]                             .
+[4,]                             .
+[5,]                             .
+
+
+2026-07-13 00:53:33.785721 : Organizing SE GeneExpressionMatrix from ArrowFile : X__pt30pre.arrow, 0.179 mins elapsed.
+mat X__7t: NonZeroEntries = 10465970, EntryRange = [ 0.188786105342647 , 4544.73475851148 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__7t#ATGTTTGAGCTATGAC-1 X__7t#ACGAATCTCCAACTGG-1 X__7t#CATATCGCAGCACGTT-1
+[1,]                        .                        .                        .
+[2,]                        .                        .                        .
+[3,]                        .                        .                        .
+[4,]                        .                        .                        .
+[5,]                        .                        .                        .
+     X__7t#TCCATTGTCATTAGTG-1 X__7t#TTGGATATCCTTGAGG-1
+[1,]                        .                        .
+[2,]                        .                        .
+[3,]                        .                        .
+[4,]                        .                        .
+[5,]                        .                        .
+
+
+2026-07-13 00:53:34.335575 : Organizing SE GeneExpressionMatrix from ArrowFile : X__7t.arrow, 0.187 mins elapsed.
+
+2026-07-13 00:53:34.817271 : se X__pt30pre, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 6064 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(6064): X__pt30pre#ATGAAGCCAGCACGAA-1
+  X__pt30pre#ACAGTATGTGCCGCAA-1 ... X__pt30pre#CTAGTAGGTTTCGCCA-1
+  X__pt30pre#GACCGAACAATCCTGA-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:34.822048 : Completed GeneExpressionMatrix : X__pt30pre(14 of 19), 0.275 mins elapsed.
+
+2026-07-13 00:53:34.861478 : mat X__12t, Class = dgCMatrix
+mat X__12t: nRows = 35292, nCols = 6077
+
+2026-07-13 00:53:35.350251 : se X__7t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 6308 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(6308): X__7t#ATGTTTGAGCTATGAC-1 X__7t#ACGAATCTCCAACTGG-1 ...
+  X__7t#CACGCAATCCCGAACA-1 X__7t#CGTGACATCCACAATA-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:35.354991 : Completed GeneExpressionMatrix : X__7t(15 of 19), 0.284 mins elapsed.
+
+2026-07-13 00:53:35.696598 : mat X__11t, Class = dgCMatrix
+mat X__11t: nRows = 35292, nCols = 10518
+mat X__11t: NonZeroEntries = 18468900, EntryRange = [ 0.157651621446927 , 10000 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__11t#CAATCGCCACAACAGG-1 X__11t#TCGTTTCCAATGCCCG-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__11t#GGCATTAGTTGTTGGA-1 X__11t#CCATCATGTTAACGAT-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__11t#CTAAATGTCTTGAGGT-1
+[1,]                         .
+[2,]                         .
+[3,]                         .
+[4,]                         .
+[5,]                         .
+
+
+2026-07-13 00:53:35.899511 : Organizing SE GeneExpressionMatrix from ArrowFile : X__11t.arrow, 0.214 mins elapsed.
+mat X__12t: NonZeroEntries = 10351098, EntryRange = [ 0.201910069255154 , 1904.7619047619 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__12t#GTCCATTGTTAAGTGT-1 X__12t#GTACTTCGTTTAAAGC-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__12t#GGGTTATTCCTGAATA-1 X__12t#TGTGCGCAGGTTTGAC-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__12t#TTTCTTGCACGAATCC-1
+[1,]                         .
+[2,]                         .
+[3,]                         .
+[4,]                         .
+[5,]                         .
+
+
+2026-07-13 00:53:36.050581 : Organizing SE GeneExpressionMatrix from ArrowFile : X__12t.arrow, 0.216 mins elapsed.
+
+2026-07-13 00:53:36.059096 : mat X__15t, Class = dgCMatrix
+mat X__15t: nRows = 35292, nCols = 11742
+mat X__15t: NonZeroEntries = 19326331, EntryRange = [ 0.109200109200109 , 2111.48648648649 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__15t#GGGTTTCCAGCCTGCA-1 X__15t#GTTCGCGCATAAAGCA-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__15t#GGTGAGGTCACAGCCA-1 X__15t#CCGATGCAGCCTGTGA-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__15t#TAGCTAGGTTACATCC-1
+[1,]                         .
+[2,]                         .
+[3,]                         .
+[4,]                         .
+[5,]                         .
+
+
+2026-07-13 00:53:36.266786 : Organizing SE GeneExpressionMatrix from ArrowFile : X__15t.arrow, 0.222 mins elapsed.
+
+2026-07-13 00:53:36.564167 : se X__11t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 10518 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(10518): X__11t#CAATCGCCACAACAGG-1 X__11t#TCGTTTCCAATGCCCG-1
+  ... X__11t#AATTAGGCAAACCTAT-1 X__11t#ACTTGTCGTGATTTGG-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:36.569649 : Completed GeneExpressionMatrix : X__11t(13 of 19), 0.305 mins elapsed.
+2026-07-13 00:53:36.592062 : Reading GeneExpressionMatrix : X__pt26pre(17 of 19), 0.305 mins elapsed.
+
+2026-07-13 00:53:36.7225 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__pt26pre 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__pt26pre.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 8999
+[1] "X__pt26pre#GCAAACAAGCTTTGTT-1" "X__pt26pre#CTCTCACAGTTTGTCT-1"
+[3] "X__pt26pre#CGGACCTAGCATTATG-1" "X__pt26pre#CCAAATCAGGTCGAGG-1"
+[5] "X__pt26pre#AAACGTACAAACTAAG-1" "X__pt26pre#CGAGCTGGTAACTACG-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:36.992719 : se X__12t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 6077 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(6077): X__12t#GTCCATTGTTAAGTGT-1 X__12t#GTACTTCGTTTAAAGC-1 ...
+  X__12t#AAAGCGGGTTACAACG-1 X__12t#TGCAAGCGTAATCGTG-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:36.99752 : Completed GeneExpressionMatrix : X__12t(16 of 19), 0.312 mins elapsed.
+
+2026-07-13 00:53:37.354929 : se X__15t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 11742 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(11742): X__15t#GGGTTTCCAGCCTGCA-1 X__15t#GTTCGCGCATAAAGCA-1
+  ... X__15t#TGACCTTGTCCTAGTT-1 X__15t#CTATGACAGCCTAATA-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:37.360643 : Completed GeneExpressionMatrix : X__15t(9 of 19), 0.318 mins elapsed.
+2026-07-13 00:53:37.937274 : Reading GeneExpressionMatrix : X__pt20pre(18 of 19), 0.327 mins elapsed.
+
+2026-07-13 00:53:38.024178 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__pt20pre 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__pt20pre.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 5006
+[1] "X__pt20pre#GGTAGGAGTGCTGTAA-1" "X__pt20pre#CTCGTTATCTCAATTC-1"
+[3] "X__pt20pre#CTGTAACAGTTAGTTG-1" "X__pt20pre#CCTTGTTCATTATGCG-1"
+[5] "X__pt20pre#GATCGCTCAATTAGCT-1" "X__pt20pre#AACGCCCAGGCCATCA-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+2026-07-13 00:53:38.062772 : Reading GeneExpressionMatrix : X__pt23pre(19 of 19), 0.329 mins elapsed.
+
+2026-07-13 00:53:38.11004 : featureDF X__pt26pre, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:38.155085 : Getting GeneExpressionMatrix from ArrowFile : X__pt26pre.arrow, 0.024 mins elapsed.
+
+2026-07-13 00:53:38.168527 : getMatrixFromArrow Input-Parameters, Class = list
+
+getMatrixFromArrow Input-Parameters$ArrowFile: length = 1
+                                                                                                                                                           X__pt23pre 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/ArrowFiles/X__pt23pre.arrow" 
+
+
+getMatrixFromArrow Input-Parameters$useMatrix: length = 1
+[1] "GeneExpressionMatrix"
+
+
+getMatrixFromArrow Input-Parameters$useSeqnames: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$excludeChr: length = 0
+NULL
+
+
+getMatrixFromArrow Input-Parameters$cellNames: length = 1836
+[1] "X__pt23pre#GCATCCTTCGGCCATA-1" "X__pt23pre#ATTCAACCATTAAACC-1"
+[3] "X__pt23pre#CAAACACTCGTTACAA-1" "X__pt23pre#CGCATGATCGCTTGCT-1"
+[5] "X__pt23pre#AAATGCCTCCGGTTAG-1" "X__pt23pre#GCTATCCTCGCTAGCA-1"
+
+
+getMatrixFromArrow Input-Parameters$ArchRProj: length = 1
+
+getMatrixFromArrow Input-Parameters$verbose: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$binarize: length = 1
+[1] FALSE
+
+
+getMatrixFromArrow Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-getGeneExpressionMatrix-6b846323cf92d-Date-2026-07-13_Time-00-53-18.415782.log"
+
+
+
+2026-07-13 00:53:38.334844 : mat X__pt29pre, Class = dgCMatrix
+mat X__pt29pre: nRows = 35292, nCols = 10677
+
+2026-07-13 00:53:38.491651 : mat X__19t, Class = dgCMatrix
+mat X__19t: nRows = 35292, nCols = 11712
+mat X__pt29pre: NonZeroEntries = 24027711, EntryRange = [ 0.0629778443943421 , 4711.9341563786 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__pt29pre#GCTGGTTCAACCTGGT-1 X__pt29pre#TCACTGACAATAACCT-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt29pre#ATGAATGCACCTCAGG-1 X__pt29pre#CTCTAGCTCATGTTTC-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt29pre#GCCTGAGGTTACGCGG-1
+[1,]                             .
+[2,]                             .
+[3,]                             .
+[4,]                             .
+[5,]                             .
+
+
+2026-07-13 00:53:38.580861 : Organizing SE GeneExpressionMatrix from ArrowFile : X__pt29pre.arrow, 0.26 mins elapsed.
+mat X__19t: NonZeroEntries = 24944980, EntryRange = [ 0.173997772828508 , 1495.32710280374 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__19t#AAGACCAAGGTAAGGC-1 X__19t#TTGCGAGTCGAGGTGG-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__19t#CTCCTAATCGGTCAAT-1 X__19t#GATGCTTAGGCTGGCT-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__19t#TTAGGCGTCCGCCTAT-1
+[1,]                         .
+[2,]                         .
+[3,]                         .
+[4,]                         .
+[5,]                         .
+
+
+2026-07-13 00:53:38.745566 : Organizing SE GeneExpressionMatrix from ArrowFile : X__19t.arrow, 0.265 mins elapsed.
+
+2026-07-13 00:53:39.381047 : featureDF X__pt23pre, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:39.421039 : Getting GeneExpressionMatrix from ArrowFile : X__pt23pre.arrow, 0.021 mins elapsed.
+
+2026-07-13 00:53:39.444044 : featureDF X__pt20pre, Class = DFrame
+DataFrame with 35292 rows and 6 columns
+      seqnames       idx     start       end        name    strand
+         <Rle> <integer> <integer> <integer> <character> <integer>
+1         chr1         1     29553     30267 MIR1302-2HG         3
+2         chr1         2     36080     36081     FAM138A         3
+3         chr1         3     65418     69055       OR4F5         3
+4         chr1         4     91104     91105  AL627309.3         3
+5         chr1         5    120931    133723  AL627309.1         3
+...        ...       ...       ...       ...         ...       ...
+35288     chr9      1314 137618812 137618820  ARRDC1-AS1         3
+35289     chr9      1315 137618991 137788811       EHMT1         3
+35290     chr9      1316 137876692 137892570  AL772363.1         3
+35291     chr9      1317 137877781 137877934     CACNA1B         3
+35292     chr9      1318 138203324 138203325  AL954642.1         3
+
+2026-07-13 00:53:39.485834 : Getting GeneExpressionMatrix from ArrowFile : X__pt20pre.arrow, 0.024 mins elapsed.
+
+2026-07-13 00:53:39.917905 : se X__pt29pre, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 10677 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(10677): X__pt29pre#GCTGGTTCAACCTGGT-1
+  X__pt29pre#TCACTGACAATAACCT-1 ... X__pt29pre#TGGCTATAGCACTTGG-1
+  X__pt29pre#GGGAGTAGTTGGTTCT-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:39.923468 : Completed GeneExpressionMatrix : X__pt29pre(11 of 19), 0.36 mins elapsed.
+
+2026-07-13 00:53:40.424264 : se X__19t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 11712 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(11712): X__19t#AAGACCAAGGTAAGGC-1 X__19t#TTGCGAGTCGAGGTGG-1
+  ... X__19t#GAGTCAAAGTATTGTG-1 X__19t#CCGCTTAGTCTTTATG-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:40.429964 : Completed GeneExpressionMatrix : X__19t(6 of 19), 0.369 mins elapsed.
+
+2026-07-13 00:53:40.569933 : mat X__20t, Class = dgCMatrix
+mat X__20t: nRows = 35292, nCols = 7784
+mat X__20t: NonZeroEntries = 29884654, EntryRange = [ 0.0633440595940913 , 2379.85743849161 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__20t#AAGCCTGTCAAAGGCA-1 X__20t#CCGTTTGGTCATGAGC-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__20t#GAGCAAATCCTGGTGA-1 X__20t#GAGCAAATCGTTTCCA-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__20t#CTGCTCCCAGCCAGTT-1
+[1,]                         .
+[2,]                         .
+[3,]                         .
+[4,]                         .
+[5,]                         .
+
+
+2026-07-13 00:53:40.905673 : Organizing SE GeneExpressionMatrix from ArrowFile : X__20t.arrow, 0.304 mins elapsed.
+
+2026-07-13 00:53:41.126239 : mat X__pt22pre, Class = dgCMatrix
+mat X__pt22pre: nRows = 35292, nCols = 14243
+mat X__pt22pre: NonZeroEntries = 30536975, EntryRange = [ 0.0711197086936732 , 4183.87488612208 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__pt22pre#CTAGCTGAGAATCTCA-1 X__pt22pre#GCACTAAGTAATCCCT-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt22pre#GGCCAACTCTCCTCTT-1 X__pt22pre#ACCTTGCTCATCCTAT-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt22pre#GCAGCTATCCATAATG-1
+[1,]                             .
+[2,]                             .
+[3,]                             .
+[4,]                             .
+[5,]                             .
+
+
+2026-07-13 00:53:41.427869 : Organizing SE GeneExpressionMatrix from ArrowFile : X__pt22pre.arrow, 0.307 mins elapsed.
+
+2026-07-13 00:53:42.226015 : mat X__pt23pre, Class = dgCMatrix
+mat X__pt23pre: nRows = 35292, nCols = 1836
+mat X__pt23pre: NonZeroEntries = 3963593, EntryRange = [ 0.128698472349133 , 3161.31074877315 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__pt23pre#GCATCCTTCGGCCATA-1 X__pt23pre#ATTCAACCATTAAACC-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt23pre#CAAACACTCGTTACAA-1 X__pt23pre#CGCATGATCGCTTGCT-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt23pre#AAATGCCTCCGGTTAG-1
+[1,]                             .
+[2,]                             .
+[3,]                             .
+[4,]                             .
+[5,]                             .
+
+
+2026-07-13 00:53:42.302977 : Organizing SE GeneExpressionMatrix from ArrowFile : X__pt23pre.arrow, 0.069 mins elapsed.
+
+2026-07-13 00:53:42.394998 : mat X__18t, Class = dgCMatrix
+mat X__18t: nRows = 35292, nCols = 12914
+
+2026-07-13 00:53:42.588826 : se X__pt23pre, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 1836 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(1836): X__pt23pre#GCATCCTTCGGCCATA-1
+  X__pt23pre#ATTCAACCATTAAACC-1 ... X__pt23pre#TGCACACCACCTCAGG-1
+  X__pt23pre#TGCGCAGGTGTTAGCA-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:42.592692 : Completed GeneExpressionMatrix : X__pt23pre(19 of 19), 0.405 mins elapsed.
+mat X__18t: NonZeroEntries = 29496395, EntryRange = [ 0.0710984713828653 , 5111.40235910878 ]
+
+2026-07-13 00:53:42.669965 : se X__20t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 7784 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(7784): X__20t#AAGCCTGTCAAAGGCA-1 X__20t#CCGTTTGGTCATGAGC-1 ...
+  X__20t#ACTCAGTAGCGTGCAC-1 X__20t#CATAATGTCCGGTTGA-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:42.674872 : Completed GeneExpressionMatrix : X__20t(2 of 19), 0.406 mins elapsed.
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__18t#TAGCGGCTCGATTCTT-1 X__18t#CTAATTGAGTAAGTGG-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__18t#TGGTCATAGCGCTCAA-1 X__18t#CATTATCTCGGCCATA-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__18t#GGCCTTAAGCACCACA-1
+[1,]                         .
+[2,]                         .
+[3,]                         .
+[4,]                         .
+[5,]                         .
+
+
+2026-07-13 00:53:42.721792 : Organizing SE GeneExpressionMatrix from ArrowFile : X__18t.arrow, 0.331 mins elapsed.
+
+2026-07-13 00:53:42.736899 : mat X__17t, Class = dgCMatrix
+mat X__17t: nRows = 35292, nCols = 11844
+mat X__17t: NonZeroEntries = 30152710, EntryRange = [ 0.127713920817369 , 2358.71271585557 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__17t#ACCAAGTTCTTGCAAA-1 X__17t#CTGATCACAATACTGT-1
+[1,]                  .                                .
+[2,]                  .                                .
+[3,]                  .                                .
+[4,]                  .                                .
+[5,]                  0.166675                         .
+     X__17t#GGTACTTAGCTATGAC-1 X__17t#CTCCGGACAATTATGC-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__17t#CTTCACTCAACGTGCT-1
+[1,]                         .
+[2,]                         .
+[3,]                         .
+[4,]                         .
+[5,]                         .
+
+
+2026-07-13 00:53:43.027483 : Organizing SE GeneExpressionMatrix from ArrowFile : X__17t.arrow, 0.336 mins elapsed.
+
+2026-07-13 00:53:43.233188 : se X__pt22pre, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 14243 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(14243): X__pt22pre#CTAGCTGAGAATCTCA-1
+  X__pt22pre#GCACTAAGTAATCCCT-1 ... X__pt22pre#TCGTTACGTAGCTGGT-1
+  X__pt22pre#GAGCGAAGTTTGCGAA-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:43.239559 : Completed GeneExpressionMatrix : X__pt22pre(10 of 19), 0.416 mins elapsed.
+
+2026-07-13 00:53:43.859388 : mat X__22t, Class = dgCMatrix
+mat X__22t: nRows = 35292, nCols = 15661
+mat X__22t: NonZeroEntries = 35719406, EntryRange = [ 0.122312189632819 , 3742.54802384632 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__22t#TTGCTTTAGGCTACAT-1 X__22t#TCACATAAGGAGCATA-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__22t#TTATTGCTCGGGCCAT-1 X__22t#GATTCCTGTCTAACCT-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__22t#GACCGAACAGTTATCG-1
+[1,]                         .
+[2,]                         .
+[3,]                         .
+[4,]                         .
+[5,]                         .
+
+
+2026-07-13 00:53:44.201208 : Organizing SE GeneExpressionMatrix from ArrowFile : X__22t.arrow, 0.357 mins elapsed.
+
+2026-07-13 00:53:44.276502 : mat X__13t, Class = dgCMatrix
+mat X__13t: nRows = 35292, nCols = 19667
+
+2026-07-13 00:53:44.487279 : se X__18t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 12914 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(12914): X__18t#TAGCGGCTCGATTCTT-1 X__18t#CTAATTGAGTAAGTGG-1
+  ... X__18t#TGCAGGCTCCTTCAAT-1 X__18t#GCTGGATGTCGTTATC-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:44.493253 : Completed GeneExpressionMatrix : X__18t(7 of 19), 0.437 mins elapsed.
+mat X__13t: NonZeroEntries = 39344074, EntryRange = [ 0.229848070425449 , 1486.41588296761 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__13t#GTCATCACACCTACGG-1 X__13t#GTAGGCGAGGCGGATG-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__13t#ACCTTGCTCCCTCGCA-1 X__13t#ACCTTGCTCGTTATAG-1
+[1,]                         .                         .
+[2,]                         .                         .
+[3,]                         .                         .
+[4,]                         .                         .
+[5,]                         .                         .
+     X__13t#CGAGCTGGTCAATACG-1
+[1,]                 .        
+[2,]                 .        
+[3,]                 .        
+[4,]                 .        
+[5,]                 0.5211862
+
+
+2026-07-13 00:53:44.649026 : Organizing SE GeneExpressionMatrix from ArrowFile : X__13t.arrow, 0.366 mins elapsed.
+
+2026-07-13 00:53:44.660461 : se X__17t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 11844 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(11844): X__17t#ACCAAGTTCTTGCAAA-1 X__17t#CTGATCACAATACTGT-1
+  ... X__17t#TGATCCTGTTCCGGGA-1 X__17t#AGTTACTCATTAAGCT-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:44.666167 : Completed GeneExpressionMatrix : X__17t(8 of 19), 0.439 mins elapsed.
+
+2026-07-13 00:53:44.905966 : mat X__pt20pre, Class = dgCMatrix
+mat X__pt20pre: nRows = 35292, nCols = 5006
+
+2026-07-13 00:53:45.149128 : mat X__1t, Class = dgCMatrix
+mat X__1t: nRows = 35292, nCols = 17846
+mat X__1t: NonZeroEntries = 42636679, EntryRange = [ 0.111411923304032 , 1842.10526315789 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__1t#AGTGGACAGCCGCAGT-1 X__1t#ATCACAATCACGCCAA-1 X__1t#ACCAGCTCATTAAGTC-1
+[1,]                .                                .                        .
+[2,]                .                                .                        .
+[3,]                .                                .                        .
+[4,]                .                                .                        .
+[5,]                0.2096041                        .                        .
+     X__1t#TATTAGCCAGCACCAT-1 X__1t#GTAGCGCTCCTCACTA-1
+[1,]                        .                        .
+[2,]                        .                        .
+[3,]                        .                        .
+[4,]                        .                        .
+[5,]                        .                        .
+
+
+2026-07-13 00:53:45.58192 : Organizing SE GeneExpressionMatrix from ArrowFile : X__1t.arrow, 0.38 mins elapsed.
+mat X__pt20pre: NonZeroEntries = 10200247, EntryRange = [ 0.0970939772605905 , 3929.14653784219 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__pt20pre#GGTAGGAGTGCTGTAA-1 X__pt20pre#CTCGTTATCTCAATTC-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt20pre#CTGTAACAGTTAGTTG-1 X__pt20pre#CCTTGTTCATTATGCG-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt20pre#GATCGCTCAATTAGCT-1
+[1,]                     .        
+[2,]                     .        
+[3,]                     .        
+[4,]                     .        
+[5,]                     0.1522765
+
+
+2026-07-13 00:53:45.862196 : Organizing SE GeneExpressionMatrix from ArrowFile : X__pt20pre.arrow, 0.131 mins elapsed.
+
+2026-07-13 00:53:46.341928 : mat X__pt26pre, Class = dgCMatrix
+mat X__pt26pre: nRows = 35292, nCols = 8999
+mat X__pt26pre: NonZeroEntries = 14702529, EntryRange = [ 0.129942695271385 , 4283.03241124179 ]
+
+2026-07-13 00:53:46.492377 : mat X__3t, Class = dgCMatrix
+mat X__3t: nRows = 35292, nCols = 19837
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__pt26pre#GCAAACAAGCTTTGTT-1 X__pt26pre#CTCTCACAGTTTGTCT-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt26pre#CGGACCTAGCATTATG-1 X__pt26pre#CCAAATCAGGTCGAGG-1
+[1,]                             .                             .
+[2,]                             .                             .
+[3,]                             .                             .
+[4,]                             .                             .
+[5,]                             .                             .
+     X__pt26pre#AAACGTACAAACTAAG-1
+[1,]                             .
+[2,]                             .
+[3,]                             .
+[4,]                             .
+[5,]                             .
+
+
+2026-07-13 00:53:46.509727 : Organizing SE GeneExpressionMatrix from ArrowFile : X__pt26pre.arrow, 0.163 mins elapsed.
+
+2026-07-13 00:53:46.594805 : se X__13t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 19667 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(19667): X__13t#GTCATCACACCTACGG-1 X__13t#GTAGGCGAGGCGGATG-1
+  ... X__13t#GTTTCTAGTTAATCGG-1 X__13t#AGCCTCCGTTGGTTGA-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:46.601931 : Completed GeneExpressionMatrix : X__13t(1 of 19), 0.472 mins elapsed.
+
+2026-07-13 00:53:46.608904 : se X__pt20pre, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 5006 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(5006): X__pt20pre#GGTAGGAGTGCTGTAA-1
+  X__pt20pre#CTCGTTATCTCAATTC-1 ... X__pt20pre#ATCCCGCGTCACACCC-1
+  X__pt20pre#CAAGTGAAGCACTAAC-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:46.613387 : Completed GeneExpressionMatrix : X__pt20pre(18 of 19), 0.472 mins elapsed.
+
+2026-07-13 00:53:46.625933 : se X__22t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 15661 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(15661): X__22t#TTGCTTTAGGCTACAT-1 X__22t#TCACATAAGGAGCATA-1
+  ... X__22t#TCGTTACGTTGGCCGA-1 X__22t#AAAGCAAGTGGAGCAA-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:46.632308 : Completed GeneExpressionMatrix : X__22t(5 of 19), 0.472 mins elapsed.
+mat X__3t: NonZeroEntries = 34333175, EntryRange = [ 0.140303617027247 , 5403.40109960363 ]
+5 x 5 sparse Matrix of class "dgCMatrix"
+     X__3t#TGGGCATGTGGTTAGC-1 X__3t#TATCGCGAGTGTTGTA-1 X__3t#AAGCCACGTAAATTGC-1
+[1,]                        .                        .                        .
+[2,]                        .                        .                        .
+[3,]                        .                        .                        .
+[4,]                        .                        .                        .
+[5,]                        .                        .                        .
+     X__3t#GATGGACAGCCTGTTC-1 X__3t#TATTAGGTCGCAGGCT-1
+[1,]                        .                        .
+[2,]                        .                        .
+[3,]                        .                        .
+[4,]                        .                        .
+[5,]                        .                        .
+
+
+2026-07-13 00:53:46.821508 : Organizing SE GeneExpressionMatrix from ArrowFile : X__3t.arrow, 0.401 mins elapsed.
+
+2026-07-13 00:53:47.356499 : se X__pt26pre, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 8999 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(8999): X__pt26pre#GCAAACAAGCTTTGTT-1
+  X__pt26pre#CTCTCACAGTTTGTCT-1 ... X__pt26pre#GGAGTCTGTGCTAGAC-1
+  X__pt26pre#TAGCGGCTCTAACTGA-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:47.361711 : Completed GeneExpressionMatrix : X__pt26pre(17 of 19), 0.484 mins elapsed.
+
+2026-07-13 00:53:47.934164 : se X__1t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 17846 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(17846): X__1t#AGTGGACAGCCGCAGT-1 X__1t#ATCACAATCACGCCAA-1 ...
+  X__1t#CTGTGTGAGGTGAGAC-1 X__1t#GAAGTCAAGGCCTGGT-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:47.940826 : Completed GeneExpressionMatrix : X__1t(4 of 19), 0.494 mins elapsed.
+
+2026-07-13 00:53:48.913245 : se X__3t, Class = SummarizedExperiment
+class: SummarizedExperiment 
+dim: 35292 19837 
+metadata(0):
+assays(1): GeneExpressionMatrix
+rownames: NULL
+rowData names(6): seqnames idx ... name strand
+colnames(19837): X__3t#TGGGCATGTGGTTAGC-1 X__3t#TATCGCGAGTGTTGTA-1 ...
+  X__3t#GGTTGACGTACTAAAC-1 X__3t#CGTTTGTGTTAAGGCC-1
+colData names(24): BlacklistRatio DoubletEnrichment ... Cluster_0.0625
+  Cluster_0.03125
+
+2026-07-13 00:53:48.920396 : Completed GeneExpressionMatrix : X__3t(3 of 19), 0.51 mins elapsed.
+2026-07-13 00:53:50.404934 : Organizing colData, 0.535 mins elapsed.
+2026-07-13 00:53:51.418797 : Organizing rowData, 0.552 mins elapsed.
+2026-07-13 00:53:51.431473 : Organizing rowRanges, 0.552 mins elapsed.
+2026-07-13 00:53:51.479388 : Organizing Assays (1 of 1), 0.553 mins elapsed.
+2026-07-13 00:54:08.95009 : Constructing SummarizedExperiment, 0.844 mins elapsed.
+2026-07-13 00:54:09.780745 : Finished Matrix Creation, 0.858 mins elapsed.
