@@ -1,0 +1,1586 @@
+
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----'|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+Logging With ArchR!
+
+Start Time : 2026-07-20 22:54:07.993205
+
+------- ArchR Info
+
+ArchRThreads = 16
+ArchRGenome = Hg38
+
+------- System Info
+
+Computer OS = unix
+Total Cores = 80
+
+------- Session Info
+
+R version 4.3.0 (2023-04-21)
+Platform: x86_64-conda-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux 8.10 (Ootpa)
+
+Matrix products: default
+BLAS/LAPACK: /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/Anaconda/miniconda3/envs/jwen_scRNA_singCellaR/lib/libopenblasp-r0.3.30.so;  LAPACK version 3.12.0
+
+Random number generation:
+ RNG:     L'Ecuyer-CMRG 
+ Normal:  Inversion 
+ Sample:  Rejection 
+ 
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C               LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8     LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8    LC_PAPER=en_US.UTF-8      
+ [8] LC_NAME=C                  LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+time zone: America/Chicago
+tzcode source: system (glibc)
+
+attached base packages:
+ [1] parallel  stats4    grid      stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] BSgenome.Hsapiens.UCSC.hg38_1.4.5        BSgenome_1.70.1                          rtracklayer_1.62.0                       BiocIO_1.12.0                            Biostrings_2.70.1                       
+ [6] XVector_0.42.0                           org.Hs.eg.db_3.18.0                      TxDb.Hsapiens.UCSC.hg38.knownGene_3.18.0 GenomicFeatures_1.54.1                   AnnotationDbi_1.64.1                    
+[11] fs_1.6.6                                 qs2_0.1.5                                snow_0.4-4                               doFuture_1.1.2                           doParallel_1.0.17                       
+[16] iterators_1.0.14                         foreach_1.5.2                            BiocParallel_1.36.0                      future_1.67.0                            rhdf5_2.46.1                            
+[21] SummarizedExperiment_1.32.0              Biobase_2.62.0                           RcppArmadillo_14.6.3-1                   Rcpp_1.1.0                               Matrix_1.6-5                            
+[26] GenomicRanges_1.54.1                     GenomeInfoDb_1.38.1                      IRanges_2.36.0                           S4Vectors_0.40.2                         BiocGenerics_0.48.1                     
+[31] sparseMatrixStats_1.14.0                 MatrixGenerics_1.14.0                    matrixStats_1.5.0                        data.table_1.17.8                        stringr_1.5.1                           
+[36] plyr_1.8.9                               magrittr_2.0.3                           gtable_0.3.6                             gtools_3.9.5                             gridExtra_2.3                           
+[41] devtools_2.4.5                           usethis_3.1.0                            ArchR_1.0.3                              gplots_3.2.0                             Seurat_5.3.0                            
+[46] SeuratObject_5.1.0                       sp_2.2-0                                 ggplot2_3.5.2                           
+
+loaded via a namespace (and not attached):
+  [1] RcppAnnoy_0.0.22         splines_4.3.0            later_1.4.2              filelock_1.0.3           bitops_1.0-9             tibble_3.3.0             polyclip_1.10-7          XML_3.99-0.15           
+  [9] fastDummies_1.7.5        lifecycle_1.0.4          globals_0.18.0           lattice_0.22-7           MASS_7.3-60.0.1          plotly_4.11.0            yaml_2.3.10              remotes_2.5.0           
+ [17] httpuv_1.6.16            sctransform_0.4.2        spam_2.11-1              sessioninfo_1.2.3        pkgbuild_1.4.8           spatstat.sparse_3.1-0    reticulate_1.43.0        DBI_1.2.3               
+ [25] cowplot_1.2.0            pbapply_1.7-4            RColorBrewer_1.1-3       abind_1.4-5              pkgload_1.4.0            zlibbioc_1.48.0          Rtsne_0.17               purrr_1.1.0             
+ [33] RCurl_1.98-1.12          rappdirs_0.3.3           GenomeInfoDbData_1.2.11  ggrepel_0.9.6            irlba_2.3.5.1            listenv_0.9.1            spatstat.utils_3.1-5     goftest_1.2-3           
+ [41] RSpectra_0.16-2          spatstat.random_3.4-1    fitdistrplus_1.2-4       parallelly_1.45.1        codetools_0.2-20         DelayedArray_0.28.0      xml2_1.5.1               tidyselect_1.2.1        
+ [49] farver_2.1.2             BiocFileCache_2.10.1     spatstat.explore_3.5-2   GenomicAlignments_1.38.0 jsonlite_2.0.0           ellipsis_0.3.2           progressr_0.15.1         ggridges_0.5.6          
+ [57] survival_3.8-3           progress_1.2.3           tools_4.3.0              ica_1.0-3                glue_1.8.0               SparseArray_1.2.2        dplyr_1.1.4              withr_3.0.2             
+ [65] fastmap_1.2.0            rhdf5filters_1.14.1      caTools_1.18.3           digest_0.6.37            R6_2.6.1                 mime_0.13                colorspace_2.1-1         scattermore_1.2         
+ [73] Cairo_1.6-1              tensor_1.5.1             biomaRt_2.58.0           RSQLite_2.4.3            dichromat_2.0-0.1        spatstat.data_3.1-8      tidyr_1.3.1              generics_0.1.4          
+ [81] prettyunits_1.2.0        httr_1.4.7               htmlwidgets_1.6.4        S4Arrays_1.2.0           uwot_0.2.3               pkgconfig_2.0.3          blob_1.2.4               lmtest_0.9-40           
+ [89] htmltools_0.5.8.1        profvis_0.4.0            dotCall64_1.2            scales_1.4.0             png_0.1-8                spatstat.univar_3.1-4    rjson_0.2.23             reshape2_1.4.4          
+ [97] curl_7.0.0               nlme_3.1-168             zoo_1.8-14               cachem_1.1.0             KernSmooth_2.23-26       miniUI_0.1.2             restfulr_0.0.15          pillar_1.11.0           
+[105] vctrs_0.6.5              RANN_2.6.2               urlchecker_1.0.1         promises_1.3.3           stringfish_0.17.0        dbplyr_2.5.0             xtable_1.8-4             cluster_2.1.8.1         
+[113] Rsamtools_2.18.0         cli_3.6.5                compiler_4.3.0           rlang_1.1.6              crayon_1.5.3             future.apply_1.20.0      stringi_1.7.12           viridisLite_0.4.2       
+[121] deldir_2.0-4             lazyeval_0.2.2           spatstat.geom_3.5-0      RcppHNSW_0.6.0           hms_1.1.3                patchwork_1.3.1          bit64_4.6.0-1            Rhdf5lib_1.24.0         
+[129] KEGGREST_1.42.0          shiny_1.11.1             ROCR_1.0-11              igraph_1.5.1             memoise_2.0.1            RcppParallel_5.1.9       bit_4.6.0               
+
+
+------- Log Info
+
+
+2026-07-20 22:54:08.106955 : ReproduciblePeakSet Args, Class = list
+
+ReproduciblePeakSet Args$ArchRProj: length = 1
+
+ReproduciblePeakSet Args$groupBy: length = 1
+[1] "celltype"
+
+
+ReproduciblePeakSet Args$peakMethod: length = 1
+[1] "Macs2"
+
+
+ReproduciblePeakSet Args$reproducibility: length = 1
+[1] "2"
+
+
+ReproduciblePeakSet Args$peaksPerCell: length = 1
+[1] 500
+
+
+ReproduciblePeakSet Args$maxPeaks: length = 1
+[1] 150000
+
+
+ReproduciblePeakSet Args$minCells: length = 1
+[1] 25
+
+
+ReproduciblePeakSet Args$excludeChr: length = 3
+[1] "chrM" "chrX" "chrY"
+
+
+ReproduciblePeakSet Args$pathToMacs2: length = 1
+[1] "macs2"
+
+
+ReproduciblePeakSet Args$genomeSize: length = 0
+NULL
+
+
+ReproduciblePeakSet Args$shift: length = 1
+[1] -75
+
+
+ReproduciblePeakSet Args$extsize: length = 1
+[1] 150
+
+
+ReproduciblePeakSet Args$method: length = 1
+[1] "q"
+
+
+ReproduciblePeakSet Args$cutOff: length = 1
+[1] 0.1
+
+
+ReproduciblePeakSet Args$additionalParams: length = 1
+[1] "--nomodel --nolambda"
+
+
+ReproduciblePeakSet Args$extendSummits: length = 1
+[1] 250
+
+
+ReproduciblePeakSet Args$promoterRegion: length = 2
+[1] 2000  100
+
+
+ReproduciblePeakSet Args$plot: length = 1
+[1] TRUE
+
+
+ReproduciblePeakSet Args$threads: length = 1
+[1] 16
+
+
+ReproduciblePeakSet Args$parallelParam: length = 0
+NULL
+
+
+ReproduciblePeakSet Args$force: length = 1
+[1] TRUE
+
+
+ReproduciblePeakSet Args$verbose: length = 1
+[1] TRUE
+
+
+ReproduciblePeakSet Args$logFile: length = 1
+[1] "ArchRLogs/ArchR-addReproduciblePeakSet-151c46d74ce34-Date-2026-07-20_Time-22-54-07.599391.log"
+
+
+
+2026-07-20 22:54:08.12466 : Calling Peaks with Macs2
+2026-07-20 22:54:08.317723 : Peak Calling Parameters!, 0.012 mins elapsed.
+
+2026-07-20 22:54:08.318374 : PeakCallSummary, Class = data.frame
+PeakCallSummary: nRows = 9, nCols = 7
+                        Group nCells nCellsUsed nReplicates nMin nMax maxPeaks
+B/Plasma cell   B/Plasma cell   3446       2048           5  262  776   150000
+Cycling               Cycling   9484       6589           5  905 1668   150000
+Endothelial       Endothelial  24749      17598           5 2386 4429   150000
+Fibroblast/HSC Fibroblast/HSC   4881       2982           5  317 1193   150000
+Hepatocyte         Hepatocyte  54229      24107           5 4107 5000   150000
+Macrophage         Macrophage  23701      16229           5 1351 5000   150000
+
+
+2026-07-20 22:54:08.327235 : Batching Peak Calls!, 0.012 mins elapsed.
+
+2026-07-20 22:54:08.327759 : PeakArgs, Class = list
+
+PeakArgs$X: length = 45
+[1] 1 2 3 4 5 6
+
+
+PeakArgs$FUN: length = 1
+                                                                                
+1 function (i = NULL, coverageFiles = NULL, outFiles = NULL, peakParams = NULL, 
+2     bedDir = NULL, excludeChr = NULL, subThreads = 1, tstart = NULL,          
+3     logFile = NULL)                                                           
+4 {                                                                             
+5     .logDiffTime(sprintf("Group %s of %s, Calling Peaks with MACS2!",         
+6         i, length(coverageFiles)), tstart, verbose = TRUE, logFile = logFile) 
+
+
+PeakArgs$coverageFiles: length = 45
+                                                                                                                                                                                         B/Plasma cell._.X__pt26pre 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/GroupCoverages/celltype/B.Plasma.cell._.X__pt26pre.insertions.coverage.h5" 
+                                                                                                                                                                                             B/Plasma cell._.X__18t 
+    "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/GroupCoverages/celltype/B.Plasma.cell._.X__18t.insertions.coverage.h5" 
+                                                                                                                                                                                             B/Plasma cell._.X__13t 
+    "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/GroupCoverages/celltype/B.Plasma.cell._.X__13t.insertions.coverage.h5" 
+                                                                                                                                                                                              B/Plasma cell._.X__3t 
+     "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/GroupCoverages/celltype/B.Plasma.cell._.X__3t.insertions.coverage.h5" 
+                                                                                                                                                                                             B/Plasma cell._.X__22t 
+    "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/GroupCoverages/celltype/B.Plasma.cell._.X__22t.insertions.coverage.h5" 
+                                                                                                                                                                                                   Cycling._.X__17t 
+          "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/GroupCoverages/celltype/Cycling._.X__17t.insertions.coverage.h5" 
+
+
+PeakArgs$outFiles: length = 45
+[1] "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/ReplicateCalls/B.Plasma.cell._.X__pt26pre-summits.rds"
+[2] "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/ReplicateCalls/B.Plasma.cell._.X__18t-summits.rds"    
+[3] "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/ReplicateCalls/B.Plasma.cell._.X__13t-summits.rds"    
+[4] "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/ReplicateCalls/B.Plasma.cell._.X__3t-summits.rds"     
+[5] "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/ReplicateCalls/B.Plasma.cell._.X__22t-summits.rds"    
+[6] "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/ReplicateCalls/Cycling._.X__17t-summits.rds"          
+
+
+PeakArgs$bedDir: length = 1
+[1] "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds"
+
+
+PeakArgs$excludeChr: length = 3
+[1] "chrM" "chrX" "chrY"
+
+
+PeakArgs$threads: length = 1
+[1] 16
+
+
+PeakArgs$logFile: length = 1
+[1] "ArchRLogs/ArchR-addReproduciblePeakSet-151c46d74ce34-Date-2026-07-20_Time-22-54-07.599391.log"
+
+
+PeakArgs$registryDir: length = 1
+[1] "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/batchRegistry"
+
+
+2026-07-20 22:54:08.33507 : Batch Execution w/ safelapply!, 0 mins elapsed.
+2026-07-20 22:54:08.502624 : Group 1 of 45, Calling Peaks with MACS2!, 0.003 mins elapsed.
+2026-07-20 22:54:08.639466 : Group 2 of 45, Calling Peaks with MACS2!, 0.005 mins elapsed.
+2026-07-20 22:54:08.776646 : Group 3 of 45, Calling Peaks with MACS2!, 0.007 mins elapsed.
+2026-07-20 22:54:08.914253 : Group 4 of 45, Calling Peaks with MACS2!, 0.01 mins elapsed.
+2026-07-20 22:54:09.0541 : Group 5 of 45, Calling Peaks with MACS2!, 0.012 mins elapsed.
+2026-07-20 22:54:09.194723 : Group 6 of 45, Calling Peaks with MACS2!, 0.014 mins elapsed.
+2026-07-20 22:54:09.341685 : Group 7 of 45, Calling Peaks with MACS2!, 0.017 mins elapsed.
+
+2026-07-20 22:54:09.432837 : InsertionSites, Class = integer
+
+InsertionSites: length = 745540
+[1] 10152 10204 47065 47144 56634 56823
+
+
+
+2026-07-20 22:54:09.455353 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:09.455353 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 745540, nCols = 3
+2026-07-20 22:54:09.487359 : Group 8 of 45, Calling Peaks with MACS2!, 0.019 mins elapsed.
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10203 10204
+3:     chr1 47064 47065
+4:     chr1 47143 47144
+5:     chr1 56633 56634
+6:     chr1 56822 56823
+
+
+
+2026-07-20 22:54:09.630641 : InsertionSites, Class = integer
+
+InsertionSites: length = 838956
+[1] 10164 10216 73234 73423 77893 78031
+
+
+
+2026-07-20 22:54:09.654886 : InsertionSites, Class = integer
+
+InsertionSites: length = 573948
+[1] 17459 17522 55810 55880 69522 69564
+
+
+
+2026-07-20 22:54:09.658861 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:09.658861 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 838956, nCols = 3
+2026-07-20 22:54:09.660958 : Group 9 of 45, Calling Peaks with MACS2!, 0.022 mins elapsed.
+
+2026-07-20 22:54:09.671494 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:09.671494 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 573948, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10163 10164
+2:     chr1 10215 10216
+3:     chr1 73233 73234
+4:     chr1 73422 73423
+5:     chr1 77892 77893
+6:     chr1 78030 78031
+
+
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 17458 17459
+2:     chr1 17521 17522
+3:     chr1 55809 55810
+4:     chr1 55879 55880
+5:     chr1 69521 69522
+6:     chr1 69563 69564
+
+
+
+2026-07-20 22:54:09.764789 : InsertionSites, Class = integer
+
+InsertionSites: length = 1024168
+[1] 10152 10163 10164 10169 10175 10185
+
+
+
+2026-07-20 22:54:09.792722 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:09.792722 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 1024168, nCols = 3
+
+2026-07-20 22:54:09.801995 : InsertionSites, Class = integer
+
+InsertionSites: length = 461526
+[1] 10073 10197 10316 10346 61836 62051
+
+
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10162 10163
+3:     chr1 10163 10164
+4:     chr1 10168 10169
+5:     chr1 10174 10175
+6:     chr1 10184 10185
+
+
+2026-07-20 22:54:09.825212 : Group 10 of 45, Calling Peaks with MACS2!, 0.025 mins elapsed.
+
+2026-07-20 22:54:09.829496 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:09.829496 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 461526, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10072 10073
+2:     chr1 10196 10197
+3:     chr1 10315 10316
+4:     chr1 10345 10346
+5:     chr1 61835 61836
+6:     chr1 62050 62051
+
+
+2026-07-20 22:54:09.988591 : Group 11 of 45, Calling Peaks with MACS2!, 0.028 mins elapsed.
+2026-07-20 22:54:10.14945 : Group 12 of 45, Calling Peaks with MACS2!, 0.03 mins elapsed.
+2026-07-20 22:54:10.310589 : Group 13 of 45, Calling Peaks with MACS2!, 0.033 mins elapsed.
+2026-07-20 22:54:10.473833 : Group 14 of 45, Calling Peaks with MACS2!, 0.036 mins elapsed.
+2026-07-20 22:54:10.635194 : Group 15 of 45, Calling Peaks with MACS2!, 0.038 mins elapsed.
+2026-07-20 22:54:10.797667 : Group 16 of 45, Calling Peaks with MACS2!, 0.041 mins elapsed.
+
+2026-07-20 22:54:11.099739 : InsertionSites, Class = integer
+
+InsertionSites: length = 1679452
+[1] 10133 10152 10152 10162 10170 10186
+
+
+
+2026-07-20 22:54:11.141201 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:11.141201 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 1679452, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10132 10133
+2:     chr1 10151 10152
+3:     chr1 10151 10152
+4:     chr1 10161 10162
+5:     chr1 10169 10170
+6:     chr1 10185 10186
+
+
+
+2026-07-20 22:54:11.949857 : InsertionSites, Class = integer
+
+InsertionSites: length = 3107234
+[1] 10152 10156 10163 10164 10170 10186
+
+
+
+2026-07-20 22:54:11.995597 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:11.995597 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 3107234, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10155 10156
+3:     chr1 10162 10163
+4:     chr1 10163 10164
+5:     chr1 10169 10170
+6:     chr1 10185 10186
+
+
+
+2026-07-20 22:54:12.076648 : InsertionSites, Class = integer
+
+InsertionSites: length = 3243380
+[1] 10152 10158 10164 10164 10164 10186
+
+
+
+2026-07-20 22:54:12.124481 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:12.124481 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 3243380, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10157 10158
+3:     chr1 10163 10164
+4:     chr1 10163 10164
+5:     chr1 10163 10164
+6:     chr1 10185 10186
+
+
+
+2026-07-20 22:54:12.626348 : InsertionSites, Class = integer
+
+InsertionSites: length = 6039336
+[1] 10098 10152 10152 10152 10152 10152
+
+
+
+2026-07-20 22:54:12.711819 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:12.711819 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 6039336, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10097 10098
+2:     chr1 10151 10152
+3:     chr1 10151 10152
+4:     chr1 10151 10152
+5:     chr1 10151 10152
+6:     chr1 10151 10152
+
+
+
+2026-07-20 22:54:12.78975 : InsertionSites, Class = integer
+
+InsertionSites: length = 4467398
+[1] 10152 10152 10158 10158 10170 10176
+
+
+
+2026-07-20 22:54:12.854702 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:12.854702 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4467398, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10151 10152
+3:     chr1 10157 10158
+4:     chr1 10157 10158
+5:     chr1 10169 10170
+6:     chr1 10175 10176
+
+
+
+2026-07-20 22:54:13.015903 : InsertionSites, Class = integer
+
+InsertionSites: length = 4342076
+[1] 10098 10152 10152 10157 10164 10186
+
+
+
+2026-07-20 22:54:13.030375 : InsertionSites, Class = integer
+
+InsertionSites: length = 4294852
+[1] 10152 10158 10158 10158 10158 10170
+
+
+
+2026-07-20 22:54:13.05958 : InsertionSites, Class = integer
+
+InsertionSites: length = 2856688
+[1] 10158 10158 10197 10198 10310 10346
+
+
+
+2026-07-20 22:54:13.077791 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:13.077791 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4342076, nCols = 3
+
+2026-07-20 22:54:13.091324 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:13.091324 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4294852, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10097 10098
+2:     chr1 10151 10152
+3:     chr1 10151 10152
+4:     chr1 10156 10157
+5:     chr1 10163 10164
+6:     chr1 10185 10186
+
+
+
+2026-07-20 22:54:13.100909 : InsertionSites, Class = integer
+
+InsertionSites: length = 4444374
+[1] 10152 10152 10158 10158 10170 10198
+
+
+2026-07-20 22:54:13.10203 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:13.10203 : InsertionSites-DT, Class = data.frame
+
+InsertionSites-DT: nRows = 2856688, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10157 10158
+3:     chr1 10157 10158
+4:     chr1 10157 10158
+5:     chr1 10157 10158
+6:     chr1 10169 10170
+
+
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10157 10158
+2:     chr1 10157 10158
+3:     chr1 10196 10197
+4:     chr1 10197 10198
+5:     chr1 10309 10310
+6:     chr1 10345 10346
+
+
+
+2026-07-20 22:54:13.124223 : InsertionSites, Class = integer
+
+InsertionSites: length = 6797222
+[1] 10079 10085 10086 10086 10103 10127
+
+
+
+2026-07-20 22:54:13.163575 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:13.163575 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4444374, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10151 10152
+3:     chr1 10157 10158
+4:     chr1 10157 10158
+5:     chr1 10169 10170
+6:     chr1 10197 10198
+
+
+
+2026-07-20 22:54:13.22136 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:13.22136 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 6797222, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10078 10079
+2:     chr1 10084 10085
+3:     chr1 10085 10086
+4:     chr1 10085 10086
+5:     chr1 10102 10103
+6:     chr1 10126 10127
+
+
+
+2026-07-20 22:54:13.31593 : InsertionSites, Class = integer
+
+InsertionSites: length = 4324312
+[1] 10079 10168 10192 10285 10438 10601
+
+
+
+2026-07-20 22:54:13.378888 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:13.378888 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4324312, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10078 10079
+2:     chr1 10167 10168
+3:     chr1 10191 10192
+4:     chr1 10284 10285
+5:     chr1 10437 10438
+6:     chr1 10600 10601
+
+
+
+2026-07-20 22:54:13.645579 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Plasma.cell._.X__22t-5 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Plasma.cell._.X__22t-5.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:14.009451 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Plasma.cell._.X__3t-4 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Plasma.cell._.X__3t-4.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:14.465684 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Plasma.cell._.X__pt26pre-1 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Plasma.cell._.X__pt26pre-1.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:15.032959 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Plasma.cell._.X__18t-2 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Plasma.cell._.X__18t-2.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:15.191765 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Plasma.cell._.X__13t-3 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Plasma.cell._.X__13t-3.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:24.76992 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Cycling._.X__1t-7 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Cycling._.X__1t-7.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:26.852854 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name HSC._.X__22t-16 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/HSC._.X__22t-16.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:26.955577 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Cycling._.X__18t-10 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Cycling._.X__18t-10.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:27.559963 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Cycling._.X__pt29pre-9 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Cycling._.X__pt29pre-9.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:32.593527 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Cycling._.X__17t-6 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Cycling._.X__17t-6.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:34.69707 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Cycling._.X__13t-8 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Cycling._.X__13t-8.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:35.127499 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Endothelial._.X__11t-14 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Endothelial._.X__11t-14.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:35.629622 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Endothelial._.X__15t-13 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Endothelial._.X__15t-13.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:35.924865 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Endothelial._.X__3t-12 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Endothelial._.X__3t-12.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:36.206593 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Endothelial._.X__22t-11 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Endothelial._.X__22t-11.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:36.338315 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Endothelial._.X__16t-15 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Endothelial._.X__16t-15.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:54:47.932039 : Group 17 of 45, Calling Peaks with MACS2!, 0.66 mins elapsed.
+
+2026-07-20 22:54:49.482382 : InsertionSites, Class = integer
+
+InsertionSites: length = 1480834
+[1] 10098 10339 13294 13314 13345 13352
+
+
+
+2026-07-20 22:54:49.514655 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:49.514655 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 1480834, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10097 10098
+2:     chr1 10338 10339
+3:     chr1 13293 13294
+4:     chr1 13313 13314
+5:     chr1 13344 13345
+6:     chr1 13351 13352
+
+
+2026-07-20 22:54:50.653122 : Group 18 of 45, Calling Peaks with MACS2!, 0.705 mins elapsed.
+
+2026-07-20 22:54:51.697352 : InsertionSites, Class = integer
+
+InsertionSites: length = 945584
+[1] 10158 10192 10247 10326 17469 17668
+
+
+
+2026-07-20 22:54:51.72054 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:51.72054 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 945584, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10157 10158
+2:     chr1 10191 10192
+3:     chr1 10246 10247
+4:     chr1 10325 10326
+5:     chr1 17468 17469
+6:     chr1 17667 17668
+
+
+2026-07-20 22:54:57.024151 : Group 19 of 45, Calling Peaks with MACS2!, 0.811 mins elapsed.
+
+2026-07-20 22:54:57.262253 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name HSC._.X__11t-18 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/HSC._.X__11t-18.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:54:57.43225 : Group 20 of 45, Calling Peaks with MACS2!, 0.818 mins elapsed.
+
+2026-07-20 22:54:57.589258 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name HSC._.X__3t-17 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/HSC._.X__3t-17.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:54:58.584076 : InsertionSites, Class = integer
+
+InsertionSites: length = 802056
+[1] 10170 10216 17348 17513 55394 55562
+
+
+
+2026-07-20 22:54:58.605133 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:58.605133 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 802056, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10169 10170
+2:     chr1 10215 10216
+3:     chr1 17347 17348
+4:     chr1 17512 17513
+5:     chr1 55393 55394
+6:     chr1 55561 55562
+
+
+
+2026-07-20 22:54:58.768012 : InsertionSites, Class = integer
+
+InsertionSites: length = 1809018
+[1] 10156 10158 10158 10170 10186 10192
+
+
+
+2026-07-20 22:54:58.808708 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:54:58.808708 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 1809018, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10155 10156
+2:     chr1 10157 10158
+3:     chr1 10157 10158
+4:     chr1 10169 10170
+5:     chr1 10185 10186
+6:     chr1 10191 10192
+
+
+
+2026-07-20 22:55:03.511179 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name HSC._.X__15t-20 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/HSC._.X__15t-20.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:55:05.675164 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name HSC._.X__13t-19 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/HSC._.X__13t-19.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:55:24.422165 : Group 21 of 45, Calling Peaks with MACS2!, 1.268 mins elapsed.
+
+2026-07-20 22:55:27.43707 : InsertionSites, Class = integer
+
+InsertionSites: length = 6023774
+[1] 10084 10104 10152 10152 10152 10152
+
+
+
+2026-07-20 22:55:27.52617 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:55:27.52617 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 6023774, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10083 10084
+2:     chr1 10103 10104
+3:     chr1 10151 10152
+4:     chr1 10151 10152
+5:     chr1 10151 10152
+6:     chr1 10151 10152
+
+
+2026-07-20 22:55:41.714494 : Group 22 of 45, Calling Peaks with MACS2!, 1.556 mins elapsed.
+
+2026-07-20 22:55:44.883635 : InsertionSites, Class = integer
+
+InsertionSites: length = 6409684
+[1] 10073 10074 10080 10092 10152 10152
+
+
+
+2026-07-20 22:55:44.97383 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:55:44.97383 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 6409684, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10072 10073
+2:     chr1 10073 10074
+3:     chr1 10079 10080
+4:     chr1 10091 10092
+5:     chr1 10151 10152
+6:     chr1 10151 10152
+
+
+
+2026-07-20 22:55:46.058386 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Hepatocyte._.X__17t-21 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Hepatocyte._.X__17t-21.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:55:50.989988 : Group 23 of 45, Calling Peaks with MACS2!, 1.711 mins elapsed.
+
+2026-07-20 22:55:53.4465 : InsertionSites, Class = integer
+
+InsertionSites: length = 3097288
+[1] 10078 10152 10152 10152 10157 10157
+
+
+
+2026-07-20 22:55:53.490916 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:55:53.490916 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 3097288, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10077 10078
+2:     chr1 10151 10152
+3:     chr1 10151 10152
+4:     chr1 10151 10152
+5:     chr1 10156 10157
+6:     chr1 10156 10157
+
+
+2026-07-20 22:55:59.92344 : Group 24 of 45, Calling Peaks with MACS2!, 1.86 mins elapsed.
+
+2026-07-20 22:56:02.933357 : InsertionSites, Class = integer
+
+InsertionSites: length = 4458548
+[1] 10152 10158 10170 10191 10198 10216
+
+
+
+2026-07-20 22:56:02.997488 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:56:02.997488 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4458548, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10157 10158
+3:     chr1 10169 10170
+4:     chr1 10190 10191
+5:     chr1 10197 10198
+6:     chr1 10215 10216
+
+
+
+2026-07-20 22:56:04.621259 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Hepatocyte._.X__13t-22 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Hepatocyte._.X__13t-22.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:56:08.554796 : Group 25 of 45, Calling Peaks with MACS2!, 2.004 mins elapsed.
+
+2026-07-20 22:56:11.949795 : InsertionSites, Class = integer
+
+InsertionSites: length = 5865978
+[1] 10086 10086 10086 10091 10139 10145
+
+
+
+2026-07-20 22:56:12.033711 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:56:12.033711 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 5865978, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10085 10086
+2:     chr1 10085 10086
+3:     chr1 10085 10086
+4:     chr1 10090 10091
+5:     chr1 10138 10139
+6:     chr1 10144 10145
+
+
+2026-07-20 22:56:13.518274 : Group 26 of 45, Calling Peaks with MACS2!, 2.086 mins elapsed.
+
+2026-07-20 22:56:14.853131 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Hepatocyte._.X__1t-23 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Hepatocyte._.X__1t-23.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:56:16.501338 : InsertionSites, Class = integer
+
+InsertionSites: length = 4909112
+[1] 10126 10157 10163 10164 10168 10175
+
+
+
+2026-07-20 22:56:16.569292 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:56:16.569292 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4909112, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10125 10126
+2:     chr1 10156 10157
+3:     chr1 10162 10163
+4:     chr1 10163 10164
+5:     chr1 10167 10168
+6:     chr1 10174 10175
+
+
+2026-07-20 22:56:16.685547 : Group 27 of 45, Calling Peaks with MACS2!, 2.139 mins elapsed.
+
+2026-07-20 22:56:19.632551 : InsertionSites, Class = integer
+
+InsertionSites: length = 4512892
+[1] 10080 10127 10152 10152 10157 10157
+
+
+
+2026-07-20 22:56:19.697449 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:56:19.697449 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4512892, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10079 10080
+2:     chr1 10126 10127
+3:     chr1 10151 10152
+4:     chr1 10151 10152
+5:     chr1 10156 10157
+6:     chr1 10156 10157
+
+
+
+2026-07-20 22:56:25.786247 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Hepatocyte._.X__pt29pre-24 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Hepatocyte._.X__pt29pre-24.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:56:31.602836 : Group 28 of 45, Calling Peaks with MACS2!, 2.388 mins elapsed.
+2026-07-20 22:56:32.44289 : Group 29 of 45, Calling Peaks with MACS2!, 2.402 mins elapsed.
+
+2026-07-20 22:56:32.622518 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Hepatocyte._.X__20t-25 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Hepatocyte._.X__20t-25.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:56:34.451762 : InsertionSites, Class = integer
+
+InsertionSites: length = 4592044
+[1] 10152 10164 10170 10192 10210 10216
+
+
+
+2026-07-20 22:56:34.516053 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:56:34.516053 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4592044, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10163 10164
+3:     chr1 10169 10170
+4:     chr1 10191 10192
+5:     chr1 10209 10210
+6:     chr1 10215 10216
+
+
+
+2026-07-20 22:56:35.287982 : InsertionSites, Class = integer
+
+InsertionSites: length = 4323696
+[1] 10152 10163 10179 10216 16090 16117
+
+
+
+2026-07-20 22:56:35.348382 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:56:35.348382 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4323696, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10162 10163
+3:     chr1 10178 10179
+4:     chr1 10215 10216
+5:     chr1 16089 16090
+6:     chr1 16116 16117
+
+
+
+2026-07-20 22:56:38.297535 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Macrophage._.X__13t-26 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Macrophage._.X__13t-26.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:56:41.460363 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Macrophage._.X__22t-27 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Macrophage._.X__22t-27.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:56:54.805802 : Group 30 of 45, Calling Peaks with MACS2!, 2.774 mins elapsed.
+2026-07-20 22:56:56.194304 : Group 31 of 45, Calling Peaks with MACS2!, 2.798 mins elapsed.
+
+2026-07-20 22:56:57.074293 : InsertionSites, Class = integer
+
+InsertionSites: length = 2248946
+[1] 10152 10180 10304 10509 57049 57267
+
+
+
+2026-07-20 22:56:57.107227 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:56:57.107227 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 2248946, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10179 10180
+3:     chr1 10303 10304
+4:     chr1 10508 10509
+5:     chr1 57048 57049
+6:     chr1 57266 57267
+
+
+
+2026-07-20 22:56:57.450304 : InsertionSites, Class = integer
+
+InsertionSites: length = 995800
+[1] 10155 10158 10186 10198 10437 10565
+
+
+
+2026-07-20 22:56:57.474986 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:56:57.474986 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 995800, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10154 10155
+2:     chr1 10157 10158
+3:     chr1 10185 10186
+4:     chr1 10197 10198
+5:     chr1 10436 10437
+6:     chr1 10564 10565
+
+
+
+2026-07-20 22:56:58.243379 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Macrophage._.X__18t-28 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Macrophage._.X__18t-28.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:56:58.977747 : Group 32 of 45, Calling Peaks with MACS2!, 2.844 mins elapsed.
+
+2026-07-20 22:56:59.423204 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Macrophage._.X__15t-29 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Macrophage._.X__15t-29.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:56:59.859804 : InsertionSites, Class = integer
+
+InsertionSites: length = 593042
+[1] 51894 52050 72138 72287 77080 77124
+
+
+
+2026-07-20 22:56:59.87691 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:56:59.87691 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 593042, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 51893 51894
+2:     chr1 52049 52050
+3:     chr1 72137 72138
+4:     chr1 72286 72287
+5:     chr1 77079 77080
+6:     chr1 77123 77124
+
+
+2026-07-20 22:57:02.061058 : Group 33 of 45, Calling Peaks with MACS2!, 2.895 mins elapsed.
+
+2026-07-20 22:57:02.942373 : InsertionSites, Class = integer
+
+InsertionSites: length = 793970
+[1] 73828 73982 88210 88412 94695 95043
+
+
+
+2026-07-20 22:57:02.96406 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:57:02.96406 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 793970, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 73827 73828
+2:     chr1 73981 73982
+3:     chr1 88209 88210
+4:     chr1 88411 88412
+5:     chr1 94694 94695
+6:     chr1 95042 95043
+
+
+
+2026-07-20 22:57:07.472076 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Monocyte._.X__15t-31 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Monocyte._.X__15t-31.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:57:07.682368 : Group 34 of 45, Calling Peaks with MACS2!, 2.989 mins elapsed.
+
+2026-07-20 22:57:07.803987 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Monocyte._.X__22t-32 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Monocyte._.X__22t-32.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:57:08.086422 : Group 35 of 45, Calling Peaks with MACS2!, 2.996 mins elapsed.
+
+2026-07-20 22:57:08.53613 : InsertionSites, Class = integer
+
+InsertionSites: length = 686428
+[1] 55288 55363 61345 61497 63646 63680
+
+
+
+2026-07-20 22:57:08.55432 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:57:08.55432 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 686428, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 55287 55288
+2:     chr1 55362 55363
+3:     chr1 61344 61345
+4:     chr1 61496 61497
+5:     chr1 63645 63646
+6:     chr1 63679 63680
+
+
+
+2026-07-20 22:57:09.003507 : InsertionSites, Class = integer
+
+InsertionSites: length = 691152
+[1] 10146 10158 10192 10204 79136 79456
+
+
+
+2026-07-20 22:57:09.021476 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:57:09.021476 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 691152, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10145 10146
+2:     chr1 10157 10158
+3:     chr1 10191 10192
+4:     chr1 10203 10204
+5:     chr1 79135 79136
+6:     chr1 79455 79456
+
+
+
+2026-07-20 22:57:10.690545 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Monocyte._.X__18t-33 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Monocyte._.X__18t-33.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:57:12.728403 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Macrophage._.X__12t-30 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Macrophage._.X__12t-30.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:57:13.327703 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Monocyte._.X__3t-34 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Monocyte._.X__3t-34.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:57:13.387086 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name Monocyte._.X__13t-35 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/Monocyte._.X__13t-35.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:57:29.153177 : Group 36 of 45, Calling Peaks with MACS2!, 3.347 mins elapsed.
+
+2026-07-20 22:57:31.754117 : InsertionSites, Class = integer
+
+InsertionSites: length = 3381534
+[1] 10152 10157 10158 10158 10169 10186
+
+
+
+2026-07-20 22:57:31.801466 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:57:31.801466 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 3381534, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10156 10157
+3:     chr1 10157 10158
+4:     chr1 10157 10158
+5:     chr1 10168 10169
+6:     chr1 10185 10186
+
+
+
+2026-07-20 22:57:46.822018 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name T.cell._.X__18t-36 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/T.cell._.X__18t-36.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:57:50.249365 : Group 37 of 45, Calling Peaks with MACS2!, 3.699 mins elapsed.
+
+2026-07-20 22:57:51.79115 : InsertionSites, Class = integer
+
+InsertionSites: length = 1273462
+[1] 10092 10170 10192 10303 15949 16068
+
+
+
+2026-07-20 22:57:51.819756 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:57:51.819756 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 1273462, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10091 10092
+2:     chr1 10169 10170
+3:     chr1 10191 10192
+4:     chr1 10302 10303
+5:     chr1 15948 15949
+6:     chr1 16067 16068
+
+
+2026-07-20 22:57:56.297231 : Group 38 of 45, Calling Peaks with MACS2!, 3.799 mins elapsed.
+
+2026-07-20 22:57:58.611863 : InsertionSites, Class = integer
+
+InsertionSites: length = 2604074
+[1] 10074 10086 10090 10152 10152 10158
+
+
+
+2026-07-20 22:57:58.654391 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:57:58.654391 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 2604074, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10073 10074
+2:     chr1 10085 10086
+3:     chr1 10089 10090
+4:     chr1 10151 10152
+5:     chr1 10151 10152
+6:     chr1 10157 10158
+
+
+
+2026-07-20 22:57:59.816613 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name T.cell._.X__pt26pre-37 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/T.cell._.X__pt26pre-37.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:58:02.954739 : Group 39 of 45, Calling Peaks with MACS2!, 3.91 mins elapsed.
+2026-07-20 22:58:03.694898 : Group 40 of 45, Calling Peaks with MACS2!, 3.923 mins elapsed.
+2026-07-20 22:58:03.997044 : Group 41 of 45, Calling Peaks with MACS2!, 3.928 mins elapsed.
+
+2026-07-20 22:58:04.690373 : InsertionSites, Class = integer
+
+InsertionSites: length = 1613702
+[1] 10158 10169 10198 10210 17454 17478
+
+
+
+2026-07-20 22:58:04.727479 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:58:04.727479 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 1613702, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10157 10158
+2:     chr1 10168 10169
+3:     chr1 10197 10198
+4:     chr1 10209 10210
+5:     chr1 17453 17454
+6:     chr1 17477 17478
+
+
+
+2026-07-20 22:58:05.31236 : InsertionSites, Class = integer
+
+InsertionSites: length = 1309684
+[1] 10152 10152 10152 10158 10197 10204
+
+
+
+2026-07-20 22:58:05.343871 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:58:05.343871 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 1309684, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10151 10152
+3:     chr1 10151 10152
+4:     chr1 10157 10158
+5:     chr1 10196 10197
+6:     chr1 10203 10204
+
+
+2026-07-20 22:58:05.977351 : Group 42 of 45, Calling Peaks with MACS2!, 3.961 mins elapsed.
+
+2026-07-20 22:58:07.100976 : InsertionSites, Class = integer
+
+InsertionSites: length = 4618560
+[1] 10152 10158 10158 10163 10179 10181
+
+
+
+2026-07-20 22:58:07.166872 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:58:07.166872 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 4618560, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10157 10158
+3:     chr1 10157 10158
+4:     chr1 10162 10163
+5:     chr1 10178 10179
+6:     chr1 10180 10181
+
+
+
+2026-07-20 22:58:08.515077 : InsertionSites, Class = integer
+
+InsertionSites: length = 2715768
+[1] 10144 10158 10186 10203 17454 17492
+
+
+
+2026-07-20 22:58:08.555633 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:58:08.555633 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 2715768, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10143 10144
+2:     chr1 10157 10158
+3:     chr1 10185 10186
+4:     chr1 10202 10203
+5:     chr1 17453 17454
+6:     chr1 17491 17492
+
+
+
+2026-07-20 22:58:10.778234 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name T.cell._.X__pt20pre-38 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/T.cell._.X__pt20pre-38.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:58:12.229632 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name T.cell._.X__22t-40 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/T.cell._.X__22t-40.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:58:13.146566 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name T.cell._.X__11t-39 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/T.cell._.X__11t-39.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:58:21.863756 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name NK.cell._.X__3t-42 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/NK.cell._.X__3t-42.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:58:27.8948 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name NK.cell._.X__18t-41 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/NK.cell._.X__18t-41.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 22:58:36.007129 : Group 43 of 45, Calling Peaks with MACS2!, 4.461 mins elapsed.
+
+2026-07-20 22:58:37.801942 : InsertionSites, Class = integer
+
+InsertionSites: length = 1465092
+[1] 10152 10158 10158 10163 10180 10197
+
+
+
+2026-07-20 22:58:37.840712 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:58:37.840712 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 1465092, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10151 10152
+2:     chr1 10157 10158
+3:     chr1 10157 10158
+4:     chr1 10162 10163
+5:     chr1 10179 10180
+6:     chr1 10196 10197
+
+
+2026-07-20 22:58:45.274741 : Group 44 of 45, Calling Peaks with MACS2!, 4.616 mins elapsed.
+2026-07-20 22:58:45.455549 : Group 45 of 45, Calling Peaks with MACS2!, 4.619 mins elapsed.
+
+2026-07-20 22:58:46.481304 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name NK.cell._.X__11t-43 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/NK.cell._.X__11t-43.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:58:46.787054 : InsertionSites, Class = integer
+
+InsertionSites: length = 916066
+[1] 10098 10152 10157 10181 10198 10279
+
+
+
+2026-07-20 22:58:46.811112 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:58:46.811112 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 916066, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10097 10098
+2:     chr1 10151 10152
+3:     chr1 10156 10157
+4:     chr1 10180 10181
+5:     chr1 10197 10198
+6:     chr1 10278 10279
+
+
+
+2026-07-20 22:58:47.82011 : InsertionSites, Class = integer
+
+InsertionSites: length = 2686366
+[1] 10086 10152 10152 10152 10152 10157
+
+
+
+2026-07-20 22:58:47.860172 : InsertionSites-DT, Class = data.table
+ 
+2026-07-20 22:58:47.860172 : InsertionSites-DT, Class = data.frame
+InsertionSites-DT: nRows = 2686366, nCols = 3
+   seqnames start   end
+     <char> <int> <int>
+1:     chr1 10085 10086
+2:     chr1 10151 10152
+3:     chr1 10151 10152
+4:     chr1 10151 10152
+5:     chr1 10151 10152
+6:     chr1 10156 10157
+
+
+
+2026-07-20 22:58:52.273708 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name NK.cell._.X__12t-45 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/NK.cell._.X__12t-45.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+
+2026-07-20 22:58:57.871552 : Running Macs2 with Params : macs2 callpeak -g 2.7e+09 --name NK.cell._.X__13t-44 --treatment /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds/NK.cell._.X__13t-44.insertions.bed --outdir /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/ArchR_multiome_obj/PeakCalls/celltype/InsertionBeds --format BED --call-summits --keep-dup all --nomodel --nolambda --shift -75 --extsize 150 -q 0.1
+2026-07-20 23:00:36.163563 : Identifying Reproducible Peaks!, 6.476 mins elapsed.
+2026-07-20 23:00:36.35717 : Rep. Peaks Group (1 of 9) : Creating Reproducible Peaks, 6.479 mins elapsed.
+
+2026-07-20 23:00:36.361695 : 
+2026-07-20 23:00:36.518289 : Rep. Peaks Group (2 of 9) : Creating Reproducible Peaks, 6.482 mins elapsed.
+
+2026-07-20 23:00:36.522701 : 
+2026-07-20 23:00:36.66978 : Rep. Peaks Group (3 of 9) : Creating Reproducible Peaks, 6.484 mins elapsed.
+
+2026-07-20 23:00:36.674516 : 
+2026-07-20 23:00:36.820616 : Rep. Peaks Group (4 of 9) : Creating Reproducible Peaks, 6.487 mins elapsed.
+
+2026-07-20 23:00:36.825267 : 
+2026-07-20 23:00:36.973897 : Rep. Peaks Group (5 of 9) : Creating Reproducible Peaks, 6.49 mins elapsed.
+
+2026-07-20 23:00:36.978593 : 
+
+2026-07-20 23:00:37.049531 : 
+2026-07-20 23:00:37.125166 : Rep. Peaks Group (6 of 9) : Creating Reproducible Peaks, 6.492 mins elapsed.
+
+2026-07-20 23:00:37.12949 : 
+2026-07-20 23:00:37.279379 : Rep. Peaks Group (7 of 9) : Creating Reproducible Peaks, 6.495 mins elapsed.
+
+2026-07-20 23:00:37.28405 : 
+2026-07-20 23:00:37.433836 : Rep. Peaks Group (8 of 9) : Creating Reproducible Peaks, 6.497 mins elapsed.
+
+2026-07-20 23:00:37.438114 : 
+
+2026-07-20 23:00:37.492615 : 
+
+2026-07-20 23:00:37.507998 : 
+2026-07-20 23:00:37.59341 : Rep. Peaks Group (9 of 9) : Creating Reproducible Peaks, 6.5 mins elapsed.
+
+2026-07-20 23:00:37.597073 : 
+
+2026-07-20 23:00:37.597756 : 
+
+2026-07-20 23:00:37.939319 : 
+
+2026-07-20 23:00:37.942394 : 
+
+2026-07-20 23:00:37.972102 : 
+
+2026-07-20 23:00:38.038587 : 
+
+2026-07-20 23:00:38.281362 : 
+
+2026-07-20 23:00:40.728347 : 
+
+2026-07-20 23:00:41.500749 : 
+
+2026-07-20 23:00:41.690843 : 
+
+2026-07-20 23:00:41.810376 : 
+
+2026-07-20 23:00:41.853949 : 
+2026-07-20 23:00:41.855627 : Rep. Peaks Group (1 of 9) : Annotating and Filtering Peaks, 6.571 mins elapsed.
+
+2026-07-20 23:00:41.997554 : Annotating Peaks : Nearest Gene
+
+2026-07-20 23:00:42.185708 : 
+
+2026-07-20 23:00:42.34925 : Annotating Peaks : Gene
+
+2026-07-20 23:00:42.535093 : Annotating Peaks : TSS
+
+2026-07-20 23:00:42.591238 : 
+
+2026-07-20 23:00:42.613976 : 
+
+2026-07-20 23:00:42.686624 : 
+
+2026-07-20 23:00:42.768868 : 
+
+2026-07-20 23:00:42.978779 : 
+
+2026-07-20 23:00:43.001307 : 
+
+2026-07-20 23:00:43.005157 : Annotating Peaks : GC
+2026-07-20 23:00:43.03196 : Rep. Peaks Group (7 of 9) : Annotating and Filtering Peaks, 6.591 mins elapsed.
+2026-07-20 23:00:43.049422 : Rep. Peaks Group (8 of 9) : Annotating and Filtering Peaks, 6.591 mins elapsed.
+
+2026-07-20 23:00:43.086207 : 
+
+2026-07-20 23:00:43.184898 : Annotating Peaks : Nearest Gene
+
+2026-07-20 23:00:43.1859 : Annotating Peaks : Nearest Gene
+
+2026-07-20 23:00:43.360768 : 
+
+2026-07-20 23:00:43.49735 : Annotating Peaks : Gene
+
+2026-07-20 23:00:43.545507 : 
+
+2026-07-20 23:00:43.574617 : Annotating Peaks : Gene
+
+2026-07-20 23:00:43.667558 : 
+
+2026-07-20 23:00:43.678219 : Annotating Peaks : TSS
+
+2026-07-20 23:00:43.779502 : Annotating Peaks : TSS
+
+2026-07-20 23:00:43.831031 : 
+2026-07-20 23:00:43.895983 : Rep. Peaks Group (4 of 9) : Annotating and Filtering Peaks, 6.605 mins elapsed.
+
+2026-07-20 23:00:43.929855 : 
+2026-07-20 23:00:43.977744 : Rep. Peaks Group (9 of 9) : Annotating and Filtering Peaks, 6.606 mins elapsed.
+
+2026-07-20 23:00:44.056161 : 
+
+2026-07-20 23:00:44.073834 : Annotating Peaks : Nearest Gene
+
+2026-07-20 23:00:44.124715 : Annotating Peaks : GC
+
+2026-07-20 23:00:44.139364 : Annotating Peaks : Nearest Gene
+
+2026-07-20 23:00:44.193784 : 
+
+2026-07-20 23:00:44.256433 : Annotating Peaks : GC
+
+2026-07-20 23:00:44.458163 : Annotating Peaks : Gene
+
+2026-07-20 23:00:44.478908 : 
+
+2026-07-20 23:00:44.503656 : Annotating Peaks : Gene
+
+2026-07-20 23:00:44.557789 : 
+2026-07-20 23:00:44.631159 : Rep. Peaks Group (3 of 9) : Annotating and Filtering Peaks, 6.617 mins elapsed.
+
+2026-07-20 23:00:44.646383 : Annotating Peaks : TSS
+
+2026-07-20 23:00:44.700856 : Annotating Peaks : TSS
+
+2026-07-20 23:00:44.821524 : Annotating Peaks : Nearest Gene
+
+2026-07-20 23:00:44.849983 : 
+2026-07-20 23:00:44.916896 : Rep. Peaks Group (6 of 9) : Annotating and Filtering Peaks, 6.622 mins elapsed.
+
+2026-07-20 23:00:45.074638 : Annotating Peaks : Nearest Gene
+
+2026-07-20 23:00:45.086376 : Annotating Peaks : GC
+
+2026-07-20 23:00:45.147845 : Annotating Peaks : GC
+
+2026-07-20 23:00:45.198558 : Annotating Peaks : Gene
+
+2026-07-20 23:00:45.248299 : 
+
+2026-07-20 23:00:45.407732 : Annotating Peaks : TSS
+
+2026-07-20 23:00:45.421194 : Annotating Peaks : Gene
+
+2026-07-20 23:00:45.589443 : Annotating Peaks : TSS
+
+2026-07-20 23:00:45.687368 : 
+2026-07-20 23:00:45.768907 : Rep. Peaks Group (2 of 9) : Annotating and Filtering Peaks, 6.636 mins elapsed.
+
+2026-07-20 23:00:45.935136 : Annotating Peaks : Nearest Gene
+
+2026-07-20 23:00:46.053285 : Annotating Peaks : GC
+
+2026-07-20 23:00:46.074035 : Annotating Peaks : GC
+
+2026-07-20 23:00:46.173471 : 
+
+2026-07-20 23:00:46.337757 : Annotating Peaks : Gene
+
+2026-07-20 23:00:46.548548 : Annotating Peaks : TSS
+
+2026-07-20 23:00:46.728582 : 
+2026-07-20 23:00:46.811973 : Rep. Peaks Group (5 of 9) : Annotating and Filtering Peaks, 6.654 mins elapsed.
+
+2026-07-20 23:00:47.039315 : Annotating Peaks : Nearest Gene
+
+2026-07-20 23:00:47.140894 : Annotating Peaks : GC
+
+2026-07-20 23:00:47.587734 : Annotating Peaks : Gene
+
+2026-07-20 23:00:47.814139 : Annotating Peaks : TSS
+
+2026-07-20 23:00:48.379212 : Annotating Peaks : GC
+2026-07-20 23:00:55.365183 : Creating Union Peak Set!, 6.796 mins elapsed.
+
+2026-07-20 23:00:55.365967 : groupPeaks, Class = CompressedGRangesList
+
+groupPeaks: length = 9
+GRangesList object of length 6:
+$`B/Plasma cell`
+GRanges object with 97263 ranges and 11 metadata columns:
+          seqnames            ranges strand |     score replicateScoreQuantile groupScoreQuantile Reproducibility         GroupReplicate distToGeneStart  nearestGene    peakType distToTSS  nearestTSS        GC
+             <Rle>         <IRanges>  <Rle> | <numeric>              <numeric>          <numeric>       <numeric>            <character>       <integer>  <character> <character> <integer> <character> <numeric>
+      [1]     chr1   2205012-2205512      * |   271.289                      1              0.999               5 B/Plasma cell._.X__22t            7457       FAAP20    Intronic      1379  uc057blk.1    0.7784
+      [2]     chr1   9910264-9910764      * |   473.811                      1              0.999               5 B/Plasma cell._.X__13t             177     CTNNBIP1    Promoter       177  uc001aql.2    0.7525
+      [3]     chr1 15524237-15524737      * |   388.961                      1              0.999               5 B/Plasma cell._.X__18t            2046        CASP9    Intronic        41  uc001awm.3    0.7545
+      [4]     chr1 16904684-16905184      * |   403.439                      1              0.999               5 B/Plasma cell._.X__p..           15284 LOC105376805    Intronic       157  uc057csn.1    0.6088
+      [5]     chr1 16913776-16914276      * |   338.495                      1              0.999               5  B/Plasma cell._.X__3t           24376 LOC105376805    Intronic      7923  uc001azt.2    0.7764
+      ...      ...               ...    ... .       ...                    ...                ...             ...                    ...             ...          ...         ...       ...         ...       ...
+  [97259]    chr18 79464955-79465455      * |   1.76815                  0.009                  0               2 B/Plasma cell._.X__p..           69348       NFATC1    Intronic      5734  uc060qkb.1    0.5170
+  [97260]    chr19   2291393-2291893      * |   1.78429                  0.006                  0               2 B/Plasma cell._.X__18t            9466        PEAK3    Intronic       380  uc060rka.1    0.7565
+  [97261]    chr19 55216909-55217409      * |   1.78429                  0.006                  0               2 B/Plasma cell._.X__18t            7652        PTPRH      Distal       476  uc061cyk.1    0.6068
+  [97262]    chr19 56140258-56140758      * |   1.76815                  0.009                  0               3 B/Plasma cell._.X__p..            7908       ZNF444    Intronic       442  uc061ddo.1    0.5669
+  [97263]    chr20 62065119-62065619      * |   1.78429                  0.006                  0               2 B/Plasma cell._.X__18t             440         TAF4      Exonic       440  uc002ybs.3    0.8643
+  -------
+  seqinfo: 22 sequences from an unspecified genome; no seqlengths
+
+...
+<5 more elements>
+
+
+2026-07-20 23:01:08.333714 : Finished Creating Union Peak Set (342410)!, 7.012 mins elapsed.
