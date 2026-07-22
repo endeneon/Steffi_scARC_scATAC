@@ -248,6 +248,13 @@ projMultiome_annotated_celltype <-
   )
 print("Reproducible peak set added and ArchRProject saved successfully.")
 
+#####
+projMultiome_annotated_celltype <-
+  loadArchRProject(
+    path = "ArchR_multiome_annotated_celltype_obj",
+    showLogo = FALSE
+  )
+
 # extract the new peak sets from the ArchR object as GRanges
 peak_sets <- getPeakSet(projMultiome_annotated_celltype)
 peak_sets$Group <-
@@ -257,6 +264,11 @@ peak_sets$Group <-
     peak_sets$GroupReplicate
   )
 peaks_by_group <- split(peak_sets, peak_sets$Group)
+qs_save(
+  peaks_by_group,
+  "peaks_by_group.qs2",
+  nthreads = 8
+)
 # Peaks per group
 lengths(peaks_by_group)
 
@@ -272,3 +284,222 @@ for (grp in names(peaks_by_group)) {
   fname <- file.path(out_dir, paste0(gsub("[^A-Za-z0-9]+", "_", grp), ".bed"))
   export(peaks_by_group[[grp]], fname, format = "BED")
 }
+
+ASoC_df <-
+  qs_read("data_dir/ASoC_df.qs2")
+
+library(GenomicRanges)
+ASoC_gr <- GRanges(
+  seqnames = ASoC_df$chromosome,
+  ranges = IRanges(start = as.integer(ASoC_df$position), width = 1),
+  variantID = ASoC_df$variantID,
+  refAllele = ASoC_df$refAllele,
+  altAllele = ASoC_df$altAllele,
+  norm_refCount = as.numeric(ASoC_df$norm_refCount),
+  norm_altCount = as.numeric(ASoC_df$norm_altCount),
+  norm_sumCount = as.numeric(ASoC_df$norm_sumCount),
+  percRef = as.numeric(ASoC_df$percRef),
+  pVal = as.numeric(ASoC_df$pVal),
+  adjPVal = as.numeric(ASoC_df$adjPVal)
+)
+
+names(peaks_by_group) <- gsub("[^A-Za-z0-9]+", "_", names(peaks_by_group))
+
+library(BSgenome.Hsapiens.UCSC.hg38)
+
+hg38_seqinfo <- seqinfo(BSgenome.Hsapiens.UCSC.hg38)
+hg38_seqinfo <- keepSeqlevels(hg38_seqinfo, seqlevels(peak_sets))
+
+seqlevels(ASoC_gr) <- seqlevels(hg38_seqinfo)
+seqinfo(ASoC_gr) <- hg38_seqinfo
+
+seqinfo(peak_sets) <- hg38_seqinfo
+seqinfo(peaks_by_group) <- hg38_seqinfo
+
+hits <- findOverlaps(ASoC_gr, peaks_by_group[["Hepatocyte"]])
+
+ASoC_in_hep_peaks <- ASoC_gr[queryHits(hits)]
+ASoC_in_hep_peaks$peak_start <- start(peaks_by_group[[
+  "Hepatocyte"
+]])[subjectHits(hits)]
+ASoC_in_hep_peaks$peak_end <- end(peaks_by_group[["Hepatocyte"]])[subjectHits(
+  hits
+)]
+
+sum(ASoC_in_hep_peaks$adjPVal < 0.05) # Count of significant ASoC variants in Hepatocyte peaks
+sig_ASoC_in_hep_peaks <-
+  ASoC_in_hep_peaks[ASoC_in_hep_peaks$adjPVal < 0.05]
+
+library(ChIPseeker)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(org.Hs.eg.db)
+
+txdb <- TxDb.Hsapiens.UCSC.hg38.knownGene
+
+sig_ASoC_anno <- annotatePeak(
+  sig_ASoC_in_hep_peaks,
+  tssRegion = c(-3000, 3000),
+  TxDb = txdb,
+  annoDb = "org.Hs.eg.db"
+)
+
+sig_ASoC_anno_df <- as.data.frame(sig_ASoC_anno)
+head(sig_ASoC_anno_df)
+mcols(sig_ASoC_in_hep_peaks) <- cbind(
+  as.data.frame(mcols(sig_ASoC_in_hep_peaks)),
+  sig_ASoC_anno_df[, c(
+    "annotation",
+    "geneId",
+    "transcriptId",
+    "distanceToTSS",
+    "ENSEMBL",
+    "SYMBOL",
+    "GENENAME"
+  )]
+)
+
+library(motifmatchr)
+library(TFBSTools)
+library(JASPAR2020)
+library(BSgenome.Hsapiens.UCSC.hg38)
+
+pwm_set <- getMatrixSet(
+  JASPAR2020,
+  opts = list(species = 9606, collection = "CORE")
+)
+length(pwm_set)
+
+peak_ranges <- GRanges(
+  seqnames = seqnames(sig_ASoC_in_hep_peaks),
+  ranges = IRanges(
+    start = sig_ASoC_in_hep_peaks$peak_start,
+    end = sig_ASoC_in_hep_peaks$peak_end
+  ),
+  seqinfo = seqinfo(sig_ASoC_in_hep_peaks)
+)
+
+motif_matches <- matchMotifs(
+  pwm_set,
+  peak_ranges,
+  genome = BSgenome.Hsapiens.UCSC.hg38,
+  out = "matches"
+)
+
+motif_matches
+dim(motifMatches(motif_matches))
+
+match_mat <- motifMatches(motif_matches)
+motif_names <- colData(motif_matches)$name
+
+motif_list <- apply(match_mat, 1, function(row) motif_names[row])
+n_motifs <- lengths(motif_list)
+motif_str <- vapply(
+  motif_list,
+  function(x) paste(x, collapse = ";"),
+  character(1)
+)
+
+sig_ASoC_in_hep_peaks$n_motifs_matched <- n_motifs
+sig_ASoC_in_hep_peaks$motif_names <- motif_str
+
+sig_ASoC_in_hep_peaks
+
+# motifbreakR: allele-specific motif disruption ####
+library(BSgenome)
+library(motifbreakR)
+library(MotifDb)
+library(BSgenome.Hsapiens.UCSC.hg38)
+
+# Human HOCOMOCO motifs from MotifDb
+motifs_human <- MotifDb::query(MotifDb, andStrings = c("hsapiens", "HOCOMOCO"))
+length(motifs_human)
+
+# Build a motifbreakR-compatible SNP GRanges. motifbreakR expects the input
+# (normally from snps.from.file / snps.from.rsid) to carry REF/ALT DNAStringSet
+# columns, hg38 seqlengths, and an attributes(snpList)$genome.package pointing to
+# the BSgenome package; without the last one motifbreakR() errors with
+# "subscript out of bounds".
+snp_gr_min <- GRanges(
+  seqnames = seqnames(sig_ASoC_in_hep_peaks),
+  ranges = ranges(sig_ASoC_in_hep_peaks),
+  strand = "+"
+)
+names(snp_gr_min) <- sig_ASoC_in_hep_peaks$variantID
+snp_gr_min$REF <- Biostrings::DNAStringSet(sig_ASoC_in_hep_peaks$refAllele)
+snp_gr_min$ALT <- Biostrings::DNAStringSet(sig_ASoC_in_hep_peaks$altAllele)
+snp_gr_min$SNP_id <- sig_ASoC_in_hep_peaks$variantID
+genome(snp_gr_min) <- "hg38"
+seqinfo(snp_gr_min) <- hg38_seqinfo
+attributes(snp_gr_min)$genome.package <- "BSgenome.Hsapiens.UCSC.hg38"
+
+# Allele-specific motif scoring (information-content method, p-value filtered)
+set.seed(4827)
+mb_results <- motifbreakR(
+  snpList = snp_gr_min,
+  pwmList = motifs_human,
+  filterp = TRUE,
+  threshold = 1e-4,
+  method = "ic",
+  bkg = c(A = 0.25, C = 0.25, G = 0.25, T = 0.25),
+  BPPARAM = if (
+    Sys.getenv("RSTUDIO") == "1" || (Sys.getenv("TERM_PROGRAM") == "vscode")
+  ) {
+    BiocParallel::SerialParam()
+  } else {
+    BiocParallel::MulticoreParam()
+  }
+)
+length(mb_results)
+length(unique(names(mb_results)))
+table(mb_results$effect)
+
+# Per-SNP summary of motif disruption
+library(dplyr)
+
+mb_df <- as.data.frame(mb_results, row.names = NULL) |>
+  as_tibble() |>
+  mutate(SNP_id = names(mb_results))
+
+mb_summary <- mb_df |>
+  group_by(SNP_id) |>
+  summarise(
+    n_motifs_disrupted = n(),
+    n_strong = sum(effect == "strong"),
+    disrupted_TFs = paste(
+      sort(unique(geneSymbol[effect == "strong"])),
+      collapse = ";"
+    ),
+    max_abs_alleleDiff = max(abs(alleleDiff)),
+    .groups = "drop"
+  )
+
+# Integrate motifbreakR summary back into sig_ASoC_in_hep_peaks by variantID
+m <- match(sig_ASoC_in_hep_peaks$variantID, mb_summary$SNP_id)
+sig_ASoC_in_hep_peaks$mb_n_motifs_disrupted <- mb_summary$n_motifs_disrupted[m]
+sig_ASoC_in_hep_peaks$mb_n_strong <- mb_summary$n_strong[m]
+sig_ASoC_in_hep_peaks$mb_disrupted_TFs <- mb_summary$disrupted_TFs[m]
+sig_ASoC_in_hep_peaks$mb_max_abs_alleleDiff <- mb_summary$max_abs_alleleDiff[m]
+
+# SNPs overlapping no motif get 0 counts (score-diff columns remain NA)
+sig_ASoC_in_hep_peaks$mb_n_motifs_disrupted[is.na(
+  sig_ASoC_in_hep_peaks$mb_n_motifs_disrupted
+)] <- 0L
+sig_ASoC_in_hep_peaks$mb_n_strong[is.na(
+  sig_ASoC_in_hep_peaks$mb_n_strong
+)] <- 0L
+
+c(
+  total_variants = length(sig_ASoC_in_hep_peaks),
+  variants_with_any_disruption = sum(
+    sig_ASoC_in_hep_peaks$mb_n_motifs_disrupted > 0
+  ),
+  variants_with_strong_disruption = sum(sig_ASoC_in_hep_peaks$mb_n_strong > 0)
+)
+
+sig_ASoC_in_hep_peaks
+
+qs_save(
+  sig_ASoC_in_hep_peaks,
+  "sig_ASoC_in_hep_peaks_annotated.qs2",
+  nthreads = 8
+)
