@@ -205,3 +205,69 @@ There were 50 or more warnings (use warnings() to see the first 50)
 Setting default number of Parallel threads to 19.
 Setting default genome to Hg38.
 Successfully loaded ArchRProject!
+ArchR logging to : ArchRLogs/ArchR-addGroupCoverages-26d50451e8289c-Date-2026-07-22_Time-12-10-24.965737.log
+If there is an issue, please report to github with logFile!
+Skipping validation of empty chromosomes since `force` = TRUE!
+2026-07-22 12:10:34.84272 : Further Sampled 17 Groups above the Max Fragments!, 0.163 mins elapsed.
+2026-07-22 12:10:45.293568 : Creating Coverage Files!, 0.337 mins elapsed.
+2026-07-22 12:10:45.295483 : Batch Execution w/ safelapply!, 0.337 mins elapsed.
+2026-07-22 12:10:45.35423 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Creating Group Coverage File : B.Plasma.cell._.X__pt26pre.insertions.coverage.h5, 0.338 mins elapsed.
+2026-07-22 12:11:35.268132 : Group B/Plasma cell._.X__18t (2 of 45) : Creating Group Coverage File : B.Plasma.cell._.X__18t.insertions.coverage.h5, 1.17 mins elapsed.
+2026-07-22 12:12:31.555833 : Group B/Plasma cell._.X__13t (3 of 45) : Creating Group Coverage File : B.Plasma.cell._.X__13t.insertions.coverage.h5, 2.108 mins elapsed.
+2026-07-22 12:13:36.143005 : Group B/Plasma cell._.X__3t (4 of 45) : Creating Group Coverage File : B.Plasma.cell._.X__3t.insertions.coverage.h5, 3.185 mins elapsed.
+2026-07-22 12:14:33.679064 : Group B/Plasma cell._.X__22t (5 of 45) : Creating Group Coverage File : B.Plasma.cell._.X__22t.insertions.coverage.h5, 4.144 mins elapsed.
+2026-07-22 12:15:28.355181 : Group Cycling._.X__17t (6 of 45) : Creating Group Coverage File : Cycling._.X__17t.insertions.coverage.h5, 5.055 mins elapsed.
+2026-07-22 12:16:43.359703 : Group Cycling._.X__1t (7 of 45) : Creating Group Coverage File : Cycling._.X__1t.insertions.coverage.h5, 6.305 mins elapsed.
+2026-07-22 12:17:49.230167 : Group Cycling._.X__13t (8 of 45) : Creating Group Coverage File : Cycling._.X__13t.insertions.coverage.h5, 7.403 mins elapsed.
+2026-07-22 12:19:10.815413 : Group Cycling._.X__pt29pre (9 of 45) : Creating Group Coverage File : Cycling._.X__pt29pre.insertions.coverage.h5, 8.763 mins elapsed.
+2026-07-22 12:20:15.668824 : Group Cycling._.X__18t (10 of 45) : Creating Group Coverage File : Cycling._.X__18t.insertions.coverage.h5, 9.843 mins elapsed.
+2026-07-22 12:21:21.37179 : Group Endothelial._.X__22t (11 of 45) : Creating Group Coverage File : Endothelial._.X__22t.insertions.coverage.h5, 10.938 mins elapsed.
+2026-07-22 12:22:35.935033 : Group Endothelial._.X__3t (12 of 45) : Creating Group Coverage File : Endothelial._.X__3t.insertions.coverage.h5, 12.181 mins elapsed.
+2026-07-22 12:23:53.553256 : Group Endothelial._.X__15t (13 of 45) : Creating Group Coverage File : Endothelial._.X__15t.insertions.coverage.h5, 13.475 mins elapsed.
+2026-07-22 12:25:10.793903 : Group Endothelial._.X__11t (14 of 45) : Creating Group Coverage File : Endothelial._.X__11t.insertions.coverage.h5, 14.762 mins elapsed.
+2026-07-22 12:26:26.05973 : Group Endothelial._.X__16t (15 of 45) : Creating Group Coverage File : Endothelial._.X__16t.insertions.coverage.h5, 16.017 mins elapsed.
+2026-07-22 12:27:42.660552 : Group Fibroblast/HSC._.X__22t (16 of 45) : Creating Group Coverage File : Fibroblast.HSC._.X__22t.insertions.coverage.h5, 17.293 mins elapsed.
+2026-07-22 12:28:47.794862 : Group Fibroblast/HSC._.X__3t (17 of 45) : Creating Group Coverage File : Fibroblast.HSC._.X__3t.insertions.coverage.h5, 18.379 mins elapsed.
+2026-07-22 12:29:50.2153 : Group Fibroblast/HSC._.X__11t (18 of 45) : Creating Group Coverage File : Fibroblast.HSC._.X__11t.insertions.coverage.h5, 19.419 mins elapsed.
+2026-07-22 12:30:42.388412 : Group Fibroblast/HSC._.X__13t (19 of 45) : Creating Group Coverage File : Fibroblast.HSC._.X__13t.insertions.coverage.h5, 20.289 mins elapsed.
+2026-07-22 12:31:50.213639 : Group Fibroblast/HSC._.X__15t (20 of 45) : Creating Group Coverage File : Fibroblast.HSC._.X__15t.insertions.coverage.h5, 21.419 mins elapsed.
+2026-07-22 12:32:44.17187 : Group Hepatocyte._.X__17t (21 of 45) : Creating Group Coverage File : Hepatocyte._.X__17t.insertions.coverage.h5, 22.318 mins elapsed.
+2026-07-22 12:34:01.478255 : Group Hepatocyte._.X__13t (22 of 45) : Creating Group Coverage File : Hepatocyte._.X__13t.insertions.coverage.h5, 23.607 mins elapsed.
+2026-07-22 12:35:23.810675 : Group Hepatocyte._.X__1t (23 of 45) : Creating Group Coverage File : Hepatocyte._.X__1t.insertions.coverage.h5, 24.979 mins elapsed.
+2026-07-22 12:36:45.95124 : Group Hepatocyte._.X__pt29pre (24 of 45) : Creating Group Coverage File : Hepatocyte._.X__pt29pre.insertions.coverage.h5, 26.348 mins elapsed.
+2026-07-22 12:38:01.092986 : Group Hepatocyte._.X__20t (25 of 45) : Creating Group Coverage File : Hepatocyte._.X__20t.insertions.coverage.h5, 27.6 mins elapsed.
+2026-07-22 12:39:25.583253 : Group Macrophage._.X__13t (26 of 45) : Creating Group Coverage File : Macrophage._.X__13t.insertions.coverage.h5, 29.009 mins elapsed.
+2026-07-22 12:40:48.060848 : Group Macrophage._.X__22t (27 of 45) : Creating Group Coverage File : Macrophage._.X__22t.insertions.coverage.h5, 30.383 mins elapsed.
+2026-07-22 12:42:04.670215 : Group Macrophage._.X__18t (28 of 45) : Creating Group Coverage File : Macrophage._.X__18t.insertions.coverage.h5, 31.66 mins elapsed.
+2026-07-22 12:43:25.383678 : Group Macrophage._.X__15t (29 of 45) : Creating Group Coverage File : Macrophage._.X__15t.insertions.coverage.h5, 33.005 mins elapsed.
+2026-07-22 12:44:41.930393 : Group Macrophage._.X__12t (30 of 45) : Creating Group Coverage File : Macrophage._.X__12t.insertions.coverage.h5, 34.281 mins elapsed.
+2026-07-22 12:45:43.408609 : Group Monocyte._.X__15t (31 of 45) : Creating Group Coverage File : Monocyte._.X__15t.insertions.coverage.h5, 35.306 mins elapsed.
+2026-07-22 12:46:38.080823 : Group Monocyte._.X__22t (32 of 45) : Creating Group Coverage File : Monocyte._.X__22t.insertions.coverage.h5, 36.217 mins elapsed.
+2026-07-22 12:47:32.161151 : Group Monocyte._.X__18t (33 of 45) : Creating Group Coverage File : Monocyte._.X__18t.insertions.coverage.h5, 37.118 mins elapsed.
+2026-07-22 12:48:29.946555 : Group Monocyte._.X__3t (34 of 45) : Creating Group Coverage File : Monocyte._.X__3t.insertions.coverage.h5, 38.081 mins elapsed.
+2026-07-22 12:49:33.292007 : Group Monocyte._.X__13t (35 of 45) : Creating Group Coverage File : Monocyte._.X__13t.insertions.coverage.h5, 39.137 mins elapsed.
+2026-07-22 12:50:35.598905 : Group T cell._.X__18t (36 of 45) : Creating Group Coverage File : T.cell._.X__18t.insertions.coverage.h5, 40.176 mins elapsed.
+2026-07-22 12:51:43.079475 : Group T cell._.X__pt26pre (37 of 45) : Creating Group Coverage File : T.cell._.X__pt26pre.insertions.coverage.h5, 41.3 mins elapsed.
+2026-07-22 12:52:39.760399 : Group T cell._.X__pt20pre (38 of 45) : Creating Group Coverage File : T.cell._.X__pt20pre.insertions.coverage.h5, 42.245 mins elapsed.
+2026-07-22 12:53:42.12068 : Group T cell._.X__11t (39 of 45) : Creating Group Coverage File : T.cell._.X__11t.insertions.coverage.h5, 43.284 mins elapsed.
+2026-07-22 12:54:41.963613 : Group T cell._.X__22t (40 of 45) : Creating Group Coverage File : T.cell._.X__22t.insertions.coverage.h5, 44.282 mins elapsed.
+2026-07-22 12:55:41.665578 : Group T/NK cell._.X__18t (41 of 45) : Creating Group Coverage File : T.NK.cell._.X__18t.insertions.coverage.h5, 45.277 mins elapsed.
+2026-07-22 12:56:56.297119 : Group T/NK cell._.X__3t (42 of 45) : Creating Group Coverage File : T.NK.cell._.X__3t.insertions.coverage.h5, 46.521 mins elapsed.
+2026-07-22 12:58:03.875839 : Group T/NK cell._.X__11t (43 of 45) : Creating Group Coverage File : T.NK.cell._.X__11t.insertions.coverage.h5, 47.647 mins elapsed.
+2026-07-22 12:58:58.856654 : Group T/NK cell._.X__13t (44 of 45) : Creating Group Coverage File : T.NK.cell._.X__13t.insertions.coverage.h5, 48.563 mins elapsed.
+2026-07-22 13:00:08.166093 : Group T/NK cell._.X__12t (45 of 45) : Creating Group Coverage File : T.NK.cell._.X__12t.insertions.coverage.h5, 49.718 mins elapsed.
+2026-07-22 13:01:05.038508 : Adding Kmer Bias to Coverage Files!, 50.666 mins elapsed.
+chr1 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr2 chr20 chr21 chr22 chr3 chr4 chr5 chr6 chr7 chr8 chr9 2026-07-22 13:23:21.034542 : Finished Creation of Coverage Files!, 72.933 mins elapsed.
+ArchR logging successful to : ArchRLogs/ArchR-addGroupCoverages-26d50451e8289c-Date-2026-07-22_Time-12-10-24.965737.log
+Searching For MACS2..
+Found with $PATH at /home/szhang37/CAB_workspace/Anaconda/miniconda3/envs/jwen_scRNA_singCellaR/bin/macs2
+Error in .checkMacs2Options(pathToMacs2) : 
+  Macs2 Path (macs2) is out of date (version Traceback (most recent call last):  File "/home/szhang37/CAB_workspace/Anaconda/miniconda3/envs/jwen_scRNA_singCellaR/bin/macs2", line 23, in <module>    from MACS2.Constants import *ModuleNotFoundError: No module named 'MACS2') and does not have --shift option.
+  Please update (https://github.com/taoliu/MACS) and provide new path!
+Calls: <Anonymous> -> .checkMacs2Options
+In addition: Warning messages:
+1: In system2(path, "callpeak -h", stdout = TRUE, stderr = TRUE) :
+  running command ''macs2' callpeak -h 2>&1' had status 1
+2: In system2(path, " --version", stdout = TRUE, stderr = TRUE) :
+  running command ''macs2'  --version 2>&1' had status 1
+Execution halted

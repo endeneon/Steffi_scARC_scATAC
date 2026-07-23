@@ -1,0 +1,71 @@
+[1] "Running under Rscript, use plan(multicore)"
+[1] "Detected 20 available cores (LSF_DJOB_NUMPROC = 20)."
+[1] "Detected 8 OpenMP threads (OMP_NUM_THREADS = 8)."
+[1] "R session plan set to multicore with 19 workers."
+[1] "ArchR threads set to 19 and genome set to Hg38"
+[1] "All settings initialized successfully."
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@nodelmr17>
+Subject: Job 305115721: <run_bsub_generate_ASoC_tables> in cluster <hpcf_research_cluster> Exited
+
+Job <run_bsub_generate_ASoC_tables> was submitted from host <splprhpc12> by user <szhang37> in cluster <hpcf_research_cluster> at Wed Jul 22 17:40:44 2026
+Job was executed on host(s) <2*nodelmr17>, in queue <large_mem>, as user <szhang37> in cluster <hpcf_research_cluster> at Wed Jul 22 17:40:57 2026
+                            <1*nodelmr15>
+                            <17*nodelmr12>
+</home/szhang37> was used as the home directory.
+</home/szhang37/CAB_workspace/pulled_git_repos/Multiome_main/Steffi_works> was used as the working directory.
+Started at Wed Jul 22 17:40:57 2026
+Terminated at Wed Jul 22 17:44:18 2026
+Results reported at Wed Jul 22 17:44:18 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#! /bin/bash
+
+mkdir -p log
+#BSUB -n 20
+#BSUB -R "rusage[mem=30G]"
+
+#BSUB -q "large_mem"
+#BSUB -J "run_bsub_generate_ASoC_tables"
+
+#BSUB -o log/run_bsub_generate_ASoC_tables.out.%J
+#BSUB -e log/run_bsub_generate_ASoC_tables.err.%J
+
+module load conda3/202402
+conda activate /home/szhang37/CAB_workspace/Anaconda/miniconda3/envs/jwen_scRNA_singCellaR
+
+working_dir="/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
+cd $working_dir || exit 1
+
+Rscript ./call_peaks_by_annotation.R
+
+------------------------------------------------------------
+
+TERM_OWNER: job killed by owner.
+Exited with exit code 1.
+
+Resource usage summary:
+
+    CPU time :                                   206.63 sec.
+    Max Memory :                                 46621 MB
+    Average Memory :                             24712.58 MB
+    Total Requested Memory :                     614400.00 MB
+    Delta Memory :                               567779.00 MB
+    Max Swap :                                   213 MB
+    Max Processes :                              23
+    Max Threads :                                25
+    Run time :                                   201 sec.
+    Turnaround time :                            214 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <log/run_bsub_generate_ASoC_tables.err.305115721> for stderr output of this job.
+

@@ -1,0 +1,443 @@
+
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----'|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+Logging With ArchR!
+
+Start Time : 2026-07-22 17:43:07.046678
+
+------- ArchR Info
+
+ArchRThreads = 19
+ArchRGenome = Hg38
+
+------- System Info
+
+Computer OS = unix
+Total Cores = 80
+
+------- Session Info
+
+R version 4.3.0 (2023-04-21)
+Platform: x86_64-conda-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux 8.10 (Ootpa)
+
+Matrix products: default
+BLAS/LAPACK: /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/Anaconda/miniconda3/envs/jwen_scRNA_singCellaR/lib/libopenblasp-r0.3.30.so;  LAPACK version 3.12.0
+
+Random number generation:
+ RNG:     L'Ecuyer-CMRG 
+ Normal:  Inversion 
+ Sample:  Rejection 
+ 
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+time zone: America/Chicago
+tzcode source: system (glibc)
+
+attached base packages:
+ [1] parallel  stats4    grid      stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
+
+other attached packages:
+ [1] dplyr_1.1.4                             
+ [2] motifbreakR_2.16.0                      
+ [3] MotifDb_1.44.0                          
+ [4] JASPAR2020_0.99.10                      
+ [5] TFBSTools_1.40.0                        
+ [6] motifmatchr_1.24.0                      
+ [7] ChIPseeker_1.38.0                       
+ [8] BSgenome.Hsapiens.UCSC.hg38_1.4.5       
+ [9] BSgenome_1.70.1                         
+[10] rtracklayer_1.62.0                      
+[11] BiocIO_1.12.0                           
+[12] Biostrings_2.70.1                       
+[13] XVector_0.42.0                          
+[14] org.Hs.eg.db_3.18.0                     
+[15] TxDb.Hsapiens.UCSC.hg38.knownGene_3.18.0
+[16] GenomicFeatures_1.54.1                  
+[17] AnnotationDbi_1.64.1                    
+[18] fs_1.6.6                                
+[19] qs2_0.1.5                               
+[20] snow_0.4-4                              
+[21] doFuture_1.1.2                          
+[22] doParallel_1.0.17                       
+[23] iterators_1.0.14                        
+[24] foreach_1.5.2                           
+[25] BiocParallel_1.36.0                     
+[26] future_1.67.0                           
+[27] rhdf5_2.46.1                            
+[28] SummarizedExperiment_1.32.0             
+[29] Biobase_2.62.0                          
+[30] RcppArmadillo_14.6.3-1                  
+[31] Rcpp_1.1.0                              
+[32] Matrix_1.6-5                            
+[33] GenomicRanges_1.54.1                    
+[34] GenomeInfoDb_1.38.1                     
+[35] IRanges_2.36.0                          
+[36] S4Vectors_0.40.2                        
+[37] BiocGenerics_0.48.1                     
+[38] sparseMatrixStats_1.14.0                
+[39] MatrixGenerics_1.14.0                   
+[40] matrixStats_1.5.0                       
+[41] data.table_1.17.8                       
+[42] stringr_1.5.1                           
+[43] plyr_1.8.9                              
+[44] magrittr_2.0.3                          
+[45] ggplot2_3.5.2                           
+[46] gtable_0.3.6                            
+[47] gtools_3.9.5                            
+[48] gridExtra_2.3                           
+[49] devtools_2.4.5                          
+[50] usethis_3.1.0                           
+[51] ArchR_1.0.3                             
+[52] gplots_3.2.0                            
+[53] Seurat_5.3.0                            
+[54] SeuratObject_5.1.0                      
+[55] sp_2.2-0                                
+
+loaded via a namespace (and not attached):
+  [1] R.methodsS3_1.8.2                      
+  [2] dichromat_2.0-0.1                      
+  [3] progress_1.2.3                         
+  [4] urlchecker_1.0.1                       
+  [5] nnet_7.3-20                            
+  [6] poweRlaw_1.0.0                         
+  [7] goftest_1.2-3                          
+  [8] vctrs_0.6.5                            
+  [9] spatstat.random_3.4-1                  
+ [10] digest_0.6.37                          
+ [11] png_0.1-8                              
+ [12] ggrepel_0.9.6                          
+ [13] deldir_2.0-4                           
+ [14] parallelly_1.45.1                      
+ [15] MASS_7.3-60.0.1                        
+ [16] reshape2_1.4.4                         
+ [17] httpuv_1.6.16                          
+ [18] qvalue_2.34.0                          
+ [19] withr_3.0.2                            
+ [20] xfun_0.53                              
+ [21] ggfun_0.2.0                            
+ [22] ellipsis_0.3.2                         
+ [23] survival_3.8-3                         
+ [24] memoise_2.0.1                          
+ [25] profvis_0.4.0                          
+ [26] systemfonts_1.2.3                      
+ [27] tidytree_0.4.6                         
+ [28] zoo_1.8-14                             
+ [29] pbapply_1.7-4                          
+ [30] R.oo_1.27.1                            
+ [31] Formula_1.2-5                          
+ [32] prettyunits_1.2.0                      
+ [33] KEGGREST_1.42.0                        
+ [34] promises_1.3.3                         
+ [35] httr_1.4.7                             
+ [36] restfulr_0.0.15                        
+ [37] globals_0.18.0                         
+ [38] fitdistrplus_1.2-4                     
+ [39] rhdf5filters_1.14.1                    
+ [40] rstudioapi_0.17.1                      
+ [41] stringfish_0.17.0                      
+ [42] miniUI_0.1.2                           
+ [43] generics_0.1.4                         
+ [44] DOSE_3.28.1                            
+ [45] base64enc_0.1-3                        
+ [46] curl_7.0.0                             
+ [47] zlibbioc_1.48.0                        
+ [48] ggraph_2.2.1                           
+ [49] polyclip_1.10-7                        
+ [50] GenomeInfoDbData_1.2.11                
+ [51] SparseArray_1.2.2                      
+ [52] ade4_1.7-22                            
+ [53] xtable_1.8-4                           
+ [54] evaluate_1.0.4                         
+ [55] S4Arrays_1.2.0                         
+ [56] BiocFileCache_2.10.1                   
+ [57] hms_1.1.3                              
+ [58] irlba_2.3.5.1                          
+ [59] colorspace_2.1-1                       
+ [60] filelock_1.0.3                         
+ [61] ROCR_1.0-11                            
+ [62] reticulate_1.43.0                      
+ [63] spatstat.data_3.1-8                    
+ [64] lmtest_0.9-40                          
+ [65] readr_2.1.5                            
+ [66] later_1.4.2                            
+ [67] viridis_0.6.5                          
+ [68] ggtree_3.10.0                          
+ [69] lattice_0.22-7                         
+ [70] spatstat.geom_3.5-0                    
+ [71] future.apply_1.20.0                    
+ [72] scattermore_1.2                        
+ [73] XML_3.99-0.15                          
+ [74] shadowtext_0.1.6                       
+ [75] cowplot_1.2.0                          
+ [76] RcppAnnoy_0.0.22                       
+ [77] Hmisc_5.2-3                            
+ [78] pillar_1.11.0                          
+ [79] nlme_3.1-168                           
+ [80] caTools_1.18.3                         
+ [81] compiler_4.3.0                         
+ [82] RSpectra_0.16-2                        
+ [83] stringi_1.7.12                         
+ [84] tensor_1.5.1                           
+ [85] GenomicAlignments_1.38.0               
+ [86] crayon_1.5.3                           
+ [87] abind_1.4-5                            
+ [88] gridGraphics_0.5-1                     
+ [89] graphlayouts_1.2.2                     
+ [90] bit_4.6.0                              
+ [91] fastmatch_1.1-6                        
+ [92] codetools_0.2-20                       
+ [93] TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2
+ [94] biovizBase_1.50.0                      
+ [95] plotly_4.11.0                          
+ [96] mime_0.13                              
+ [97] splines_4.3.0                          
+ [98] fastDummies_1.7.5                      
+ [99] dbplyr_2.5.0                           
+[100] HDO.db_0.99.1                          
+[101] interp_1.1-6                           
+[102] knitr_1.50                             
+[103] blob_1.2.4                             
+[104] seqLogo_1.68.0                         
+[105] AnnotationFilter_1.26.0                
+[106] checkmate_2.3.3                        
+[107] listenv_0.9.1                          
+[108] pkgbuild_1.4.8                         
+[109] Gviz_1.46.1                            
+[110] ggplotify_0.1.3                        
+[111] tibble_3.3.0                           
+[112] tzdb_0.5.0                             
+[113] tweenr_2.0.3                           
+[114] pkgconfig_2.0.3                        
+[115] tools_4.3.0                            
+[116] cachem_1.1.0                           
+[117] RSQLite_2.4.3                          
+[118] viridisLite_0.4.2                      
+[119] DBI_1.2.3                              
+[120] splitstackshape_1.4.8                  
+[121] rmarkdown_2.29                         
+[122] fastmap_1.2.0                          
+[123] scales_1.4.0                           
+[124] ica_1.0-3                              
+[125] Rsamtools_2.18.0                       
+[126] patchwork_1.3.1                        
+[127] VariantAnnotation_1.48.1               
+[128] dotCall64_1.2                          
+[129] rpart_4.1.24                           
+[130] RANN_2.6.2                             
+[131] farver_2.1.2                           
+[132] tidygraph_1.3.0                        
+[133] scatterpie_0.2.6                       
+[134] yaml_2.3.10                            
+[135] latticeExtra_0.6-30                    
+[136] foreign_0.8-90                         
+[137] cli_3.6.5                              
+[138] purrr_1.1.0                            
+[139] lifecycle_1.0.4                        
+[140] uwot_0.2.3                             
+[141] backports_1.5.0                        
+[142] sessioninfo_1.2.3                      
+[143] annotate_1.80.0                        
+[144] rjson_0.2.23                           
+[145] ggridges_0.5.6                         
+[146] progressr_0.15.1                       
+[147] ape_5.8-1                              
+[148] jsonlite_2.0.0                         
+[149] RcppHNSW_0.6.0                         
+[150] bitops_1.0-9                           
+[151] bit64_4.6.0-1                          
+[152] Rtsne_0.17                             
+[153] yulab.utils_0.2.1                      
+[154] spatstat.utils_3.1-5                   
+[155] RcppParallel_5.1.9                     
+[156] CNEr_1.38.0                            
+[157] GOSemSim_2.28.0                        
+[158] spatstat.univar_3.1-4                  
+[159] R.utils_2.13.0                         
+[160] lazyeval_0.2.2                         
+[161] shiny_1.11.1                           
+[162] htmltools_0.5.8.1                      
+[163] enrichplot_1.22.0                      
+[164] GO.db_3.18.0                           
+[165] sctransform_0.4.2                      
+[166] rappdirs_0.3.3                         
+[167] ensembldb_2.26.0                       
+[168] glue_1.8.0                             
+[169] TFMPvalue_0.0.9                        
+[170] spam_2.11-1                            
+[171] RCurl_1.98-1.12                        
+[172] treeio_1.26.0                          
+[173] motifStack_1.46.0                      
+[174] jpeg_0.1-10                            
+[175] boot_1.3-31                            
+[176] igraph_1.5.1                           
+[177] R6_2.6.1                               
+[178] tidyr_1.3.1                            
+[179] ggiraph_0.8.12                         
+[180] cluster_2.1.8.1                        
+[181] pkgload_1.4.0                          
+[182] Rhdf5lib_1.24.0                        
+[183] aplot_0.2.9                            
+[184] DirichletMultinomial_1.44.0            
+[185] ProtGenerics_1.34.0                    
+[186] DelayedArray_0.28.0                    
+[187] tidyselect_1.2.1                       
+[188] plotrix_3.8-4                          
+[189] htmlTable_2.4.3                        
+[190] ggforce_0.5.0                          
+[191] xml2_1.5.1                             
+[192] KernSmooth_2.23-26                     
+[193] S7_0.2.0                               
+[194] htmlwidgets_1.6.4                      
+[195] fgsea_1.28.0                           
+[196] RColorBrewer_1.1-3                     
+[197] biomaRt_2.58.0                         
+[198] rlang_1.1.6                            
+[199] spatstat.sparse_3.1-0                  
+[200] spatstat.explore_3.5-2                 
+[201] uuid_1.2-1                             
+[202] remotes_2.5.0                          
+
+
+------- Log Info
+
+
+2026-07-22 17:43:07.315084 : addGroupCoverages Input-Parameters, Class = list
+
+addGroupCoverages Input-Parameters$ArchRProj: length = 1
+
+addGroupCoverages Input-Parameters$groupBy: length = 1
+[1] "celltype"
+
+
+addGroupCoverages Input-Parameters$useLabels: length = 1
+[1] TRUE
+
+
+addGroupCoverages Input-Parameters$sampleLabels: length = 1
+[1] "Sample"
+
+
+addGroupCoverages Input-Parameters$minCells: length = 1
+[1] 40
+
+
+addGroupCoverages Input-Parameters$maxCells: length = 1
+[1] 5000
+
+
+addGroupCoverages Input-Parameters$maxFragments: length = 1
+[1] 2.5e+07
+
+
+addGroupCoverages Input-Parameters$minReplicates: length = 1
+[1] 2
+
+
+addGroupCoverages Input-Parameters$maxReplicates: length = 1
+[1] 5
+
+
+addGroupCoverages Input-Parameters$sampleRatio: length = 1
+[1] 0.8
+
+
+addGroupCoverages Input-Parameters$excludeChr: length = 3
+[1] "chrM" "chrX" "chrY"
+
+
+addGroupCoverages Input-Parameters$kmerLength: length = 1
+[1] 6
+
+
+addGroupCoverages Input-Parameters$threads: length = 1
+[1] 19
+
+
+addGroupCoverages Input-Parameters$returnGroups: length = 1
+[1] FALSE
+
+
+addGroupCoverages Input-Parameters$parallelParam: length = 0
+NULL
+
+
+addGroupCoverages Input-Parameters$force: length = 1
+[1] TRUE
+
+
+addGroupCoverages Input-Parameters$verbose: length = 1
+[1] TRUE
+
+
+addGroupCoverages Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-addGroupCoverages-2d0a70b637132-Date-2026-07-22_Time-17-43-06.950429.log"
+
+
+
+2026-07-22 17:43:07.681717 : B/Plasma cell (1 of 9) : CellGroups N = 5
+
+2026-07-22 17:43:07.805562 : Cycling (2 of 9) : CellGroups N = 5
+
+2026-07-22 17:43:07.924025 : Endothelial (3 of 9) : CellGroups N = 5
+
+2026-07-22 17:43:08.032151 : Fibroblast/HSC (4 of 9) : CellGroups N = 5
+
+2026-07-22 17:43:08.237644 : Hepatocyte (5 of 9) : CellGroups N = 5
+
+2026-07-22 17:43:08.368284 : Macrophage (6 of 9) : CellGroups N = 5
+
+2026-07-22 17:43:08.480485 : Monocyte (7 of 9) : CellGroups N = 5
+
+2026-07-22 17:43:08.596592 : T cell (8 of 9) : CellGroups N = 5
+
+2026-07-22 17:43:08.716289 : T/NK cell (9 of 9) : CellGroups N = 5
+2026-07-22 17:43:45.738738 : Batch Execution w/ safelapply!, 0.645 mins elapsed.
+2026-07-22 17:43:45.745584 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Creating Group Coverage File : B.Plasma.cell._.X__pt26pre.insertions.coverage.h5, 0.645 mins elapsed.
+
+2026-07-22 17:43:45.747705 : Group B/Plasma cell._.X__pt26pre (1 of 45) : cellGroupi, Class = character
+
+Group B/Plasma cell._.X__pt26pre (1 of 45) : cellGroupi: length = 776
+[1] "X__pt26pre#AAACAGCCATGTGGGA-1" "X__pt26pre#AAACATGCACTGACTA-1"
+[3] "X__pt26pre#AAACCGAAGGTTTGAC-1" "X__pt26pre#AAACCGCGTTACAAAC-1"
+[5] "X__pt26pre#AAACGCGCAGAAATTG-1" "X__pt26pre#AAACGGATCTAAGTCA-1"
+
+
+
+2026-07-22 17:43:45.751965 : Number of Cells = 776
+
+2026-07-22 17:43:45.762468 : Coverage File Exists!
+
+2026-07-22 17:43:45.767571 : Added Coverage Group
+
+2026-07-22 17:43:45.77053 : Added Metadata Group
+
+2026-07-22 17:43:45.790875 : Added ArrowCoverage Class
+
+2026-07-22 17:43:45.794072 : Added Coverage/Info
+
+2026-07-22 17:43:45.805199 : Added Coverage/Info/CellNames
+2026-07-22 17:43:45.805698 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (1 of 22), 0.646 mins elapsed.
+2026-07-22 17:43:49.692517 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (2 of 22), 0.711 mins elapsed.
+2026-07-22 17:43:51.826722 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (3 of 22), 0.746 mins elapsed.
+2026-07-22 17:43:53.965512 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (4 of 22), 0.782 mins elapsed.
+2026-07-22 17:43:56.342856 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (5 of 22), 0.822 mins elapsed.
+2026-07-22 17:43:58.34282 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (6 of 22), 0.855 mins elapsed.
+2026-07-22 17:44:00.373621 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (7 of 22), 0.889 mins elapsed.
+2026-07-22 17:44:02.432421 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (8 of 22), 0.923 mins elapsed.
+2026-07-22 17:44:04.442522 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (9 of 22), 0.957 mins elapsed.
+2026-07-22 17:44:06.590079 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (10 of 22), 0.992 mins elapsed.
+2026-07-22 17:44:08.571414 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (11 of 22), 1.025 mins elapsed.
+2026-07-22 17:44:10.668298 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Processed Fragments Chr (12 of 22), 1.06 mins elapsed.

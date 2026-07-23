@@ -1,0 +1,132 @@
+[1] "Running under Rscript, use plan(multicore)"
+[1] "Detected 20 available cores (LSF_DJOB_NUMPROC = 20)."
+[1] "Detected 8 OpenMP threads (OMP_NUM_THREADS = 8)."
+[1] "R session plan set to multicore with 19 workers."
+[1] "ArchR threads set to 19 and genome set to Hg38"
+[1] "All settings initialized successfully."
+>> preparing features information...		 2026-07-22 05:48:24 PM 
+>> identifying nearest features...		 2026-07-22 05:48:25 PM 
+>> calculating distance from peak to TSS...	 2026-07-22 05:48:25 PM 
+>> assigning genomic annotation...		 2026-07-22 05:48:25 PM 
+>> adding gene annotation...			 2026-07-22 05:48:57 PM 
+>> assigning chromosome lengths			 2026-07-22 05:48:58 PM 
+>> done...					 2026-07-22 05:48:58 PM 
+>> preparing features information...		 2026-07-22 05:49:22 PM 
+>> identifying nearest features...		 2026-07-22 05:49:22 PM 
+>> calculating distance from peak to TSS...	 2026-07-22 05:49:22 PM 
+>> assigning genomic annotation...		 2026-07-22 05:49:22 PM 
+>> adding gene annotation...			 2026-07-22 05:49:26 PM 
+>> assigning chromosome lengths			 2026-07-22 05:49:26 PM 
+>> done...					 2026-07-22 05:49:26 PM 
+>> preparing features information...		 2026-07-22 05:51:45 PM 
+>> identifying nearest features...		 2026-07-22 05:51:45 PM 
+>> calculating distance from peak to TSS...	 2026-07-22 05:51:46 PM 
+>> assigning genomic annotation...		 2026-07-22 05:51:46 PM 
+>> adding gene annotation...			 2026-07-22 05:51:49 PM 
+>> assigning chromosome lengths			 2026-07-22 05:51:49 PM 
+>> done...					 2026-07-22 05:51:49 PM 
+>> preparing features information...		 2026-07-22 05:52:51 PM 
+>> identifying nearest features...		 2026-07-22 05:52:51 PM 
+>> calculating distance from peak to TSS...	 2026-07-22 05:52:52 PM 
+>> assigning genomic annotation...		 2026-07-22 05:52:52 PM 
+>> adding gene annotation...			 2026-07-22 05:52:55 PM 
+>> assigning chromosome lengths			 2026-07-22 05:52:56 PM 
+>> done...					 2026-07-22 05:52:56 PM 
+>> preparing features information...		 2026-07-22 05:53:35 PM 
+>> identifying nearest features...		 2026-07-22 05:53:35 PM 
+>> calculating distance from peak to TSS...	 2026-07-22 05:53:35 PM 
+>> assigning genomic annotation...		 2026-07-22 05:53:35 PM 
+>> adding gene annotation...			 2026-07-22 05:53:39 PM 
+>> assigning chromosome lengths			 2026-07-22 05:53:39 PM 
+>> done...					 2026-07-22 05:53:39 PM 
+>> preparing features information...		 2026-07-22 05:55:24 PM 
+>> identifying nearest features...		 2026-07-22 05:55:24 PM 
+>> calculating distance from peak to TSS...	 2026-07-22 05:55:25 PM 
+>> assigning genomic annotation...		 2026-07-22 05:55:25 PM 
+>> adding gene annotation...			 2026-07-22 05:55:29 PM 
+>> assigning chromosome lengths			 2026-07-22 05:55:29 PM 
+>> done...					 2026-07-22 05:55:29 PM 
+>> preparing features information...		 2026-07-22 05:56:31 PM 
+>> identifying nearest features...		 2026-07-22 05:56:31 PM 
+>> calculating distance from peak to TSS...	 2026-07-22 05:56:31 PM 
+>> assigning genomic annotation...		 2026-07-22 05:56:31 PM 
+>> adding gene annotation...			 2026-07-22 05:56:35 PM 
+>> assigning chromosome lengths			 2026-07-22 05:56:35 PM 
+>> done...					 2026-07-22 05:56:35 PM 
+>> preparing features information...		 2026-07-22 05:57:07 PM 
+>> identifying nearest features...		 2026-07-22 05:57:07 PM 
+>> calculating distance from peak to TSS...	 2026-07-22 05:57:07 PM 
+>> assigning genomic annotation...		 2026-07-22 05:57:07 PM 
+>> adding gene annotation...			 2026-07-22 05:57:11 PM 
+>> assigning chromosome lengths			 2026-07-22 05:57:11 PM 
+>> done...					 2026-07-22 05:57:11 PM 
+>> preparing features information...		 2026-07-22 05:57:34 PM 
+>> identifying nearest features...		 2026-07-22 05:57:34 PM 
+>> calculating distance from peak to TSS...	 2026-07-22 05:57:35 PM 
+>> assigning genomic annotation...		 2026-07-22 05:57:35 PM 
+>> adding gene annotation...			 2026-07-22 05:57:39 PM 
+>> assigning chromosome lengths			 2026-07-22 05:57:39 PM 
+>> done...					 2026-07-22 05:57:39 PM 
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@nodelmr12>
+Subject: Job 305117237: <run_bsub_generate_ASoC_tables> in cluster <hpcf_research_cluster> Done
+
+Job <run_bsub_generate_ASoC_tables> was submitted from host <splprhpc12> by user <szhang37> in cluster <hpcf_research_cluster> at Wed Jul 22 17:47:13 2026
+Job was executed on host(s) <20*nodelmr12>, in queue <large_mem>, as user <szhang37> in cluster <hpcf_research_cluster> at Wed Jul 22 17:47:23 2026
+</home/szhang37> was used as the home directory.
+</home/szhang37/CAB_workspace/pulled_git_repos/Multiome_main/Steffi_works> was used as the working directory.
+Started at Wed Jul 22 17:47:23 2026
+Terminated at Wed Jul 22 17:57:59 2026
+Results reported at Wed Jul 22 17:57:59 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#! /bin/bash
+
+mkdir -p log
+#BSUB -n 20
+#BSUB -R "rusage[mem=30G]"
+#BSUB -R "span[hosts=1]"
+
+#BSUB -q "large_mem"
+#BSUB -J "run_bsub_generate_ASoC_tables"
+
+#BSUB -o log/run_bsub_generate_ASoC_tables.out.%J
+#BSUB -e log/run_bsub_generate_ASoC_tables.err.%J
+
+module load conda3/202402
+conda activate /home/szhang37/CAB_workspace/Anaconda/miniconda3/envs/jwen_scRNA_singCellaR
+
+working_dir="/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
+cd $working_dir || exit 1
+
+Rscript ./call_peaks_by_annotation.R
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   6827.06 sec.
+    Max Memory :                                 159182 MB
+    Average Memory :                             43586.38 MB
+    Total Requested Memory :                     614400.00 MB
+    Delta Memory :                               455218.00 MB
+    Max Swap :                                   -
+    Max Processes :                              82
+    Max Threads :                                91
+    Run time :                                   636 sec.
+    Turnaround time :                            646 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <log/run_bsub_generate_ASoC_tables.err.305117237> for stderr output of this job.
+

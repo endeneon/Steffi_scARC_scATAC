@@ -180,83 +180,85 @@ print(paste0(
 ))
 print("All settings initialized successfully.")
 
-# getwd()
-projMultiome <-
-  loadArchRProject(
-    path = "ArchR_multiome_obj",
-    showLogo = FALSE
-  )
+# ### skip ###
+# # getwd()
+# projMultiome <-
+#   loadArchRProject(
+#     path = "ArchR_multiome_obj",
+#     showLogo = FALSE
+#   )
 
-head(getCellNames(projMultiome))
+# # head(getCellNames(projMultiome))
 
-seurat_annotated <-
-  qs_read("annotated_seurat.qs2")
-head(colnames(seurat_annotated))
-table(seurat_annotated$celltype)
+# seurat_annotated <-
+#   qs_read("annotated_seurat.qs2")
+# # head(colnames(seurat_annotated))
+# # table(seurat_annotated$celltype)
 
-colnames(seurat_annotated) <-
-  sub(
-    "([^_])_(?!_)",
-    "\\1#",
-    colnames(seurat_annotated),
-    perl = TRUE
-  )
-rownames(seurat_annotated@meta.data)
-length(getCellNames(projMultiome)) # 205540
-ncol(seurat_annotated) # 165115
-sum(colnames(seurat_annotated) %in% getCellNames(projMultiome))
+# colnames(seurat_annotated) <-
+#   sub(
+#     "([^_])_(?!_)",
+#     "\\1#",
+#     colnames(seurat_annotated),
+#     perl = TRUE
+#   )
+# # rownames(seurat_annotated@meta.data)
+# # length(getCellNames(projMultiome)) # 205540
+# # ncol(seurat_annotated) # 165115
+# # sum(colnames(seurat_annotated) %in% getCellNames(projMultiome))
 
-# Shared cells, ordered by Seurat's current column order
-shared_cells <-
-  colnames(seurat_annotated)[
-    colnames(seurat_annotated) %in% getCellNames(projMultiome)
-  ]
+# # Shared cells, ordered by Seurat's current column order
+# shared_cells <-
+#   colnames(seurat_annotated)[
+#     colnames(seurat_annotated) %in% getCellNames(projMultiome)
+#   ]
 
-seurat_shared <- seurat_annotated[, shared_cells]
-projMultiome_shared <- projMultiome[shared_cells, ]
+# seurat_shared <- seurat_annotated[, shared_cells]
+# projMultiome_shared <- projMultiome[shared_cells, ]
 
-cells <- getCellNames(projMultiome_shared)
+# cells <- getCellNames(projMultiome_shared)
 
-for (col in c("celltype", "celltype_fine", "treatment_group")) {
-  projMultiome_shared <- addCellColData(
-    ArchRProj = projMultiome_shared,
-    data = as.character(seurat_shared@meta.data[cells, col]),
-    name = col,
-    cells = cells,
-    force = TRUE
-  )
-}
+# for (col in c("celltype", "celltype_fine", "treatment_group")) {
+#   projMultiome_shared <- addCellColData(
+#     ArchRProj = projMultiome_shared,
+#     data = as.character(seurat_shared@meta.data[cells, col]),
+#     name = col,
+#     cells = cells,
+#     force = TRUE
+#   )
+# }
 
-getGenomeAnnotation(projMultiome_shared)
-#  B/Plasma cell        Cycling    Endothelial Fibroblast/HSC     Hepatocyte     Macrophage       Monocyte         T cell      T/NK cell
-#           3446           9484          24749           4881          54229          23701           3815          15712          11838
-# Prepare for peak calling by adding a pseudo-bulk replicate for each cluster, using the cluster_name_4_peak_calling determined above.
-projMultiome_shared <-
-  ArchR::addGroupCoverages(
-    ArchRProj = projMultiome_shared,
-    groupBy = "celltype",
-    maxCells = 5000,
-    excludeChr = c("chrM", "chrX", "chrY"),
-    force = TRUE
-  )
+# # getGenomeAnnotation(projMultiome_shared)
+# #  B/Plasma cell        Cycling    Endothelial Fibroblast/HSC     Hepatocyte     Macrophage       Monocyte         T cell      T/NK cell
+# #           3446           9484          24749           4881          54229          23701           3815          15712          11838
+# # Prepare for peak calling by adding a pseudo-bulk replicate for each cluster, using the cluster_name_4_peak_calling determined above.
+# projMultiome_shared <-
+#   ArchR::addGroupCoverages(
+#     ArchRProj = projMultiome_shared,
+#     groupBy = "celltype",
+#     maxCells = 5000,
+#     excludeChr = c("chrM", "chrX", "chrY"),
+#     force = TRUE
+#   )
 
-pathToMacs2 <- findMacs2()
-projMultiome_annotated_celltype <-
-  ArchR::addReproduciblePeakSet(
-    ArchRProj = projMultiome_shared,
-    groupBy = "celltype",
-    pathToMacs2 = pathToMacs2,
-    excludeChr = c("chrM", "chrX", "chrY"),
-    force = TRUE
-  )
-projMultiome_annotated_celltype <-
-  saveArchRProject(
-    ArchRProj = projMultiome_annotated_celltype,
-    outputDirectory = "ArchR_multiome_annotated_celltype_obj",
-    load = TRUE,
-    overwrite = TRUE
-  )
-print("Reproducible peak set added and ArchRProject saved successfully.")
+# pathToMacs2 <- findMacs2()
+# projMultiome_annotated_celltype <-
+#   ArchR::addReproduciblePeakSet(
+#     ArchRProj = projMultiome_shared,
+#     groupBy = "celltype",
+#     pathToMacs2 = pathToMacs2,
+#     excludeChr = c("chrM", "chrX", "chrY"),
+#     force = TRUE
+#   )
+# projMultiome_annotated_celltype <-
+#   saveArchRProject(
+#     ArchRProj = projMultiome_annotated_celltype,
+#     outputDirectory = "ArchR_multiome_annotated_celltype_obj",
+#     load = TRUE,
+#     overwrite = TRUE
+#   )
+# print("Reproducible peak set added and ArchRProject saved successfully.")
+### end skip ###
 
 #####
 projMultiome_annotated_celltype <-
@@ -280,7 +282,7 @@ qs_save(
   nthreads = 8
 )
 # Peaks per group
-lengths(peaks_by_group)
+# lengths(peaks_by_group)
 
 # unique(peak_sets$GroupReplicate)
 # peak_sets@metadata$PeakCallSummary$Group
@@ -291,7 +293,7 @@ dir.create(out_dir, showWarnings = FALSE)
 for (grp in names(peaks_by_group)) {
   # Sanitize group name for a safe filename (e.g. "T/NK cell" -> "T_NK_cell")
   fname <- file.path(out_dir, paste0(gsub("[^A-Za-z0-9]+", "_", grp), ".bed"))
-  export(peaks_by_group[[grp]], fname, format = "BED")
+  rtracklayer::export(peaks_by_group[[grp]], fname, format = "BED")
 }
 
 ASoC_df <-
@@ -313,8 +315,6 @@ ASoC_gr <- GRanges(
 
 names(peaks_by_group) <- gsub("[^A-Za-z0-9]+", "_", names(peaks_by_group))
 
-library(BSgenome.Hsapiens.UCSC.hg38)
-
 hg38_seqinfo <- seqinfo(BSgenome.Hsapiens.UCSC.hg38)
 hg38_seqinfo <- keepSeqlevels(hg38_seqinfo, seqlevels(peak_sets))
 
@@ -332,11 +332,11 @@ pwm_set <- getMatrixSet(
   JASPAR2020,
   opts = list(species = 9606, collection = "CORE")
 )
-length(pwm_set)
+# length(pwm_set)
 
 # Human HOCOMOCO motifs from MotifDb for motifbreakR
 motifs_human <- MotifDb::query(MotifDb, andStrings = c("hsapiens", "HOCOMOCO"))
-length(motifs_human)
+# length(motifs_human)
 
 # motifbreakR parallel backend: SerialParam() when run interactively in an IDE,
 # MulticoreParam() when run as a batch Rscript from the command line.
@@ -461,12 +461,12 @@ for (celltype in peaks_by_group@partitioning@NAMES) {
 
   # Per-SNP summary of motif disruption
   mb_df <- as.data.frame(mb_results, row.names = NULL) |>
-    as_tibble() |>
-    mutate(SNP_id = names(mb_results))
+    tibble::as_tibble() |>
+    dplyr::mutate(SNP_id = names(mb_results))
   mb_summary <- mb_df |>
-    group_by(SNP_id) |>
-    summarise(
-      n_motifs_disrupted = n(),
+    dplyr::group_by(SNP_id) |>
+    dplyr::summarise(
+      n_motifs_disrupted = dplyr::n(),
       n_strong = sum(effect == "strong"),
       disrupted_TFs = paste(
         sort(unique(geneSymbol[effect == "strong"])),
@@ -551,4 +551,4 @@ write.table(
   quote = FALSE,
   row.names = FALSE
 )
-celltype_summary
+# celltype_summary

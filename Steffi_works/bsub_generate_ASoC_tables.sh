@@ -3,6 +3,7 @@
 mkdir -p log
 #BSUB -n 20
 #BSUB -R "rusage[mem=30G]"
+#BSUB -R "span[hosts=1]"
 
 #BSUB -q "large_mem"
 #BSUB -J "run_bsub_generate_ASoC_tables"

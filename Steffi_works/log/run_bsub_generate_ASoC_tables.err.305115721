@@ -1,0 +1,216 @@
+loading conda3/202402
+Conda version '202402' loaded
+Not necessary to setup conda init now
+Loading required package: SeuratObject
+Loading required package: sp
+
+Attaching package: ‘SeuratObject’
+
+The following objects are masked from ‘package:base’:
+
+    intersect, t
+
+
+Attaching package: ‘gplots’
+
+The following object is masked from ‘package:stats’:
+
+    lowess
+
+
+                                                   / |
+                                                 /    \
+            .                                  /      |.
+            \\\                              /        |.
+              \\\                          /           `|.
+                \\\                      /              |.
+                  \                    /                |\
+                  \\#####\           /                  ||
+                ==###########>      /                   ||
+                 \\##==......\    /                     ||
+            ______ =       =|__ /__                     ||      \\\
+        ,--' ,----`-,__ ___/'  --,-`-===================##========>
+       \               '        ##_______ _____ ,--,__,=##,__   ///
+        ,    __==    ___,-,__,--'#'  ==='      `-'    | ##,-/
+        -,____,---'       \\####\\________________,--\\_##,/
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----'|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+ArchR : Version 1.0.3
+For more information see our website : www.ArchRProject.com
+If you encounter a bug please report : https://github.com/GreenleafLab/ArchR/issues
+Loading Required Packages...
+	Loading Package : devtools v2.4.5
+	Loading Package : grid v4.3.0
+	Loading Package : gridExtra v2.3
+	Loading Package : gtools v3.9.5
+	Loading Package : gtable v0.3.6
+	Loading Package : ggplot2 v3.5.2
+	Loading Package : magrittr v2.0.3
+	Loading Package : plyr v1.8.9
+	Loading Package : stringr v1.5.1
+	Loading Package : data.table v1.17.8
+	Loading Package : matrixStats v1.5.0
+	Loading Package : sparseMatrixStats v1.14.0
+	Loading Package : S4Vectors v0.40.2
+	Loading Package : GenomicRanges v1.54.1
+	Loading Package : BiocGenerics v0.48.1
+	Loading Package : Matrix v1.6.5
+	Loading Package : Rcpp v1.1.0
+	Loading Package : RcppArmadillo v14.6.3.1
+	Loading Package : SummarizedExperiment v1.32.0
+	Loading Package : rhdf5 v2.46.1
+Loading required package: iterators
+
+Attaching package: ‘snow’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, clusterSplit, makeCluster, parApply,
+    parCapply, parLapply, parRapply, parSapply, splitIndices,
+    stopCluster
+
+qs2 0.1.5
+
+Attaching package: ‘fs’
+
+The following object is masked from ‘package:BiocGenerics’:
+
+    path
+
+Loading required package: GenomicFeatures
+Loading required package: AnnotationDbi
+
+Loading required package: BSgenome
+Loading required package: Biostrings
+Loading required package: XVector
+
+Attaching package: ‘XVector’
+
+The following object is masked from ‘package:plyr’:
+
+    compact
+
+
+Attaching package: ‘Biostrings’
+
+The following object is masked from ‘package:grid’:
+
+    pattern
+
+The following object is masked from ‘package:base’:
+
+    strsplit
+
+Loading required package: BiocIO
+Loading required package: rtracklayer
+
+Attaching package: ‘rtracklayer’
+
+The following object is masked from ‘package:BiocIO’:
+
+    FileForFormat
+
+
+ChIPseeker v1.38.0
+
+If you use ChIPseeker in published research, please cite:
+Qianwen Wang, Ming Li, Tianzhi Wu, Li Zhan, Lin Li, Meijun Chen, Wenqin Xie, Zijing Xie, Erqiang Hu, Shuangbin Xu, Guangchuang Yu. Exploring epigenomic datasets by ChIPseeker. Current Protocols 2022, 2(10): e585
+
+Attaching package: ‘ChIPseeker’
+
+The following object is masked from ‘package:plyr’:
+
+    .
+
+
+Attaching package: ‘TFBSTools’
+
+The following object is masked from ‘package:Matrix’:
+
+    Matrix
+
+Loading required package: MotifDb
+See system.file("LICENSE", package="MotifDb") for use restrictions.
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:Biostrings':
+
+    collapse, intersect, setdiff, setequal, union
+
+The following object is masked from 'package:XVector':
+
+    slice
+
+The following object is masked from 'package:AnnotationDbi':
+
+    select
+
+The following object is masked from 'package:Biobase':
+
+    combine
+
+The following objects are masked from 'package:GenomicRanges':
+
+    intersect, setdiff, union
+
+The following object is masked from 'package:GenomeInfoDb':
+
+    intersect
+
+The following objects are masked from 'package:IRanges':
+
+    collapse, desc, intersect, setdiff, slice, union
+
+The following objects are masked from 'package:S4Vectors':
+
+    first, intersect, rename, setdiff, setequal, union
+
+The following objects are masked from 'package:BiocGenerics':
+
+    combine, intersect, setdiff, union
+
+The following object is masked from 'package:matrixStats':
+
+    count
+
+The following objects are masked from 'package:data.table':
+
+    between, first, last
+
+The following objects are masked from 'package:plyr':
+
+    arrange, count, desc, failwith, id, mutate, rename, summarise,
+    summarize
+
+The following object is masked from 'package:gridExtra':
+
+    combine
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+There were 50 or more warnings (use warnings() to see the first 50)
+Setting default number of Parallel threads to 19.
+Setting default genome to Hg38.
+Successfully loaded ArchRProject!
+ArchR logging to : ArchRLogs/ArchR-addGroupCoverages-2d0a70b637132-Date-2026-07-22_Time-17-43-06.950429.log
+If there is an issue, please report to github with logFile!
+Skipping validation of empty chromosomes since `force` = TRUE!
+2026-07-22 17:43:15.568081 : Further Sampled 17 Groups above the Max Fragments!, 0.142 mins elapsed.
+2026-07-22 17:43:45.734064 : Creating Coverage Files!, 0.645 mins elapsed.
+2026-07-22 17:43:45.737775 : Batch Execution w/ safelapply!, 0.645 mins elapsed.
+2026-07-22 17:43:45.744642 : Group B/Plasma cell._.X__pt26pre (1 of 45) : Creating Group Coverage File : B.Plasma.cell._.X__pt26pre.insertions.coverage.h5, 0.645 mins elapsed.
+
+Execution halted
