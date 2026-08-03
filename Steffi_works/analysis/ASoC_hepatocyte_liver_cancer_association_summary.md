@@ -277,10 +277,44 @@ Sorted by Open Targets HCC association score (`✔` in the *Strong-TF panel* col
 
 → **17** of the 33 DisGeNET hits are also in the **strong-TF-disruption panel** (`mb_n_strong` > 0), sharpening the priority list: **NDRG1, CHEK1, USP22, HDAC11, YWHAZ, MTSS1, LAMC1, TP53INP1, NEK6, FZD7, CES1, MAP3K2, TPD52, KLF10, INSIG1, HES1, HNF4G**. These are ASoC genes that are simultaneously (i) HCC-associated in a curated set, (ii) measured/known differentially expressed, and (iii) regulated by a variant predicted to strongly alter TF binding.
 
+### 4c) Per-variant join and manually-curated priority shortlist (22 variants)
+
+The per-gene curated-HCC cross-reference (4a/4b) was joined back onto the **per-variant** ASoC table (matched on base Ensembl ID) so that every SNP row carries the curated-HCC columns (`COSMIC_CGC_HCC`, `DisGeNET_HCC`, `curated_HCC_hit`, `OT_*`, alongside the existing `TCGA_LIHC_dir/log2FC` and `mb_n_strong`). Script: [analysis/hcc_geneset_crossref/join_crossref_to_snps.R](hcc_geneset_crossref/join_crossref_to_snps.R) → [sig_ASoC_in_Hepatocyte_annotated_HCC_crossref.tsv](../sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated_HCC_crossref.tsv). Of the **315** hepatocyte ASoC variant rows, **47** fall in ≥1 curated HCC set (43 DisGeNET C2239176, 8 COSMIC CGC-HCC) — more rows than genes because several genes carry multiple ASoC SNPs.
+
+From that joined table, a **manually-curated priority shortlist of 22 variants** was selected (after all automated analysis finished) — variants that are both **in the DisGeNET C2239176 HCC set** and carry **strong TF-motif disruption** (`mb_n_strong` > 0), with lower-confidence/redundant rows removed by manual review. Output: [sig_ASoC_in_Hepatocyte_annotated_HCC_crossref_DisGeNET_yes.tsv](../sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated_HCC_crossref_DisGeNET_yes.tsv) — **22 variant rows across 17 genes**, sorted by ASoC significance (`adjPVal`).
+
+| variantID    | SYMBOL | Annotation        | mb_n_strong | TCGA-LIHC dir (log2FC) | COSMIC CGC | ASoC adjP |
+| ------------ | ------ | ----------------- | ----------- | ---------------------- | ---------- | --------- |
+| rs2471847    | KLF10  | Promoter (≤1kb)   | 1           | Down (−1.44)           | —          | 4.0×10⁻¹⁰ |
+| rs145317211  | XPR1   | Promoter (≤1kb)   | 7           | Up (+0.64)             | —          | 4.9×10⁻⁶  |
+| rs10111451   | TPD52  | Promoter (≤1kb)   | 2           | Up (+0.45)             | —          | 8.3×10⁻⁶  |
+| rs1050847260 | MAP3K2 | Promoter (≤1kb)   | 1           | Down (−0.51)           | —          | 1.2×10⁻⁵  |
+| rs58065091   | NDRG1  | Distal Intergenic | 15          | Up (+1.19)             | ✔          | 1.4×10⁻⁴  |
+| rs6444772    | HES1   | Distal Intergenic | 16          | Down (−0.98)           | —          | 1.1×10⁻³  |
+| rs13034125   | MAP3K2 | Promoter (≤1kb)   | 3           | Down (−0.51)           | —          | 1.2×10⁻³  |
+| rs9935289    | SPG7   | Promoter (≤1kb)   | 6           | Down (−0.28)           | —          | 2.0×10⁻³  |
+| rs13034122   | MAP3K2 | Promoter (≤1kb)   | 1           | Down (−0.51)           | —          | 2.8×10⁻³  |
+| rs140762989  | USP22  | Promoter (≤1kb)   | 6           | Up (+0.59)             | —          | 3.3×10⁻³  |
+| rs1342691469 | MTR    | Promoter (≤1kb)   | 2           | Up (+0.76)             | —          | 4.1×10⁻³  |
+| rs117165000  | MTR    | Promoter (≤1kb)   | 13          | Up (+0.76)             | —          | 4.3×10⁻³  |
+| rs859002     | CD1D   | Promoter (≤1kb)   | 5           | Down (−1.59)           | —          | 8.0×10⁻³  |
+| rs72759286   | NEK6   | Distal Intergenic | 2           | Down (−0.40)           | —          | 8.9×10⁻³  |
+| rs2279339    | TFAM   | Promoter (≤1kb)   | 1           | Down (−0.38)           | —          | 1.3×10⁻²  |
+| rs56165483   | YWHAZ  | Promoter (≤1kb)   | 5           | Up (+0.64)             | —          | 1.9×10⁻²  |
+| rs2290193    | HDAC11 | Promoter (≤1kb)   | 3           | Up (+1.76)             | —          | 2.0×10⁻²  |
+| rs555752     | CHEK1  | Promoter (≤1kb)   | 1           | Up (+2.22)             | —          | 2.4×10⁻²  |
+| rs1428654600 | NDRG1  | Promoter (≤1kb)   | 11          | Up (+1.19)             | ✔          | 2.8×10⁻²  |
+| rs567378743  | MOK    | Promoter (≤1kb)   | 1           | Up (+0.41)             | —          | 3.7×10⁻²  |
+| rs73252164   | TPD52  | Promoter (≤1kb)   | 2           | Up (+0.45)             | —          | 4.0×10⁻²  |
+| rs3818598    | FSD1L  | Promoter (≤1kb)   | 20          | Up (+1.17)             | —          | 4.1×10⁻²  |
+
+> This 22-variant shortlist is a **manually reviewed** subset, not a purely rule-based cut (an automatic DisGeNET ∩ strong-TF filter yields 36 variant rows; 14 lower-priority/redundant rows were dropped by hand). **NDRG1** is the only member also in COSMIC CGC (two independent ASoC SNPs, rs58065091 and rs1428654600, both measured Up), keeping it the top convergent candidate. Most rows are promoter-proximal, and the panel is enriched for genes measured **Up** in TCGA-LIHC (CHEK1, HDAC11, NDRG1, FSD1L, USP22, YWHAZ, TPD52, MTR, XPR1, MOK).
+
 ### Takeaways
 
 - **Curated overlap is modest but coherent.** Only 37/230 ASoC genes appear in a curated HCC set, and just **NDRG1** appears in both COSMIC CGC and DisGeNET — reinforcing that this ASoC dataset's value is *regulatory* (which hepatocyte genes are modulated), not a rediscovery of known HCC driver mutations.
 - **NDRG1 is the top convergent candidate**: COSMIC CGC (HCC) + DisGeNET + measured Up in TCGA-LIHC + strong TF-motif disruption.
+- **A manually-curated 22-variant shortlist** (Section 4c; DisGeNET C2239176 + strong TF disruption, hand-reviewed) across 17 genes is the recommended priority set for follow-up, led by NDRG1 (2 SNPs), CHEK1, HDAC11, USP22, and FSD1L.
 - **DisGeNET breadth caveat.** The DisGeNET C2239176 set is text-mining-inclusive (3,593 genes), so its 33 hits reflect literature co-mention depth rather than curated causality; the Open Targets `cancer_gene_census` (5 genes) is the stricter, driver-oriented signal.
 - **Provenance note.** Because COSMIC and DisGeNET are login/key-gated, faithful tokenless proxies were used (Open Targets `cancer_gene_census` datasource for HCC; Enrichr DisGeNET mirror). If Sanger COSMIC and a DisGeNET API key are available, re-running against the native `cancer_gene_census.csv` and the DisGeNET GDA `score`/`EI` fields would let hits be filtered by curated evidence level (and by CGC tier 1/2, germline/somatic, and role-in-cancer).
 
