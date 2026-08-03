@@ -1,3 +1,5 @@
 {
-    "r.lsp.promptToInstall": false
+    "r.lsp.promptToInstall": false,
+    "github.copilot.nextEditSuggestions.extendedRange": true,
+    "github.copilot.selectedCompletionModel": "gpt-5.4-mini"
 }

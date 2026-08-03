@@ -27,8 +27,8 @@
   library(Signac)
   # library(loomR)
   # library(anndata)
-  library(hdf5r)
-  library(arrow)
+  # library(hdf5r)
+  # library(arrow)
   # library(rhdf5)
 
   library(stringr)
@@ -54,7 +54,7 @@
 #    szhang37/projects/szhang_dev/STEREO_seq/Human_liver/R_liver"
 # )
 setwd(
-  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main"
+  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
 )
 # determine if R is running in RSTUDIO/VSCode/Positron
 if (Sys.getenv("RSTUDIO") == "1" || (Sys.getenv("TERM_PROGRAM") == "vscode")) {
@@ -430,26 +430,42 @@ IntegrateKmeansClustering <-
 # }
 
 # load multiome GEX (Gene Expression) data ####
-## 1) locate all cellranger-arc filtered_feature_bc_matrix.h5 files
+## 1.1) locate all cellranger-arc filtered_feature_bc_matrix.h5 files
 multiome_bams_dir <-
   "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/projects/szhang_dev/test_ASoC_w_WASP/multiome_bams"
-
-h5_file_vec <-
+multiome_h5_file_vec <-
   list.files(
     path = multiome_bams_dir,
     pattern = "^filtered_feature_bc_matrix\\.h5$",
     full.names = TRUE,
     recursive = TRUE
   )
+names(multiome_h5_file_vec) <-
+  paste0(
+    "X__",
+    basename(dirname(dirname(multiome_h5_file_vec)))
+  )
+## 1.2) locate all FLEX filtered_feature_bc_matrix.h5 files
+flex_bams_dir <-
+  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/FLEX_samples"
+flex_h5_file_vec <-
+  list.files(
+    path = flex_bams_dir,
+    pattern = "^sample_filtered_feature_bc_matrix\\.h5$",
+    full.names = TRUE,
+    recursive = TRUE
+  )
+names(flex_h5_file_vec) <-
+  basename(dirname(dirname(flex_h5_file_vec)))
 
 ## 2) name the vector by sample name (the directory two levels above the .h5
 ##    file, i.e. the cellranger-arc run folder), prefixed with "X__", e.g.
 ##    ".../1t/outs/filtered_feature_bc_matrix.h5" -> "X__1t"
-names(h5_file_vec) <-
-  paste0(
-    "X__",
-    basename(dirname(dirname(h5_file_vec)))
-  )
+# names(h5_file_vec) <-
+#   paste0(
+#     "X__",
+#     basename(dirname(dirname(h5_file_vec)))
+#   )
 
 ## 3)-4) load GEX-only data, build the Seurat object, and add QC percentages
 load_multiome_gex_seurat <-
@@ -727,37 +743,3 @@ qs_save(
 #     "IH_vs_RA_markers_list.qs2",
 #     nthreads = 4
 #   )
-
-# plot the genes by sample in pseudobulk ####
-merged_integrated_liver_obj <-
-  qs_read(
-    "merged_integrated_seurat_obj.qs2",
-    nthreads = 4
-  )
-
-pseudobulk_liver <-
-  AggregateExpression(
-    merged_integrated_liver_obj,
-    group.by = c("orig.ident"),
-    assays = "RNA",
-    slot = "data"
-  )
-
-pseudobulk_liver <- as.data.frame(pseudobulk_liver)
-head(rownames(pseudobulk_liver))
-
-genes_2_plot <-
-  read.table(
-    "Steffi_works/sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated_HCC_crossref_DisGeNET_yes.tsv",
-    header = T,
-    sep = "\t"
-  )
-genes_2_plot <- genes_2_plot$SYMBOL
-genes_2_plot <- genes_2_plot[!duplicated(genes_2_plot)]
-
-df_2_plot <-
-  pseudobulk_liver[rownames(pseudobulk_liver) %in% genes_2_plot, ]
-df_2_plot <-
-  as.data.frame(t(df_2_plot))
-rownames(df_2_plot)
-colnames(df_2_plot)
