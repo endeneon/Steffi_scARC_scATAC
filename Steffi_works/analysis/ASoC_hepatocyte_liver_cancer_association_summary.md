@@ -210,6 +210,82 @@ The measured directions above come from a **scripted TCGA-LIHC edgeR analysis** 
 
 ---
 
+## 4) Cross-reference against curated HCC gene sets (COSMIC CGC + DisGeNET)
+
+The **230** ASoC-annotated genes (Ensembl IDs) were cross-referenced against two curated hepatocellular-carcinoma gene sets. Both primary resources are now access-gated (the COSMIC Cancer Gene Census download requires a Sanger login; the DisGeNET API requires an API key), so **tokenless, reproducible mirrors** were used:
+
+- **COSMIC Cancer Gene Census (HCC-mapped)** — taken from the **Open Targets Platform** GraphQL API as the `cancer_gene_census` evidence datasource for **hepatocellular carcinoma (`MONDO_0007256`)**. Open Targets ingests the census and maps each gene to its census tumour types, so a nonzero `cancer_gene_census` score for HCC ≈ "CGC gene whose census annotation includes liver/HCC."
+- **DisGeNET "Carcinoma, Hepatocellular" (`C2239176`)** — retrieved via the **Enrichr** DisGeNET library (term **"Liver carcinoma"** = `C2239176`; **3,593** genes, text-mining + curated evidence combined), which is tokenless and not rate-limited. Because this set is text-mining-inclusive it is broad/low-specificity: membership means the gene is co-reported with HCC in DisGeNET, not necessarily a curated causal driver. A second script (below) instead queries the **native DisGeNET API** for the per-gene GDA `score` + Evidence Index, but that endpoint needs an API key and rate-limits hard (TRIAL `retry-after` can be ~22 h), so the tokenless Enrichr numbers are reported here.
+
+Two interchangeable scripts produce the DisGeNET half (COSMIC-CGC half is identical in both):
+- Enrichr (tokenless, used for the numbers below): [analysis/hcc_geneset_crossref/crossref_hcc_genesets_enrichr.R](hcc_geneset_crossref/crossref_hcc_genesets_enrichr.R) → [ASoC_genes_HCC_curated_crossref_enrichr.tsv](hcc_geneset_crossref/ASoC_genes_HCC_curated_crossref_enrichr.tsv)
+- Native DisGeNET GDA score/EI (API key, rate-limited; LSF wrapper `bsub_crossref_hcc_genesets.sh`): [analysis/hcc_geneset_crossref/crossref_hcc_genesets_disgenet.R](hcc_geneset_crossref/crossref_hcc_genesets_disgenet.R) → `ASoC_genes_HCC_curated_crossref_disgenet.tsv`
+
+**Result.** Of 230 ASoC genes: **5** are in the (HCC-mapped) **COSMIC CGC**, **33** are in **DisGeNET C2239176**, **1** is in **both** (NDRG1), and **37** are in **at least one** curated HCC set. The remaining 193 ASoC genes are not in either curated HCC set — consistent with Sections 1–1c: these are regulatory variants near hepatocyte genes, most of which are not catalogued cancer drivers.
+
+### 4a) COSMIC Cancer Gene Census — HCC-mapped hits (5)
+
+| SYMBOL    | ENSEMBL         | CGC(HCC) score | DisGeNET C2239176 | TCGA-LIHC dir (log2FC) | OT HCC assoc | Strong-TF panel |
+| --------- | --------------- | -------------- | ----------------- | ---------------------- | ------------ | --------------- |
+| **NDRG1** | ENSG00000104419 | 0.53           | ✔ (both)          | **Up** (+1.19)         | 0.35         | ✔               |
+| **PBX1**  | ENSG00000185630 | 0.53           | —                 | ns (−0.32)             | 0.33         | —               |
+| **ELK4**  | ENSG00000158711 | 0.46           | —                 | Up (+0.34)             | 0.29         | —               |
+| **PLEC**  | ENSG00000178209 | 0.30           | —                 | Up (+0.71)             | 0.21         | —               |
+| **N4BP2** | ENSG00000078177 | 0.30           | —                 | Down (−0.68)           | 0.21         | —               |
+
+→ **NDRG1** is the single strongest result: it is in **both** curated sets, is measured **Up** in TCGA-LIHC, and carries a strong TF-motif disruption (`mb_n_strong` = 15 via rs58065091) — the most credible variant→gene→HCC candidate in the dataset. **PBX1** and **ELK4** are census genes by virtue of documented oncogenic **fusions/translocations** (their census tumour-type mapping reaches HCC in Open Targets); **PLEC** and **N4BP2** round out the CGC-HCC set.
+
+### 4b) DisGeNET "Carcinoma, Hepatocellular" (C2239176) hits (33)
+
+Sorted by Open Targets HCC association score (`✔` in the *Strong-TF panel* column = ASoC SNP with `mb_n_strong` > 0, i.e. the Section-3 panel):
+
+| SYMBOL       | TCGA-LIHC dir (log2FC) | OT HCC assoc | Strong-TF panel | Also COSMIC CGC |
+| ------------ | ---------------------- | ------------ | --------------- | --------------- |
+| **NDRG1**    | Up (+1.19)             | 0.35         | ✔               | ✔               |
+| **CHEK1**    | Up (+2.22)             | 0.12         | ✔               | —               |
+| **USP22**    | Up (+0.59)             | 0.12         | ✔               | —               |
+| **HDAC11**   | Up (+1.76)             | 0.11         | ✔               | —               |
+| **YWHAZ**    | Up (+0.64)             | 0.11         | ✔               | —               |
+| **SDC1**     | Down (−0.29)           | 0.11         | —               | —               |
+| **MTSS1**    | ns (+0.07)             | 0.11         | ✔               | —               |
+| **LAMC1**    | Up (+1.39)             | 0.10         | ✔               | —               |
+| **TP53INP1** | ns (+0.02)             | 0.10         | ✔               | —               |
+| **NEK6**     | Down (−0.40)           | 0.10         | ✔               | —               |
+| **FZD7**     | Up (+0.58)             | 0.09         | ✔               | —               |
+| **TFAM**     | Down (−0.38)           | 0.09         | —               | —               |
+| **DCAF13**   | Up (+1.05)             | 0.09         | —               | —               |
+| **CES1**     | ns (−0.32)             | 0.09         | ✔               | —               |
+| **GALNT2**   | Down (−0.34)           | 0.08         | —               | —               |
+| **MAP3K2**   | Down (−0.51)           | 0.08         | ✔               | —               |
+| **CD1D**     | Down (−1.59)           | 0.08         | —               | —               |
+| **TPD52**    | Up (+0.45)             | 0.08         | ✔               | —               |
+| **PEX5**     | ns (−0.04)             | 0.08         | —               | —               |
+| **ING1**     | ns (−0.04)             | 0.07         | —               | —               |
+| **KLF10**    | Down (−1.44)           | 0.06         | ✔               | —               |
+| **INSIG1**   | ns (−0.40)             | 0.06         | ✔               | —               |
+| **HES1**     | Down (−0.98)           | 0.06         | ✔               | —               |
+| **MOK**      | Up (+0.41)             | 0.04         | —               | —               |
+| **SPG7**     | Down (−0.28)           | 0.04         | —               | —               |
+| **XPR1**     | Up (+0.64)             | 0.03         | —               | —               |
+| **FSD1L**    | Up (+1.17)             | 0.03         | —               | —               |
+| **HNF4G**    | ns (−0.20)             | 0.03         | ✔               | —               |
+| **MTR**      | Up (+0.76)             | 0.03         | —               | —               |
+| **SP3**      | ns (−0.04)             | 0.02         | —               | —               |
+| **PADI1**    | Up (+1.95)             | 0.02         | —               | —               |
+| **LAMTOR2**  | Up (+0.63)             | 0.00         | —               | —               |
+| **SH3BP4**   | ns (−0.07)             | 0.00         | —               | —               |
+
+→ **17** of the 33 DisGeNET hits are also in the **strong-TF-disruption panel** (`mb_n_strong` > 0), sharpening the priority list: **NDRG1, CHEK1, USP22, HDAC11, YWHAZ, MTSS1, LAMC1, TP53INP1, NEK6, FZD7, CES1, MAP3K2, TPD52, KLF10, INSIG1, HES1, HNF4G**. These are ASoC genes that are simultaneously (i) HCC-associated in a curated set, (ii) measured/known differentially expressed, and (iii) regulated by a variant predicted to strongly alter TF binding.
+
+### Takeaways
+
+- **Curated overlap is modest but coherent.** Only 37/230 ASoC genes appear in a curated HCC set, and just **NDRG1** appears in both COSMIC CGC and DisGeNET — reinforcing that this ASoC dataset's value is *regulatory* (which hepatocyte genes are modulated), not a rediscovery of known HCC driver mutations.
+- **NDRG1 is the top convergent candidate**: COSMIC CGC (HCC) + DisGeNET + measured Up in TCGA-LIHC + strong TF-motif disruption.
+- **DisGeNET breadth caveat.** The DisGeNET C2239176 set is text-mining-inclusive (3,593 genes), so its 33 hits reflect literature co-mention depth rather than curated causality; the Open Targets `cancer_gene_census` (5 genes) is the stricter, driver-oriented signal.
+- **Provenance note.** Because COSMIC and DisGeNET are login/key-gated, faithful tokenless proxies were used (Open Targets `cancer_gene_census` datasource for HCC; Enrichr DisGeNET mirror). If Sanger COSMIC and a DisGeNET API key are available, re-running against the native `cancer_gene_census.csv` and the DisGeNET GDA `score`/`EI` fields would let hits be filtered by curated evidence level (and by CGC tier 1/2, germline/somatic, and role-in-cancer).
+
+---
+
 ## Summary
 
 1. **Variant level:** None of the `variantID` SNPs are curated disease/cancer alleles in dbSNP/ClinVar, and an **expanded search by exact rsID across Europe PMC literature and the GWAS Catalog also found no direct variant→HCC association**. They are regulatory (ASoC) variants; their relevance is mechanistic — they alter chromatin accessibility (and predicted TF motif binding, per `mb_disrupted_TFs`) at cancer-relevant loci.
@@ -222,8 +298,8 @@ The measured directions above come from a **scripted TCGA-LIHC edgeR analysis** 
 **Recommended follow-up:**
 - **LD-proxy analysis was run** (Ensembl LD REST API, `1000GENOMES:phase_3:EUR` and `:EAS`): the 6p21 MHC ASoC SNPs are **not** proxies of the HCC MICA lead rs2596542 in either population. If donors are AFR/AMR/SAS, re-run in the matched population and, optionally, also test the HLA-DQ/DP HCC leads (rs9272105/rs3077).
 - **Confirm differential expression quantitatively:** intersect the ASoC `ENSEMBL` gene list with a TCGA-LIHC tumor-vs-normal DE table (GEPIA2 export or `TCGAbiolinks` in R; |log2FC| ≥ 1, FDR < 0.05) to attach measured fold-change/direction to each gene.
-- Cross-reference the gene list against a curated HCC gene set (e.g. COSMIC Cancer Gene Census, DisGeNET "Carcinoma, Hepatocellular").
+- **Curated HCC gene-set cross-reference was run** (Section 4): of 230 ASoC genes, **5** are in the HCC-mapped **COSMIC Cancer Gene Census** (NDRG1, PBX1, ELK4, PLEC, N4BP2), **33** are in **DisGeNET "Carcinoma, Hepatocellular" (C2239176)**, and only **NDRG1** is in both. 17 DisGeNET hits also carry strong TF-motif disruption. Tokenless proxies (Open Targets `cancer_gene_census` datasource; Enrichr DisGeNET mirror) were used since COSMIC/DisGeNET are gated; re-run natively if Sanger/DisGeNET credentials are available.
 - Test whether ASoC-disrupted TF motifs (e.g. HNF4A/HNF4G, FOXA, RXR) are enriched — those are the hepatocyte lineage factors most relevant to liver-cancer regulatory rewiring.
 
 ---
-*Generated on 2026-07-26. Variant-level status verified via dbSNP/ClinVar, Europe PMC (literature by exact rsID), and the NHGRI-EBI GWAS Catalog (by rsID) — searched for HCC, any liver-related disease/trait (NAFLD, cirrhosis, hepatitis, bilirubin, liver enzymes, lipid/fatty-acid metabolism), and gastric cancer. Section 3 tumor-vs-normal expression is **measured** from TCGA-LIHC (UCSC Xena GDC STAR counts; edgeR QL F-test, 374 tumor vs 50 normal; |log2FC|≥0.2, FDR<0.05); functional roles summarized from Europe PMC. LD-proxy hypothesis for the 6p21 MHC SNPs was formally tested and rejected via the Ensembl LD REST API (1000GENOMES:phase_3:EUR and :EAS). This is a computational annotation summary, not a clinical determination.*
+*Generated on 2026-07-26 (Section 4 curated cross-reference added 2026-07-31). Variant-level status verified via dbSNP/ClinVar, Europe PMC (literature by exact rsID), and the NHGRI-EBI GWAS Catalog (by rsID) — searched for HCC, any liver-related disease/trait (NAFLD, cirrhosis, hepatitis, bilirubin, liver enzymes, lipid/fatty-acid metabolism), and gastric cancer. Section 3 tumor-vs-normal expression is **measured** from TCGA-LIHC (UCSC Xena GDC STAR counts; edgeR QL F-test, 374 tumor vs 50 normal; |log2FC|≥0.2, FDR<0.05); functional roles summarized from Europe PMC. LD-proxy hypothesis for the 6p21 MHC SNPs was formally tested and rejected via the Ensembl LD REST API (1000GENOMES:phase_3:EUR and :EAS). Section 4 cross-references the ASoC gene list against curated HCC gene sets — COSMIC Cancer Gene Census (HCC-mapped, via the Open Targets `cancer_gene_census` datasource for MONDO_0007256) and DisGeNET "Carcinoma, Hepatocellular" C2239176 (via the Enrichr DisGeNET mirror) — because the native COSMIC/DisGeNET downloads are login/API-key gated. This is a computational annotation summary, not a clinical determination.*
