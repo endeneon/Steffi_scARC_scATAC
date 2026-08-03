@@ -248,7 +248,7 @@ IterateIntegrateLayers <-
     GEX_seurat <-
       RunHarmony(
         GEX_seurat,
-        group.by.vars = "orig.ident",
+        group.by.vars = c("orig.ident", "preparation"),
         reduction.use = "pca",
         dims.use = 1:n_dims,
         reduction.save = "integrated.harmony",
@@ -258,7 +258,11 @@ IterateIntegrateLayers <-
     ## run SCT separately ####
     GEX_seurat <-
       GEX_seurat %>%
-      SCTransform(verbose = T, method = "glmGamPoi") %>%
+      SCTransform(
+        verbose = T,
+        method = "glmGamPoi",
+        vars.to.regress = c("orig.ident", "preparation")
+      ) %>%
       FindVariableFeatures(verbose = T, selection.method = "vst") %>%
       ScaleData(verbose = T) %>%
       RunPCA(verbose = T, npcs = n_dims)
@@ -458,23 +462,44 @@ flex_h5_file_vec <-
 names(flex_h5_file_vec) <-
   basename(dirname(dirname(flex_h5_file_vec)))
 
-## 2) name the vector by sample name (the directory two levels above the .h5
-##    file, i.e. the cellranger-arc run folder), prefixed with "X__", e.g.
-##    ".../1t/outs/filtered_feature_bc_matrix.h5" -> "X__1t"
-# names(h5_file_vec) <-
+## 1.3) locate all GEX filtered_feature_bc_matrix.h5 files
+gex_bams_dir <-
+  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/GEX_samples"
+gex_h5_file_vec <-
+  list.files(
+    path = gex_bams_dir,
+    pattern = "^filtered_feature_bc_matrix\\.h5$",
+    full.names = TRUE,
+    recursive = TRUE
+  )
+names(gex_h5_file_vec) <-
+  basename(dirname(dirname(gex_h5_file_vec)))
+
+## 2) merge all h5_file_vec to a master vector
+h5_file_vec <- c(multiome_h5_file_vec, flex_h5_file_vec, gex_h5_file_vec)
+names(h5_file_vec) <- c(
+  names(multiome_h5_file_vec),
+  names(flex_h5_file_vec),
+  names(gex_h5_file_vec)
+)
 #   paste0(
 #     "X__",
 #     basename(dirname(dirname(h5_file_vec)))
 #   )
-
+# test_data <-
+#   Read10X_h5("GEX_samples/GEX_pt1pre/outs/filtered_feature_bc_matrix.h5")
 ## 3)-4) load GEX-only data, build the Seurat object, and add QC percentages
-load_multiome_gex_seurat <-
+load_gex_seurat <-
   function(h5_path, sample_name) {
     data_10x <-
       Read10X_h5(filename = h5_path)
     ## extract the GEX counts only from the "Gene Expression" slot
     rna_counts <-
-      data_10x[["Gene Expression"]]
+      if ("Gene Expression" %in% names(data_10x)) {
+        data_10x[["Gene Expression"]]
+      } else {
+        data_10x
+      }
     seurat_obj <-
       CreateSeuratObject(
         counts = rna_counts,
@@ -483,6 +508,13 @@ load_multiome_gex_seurat <-
       )
     ## set orig.ident to the (prefixed) sample name
     seurat_obj$orig.ident <- sample_name
+    seurat_obj$preparation <-
+      dplyr::case_when(
+        startsWith(sample_name, "X__") ~ "multiome",
+        startsWith(sample_name, "BC") ~ "FLEX",
+        TRUE ~ "GEX"
+      )
+
     ## human mitochondrial and ribosomal gene patterns
     seurat_obj[["percent.mt"]] <-
       PercentageFeatureSet(seurat_obj, pattern = "^MT-")
@@ -501,39 +533,39 @@ n_cluster_workers <-
       workers_2_use - 2
     )
   )
-multiome_cluster <-
+gex_cluster <-
   parallel::makeCluster(n_cluster_workers)
-doParallel::registerDoParallel(multiome_cluster)
+doParallel::registerDoParallel(gex_cluster)
 
-raw_multiome_seurat_list <-
+raw_gex_seurat_list <-
   foreach(
     i = seq_along(h5_file_vec),
     .packages = c("Seurat")
   ) %dopar%
   {
-    load_multiome_gex_seurat(
+    load_gex_seurat(
       h5_path = h5_file_vec[i],
       sample_name = names(h5_file_vec)[i]
     )
   }
 
-parallel::stopCluster(multiome_cluster)
+parallel::stopCluster(gex_cluster)
 
-names(raw_multiome_seurat_list) <-
+names(raw_gex_seurat_list) <-
   names(h5_file_vec)
 
 qs_save(
-  raw_multiome_seurat_list,
-  "raw_multiome_seurat_list.qs2",
+  raw_gex_seurat_list,
+  "raw_all_samples_seurat_list.qs2",
   nthreads = 4
 )
 
-merged_liver_obj <-
-  merge(
-    x = raw_multiome_seurat_list[[1]],
-    y = raw_multiome_seurat_list[2:length(raw_multiome_seurat_list)],
-    add.cell.ids = names(raw_multiome_seurat_list)
-  )
+# merged_liver_obj <-
+#   merge(
+#     x = raw_gex_seurat_list[[1]],
+#     y = raw_gex_seurat_list[2:length(raw_gex_seurat_list)],
+#     add.cell.ids = names(raw_gex_seurat_list)
+#   )
 
 # merged_liver_obj[["RNA"]] <-
 #   JoinLayers(merged_liver_obj[["RNA"]])
@@ -556,7 +588,11 @@ merged_integrated_liver_obj <-
     n_dims = n_dims
   )
 
-
+qs_save(
+  merged_integrated_liver_obj,
+  "merged_all_samples_integrated_seurat_obj.qs2",
+  nthreads = 4
+)
 # merged_integrated_liver_obj <-
 #   qs_read(
 #     "merged_integrated_liver_obj.qs2",
@@ -572,25 +608,25 @@ merged_integrated_liver_obj <-
 #   pt.size = 0.2
 # )
 
-merged_integrated_liver_obj <-
-  merged_integrated_liver_obj %>%
-  FindNeighbors(
-    reduction = "integrated.cca",
-    dims = 1:n_dims,
-    verbose = T
-  ) %>%
-  FindClusters(
-    resolution = c(0.1, 0.2, 0.5),
-    verbose = T
-  )
+# merged_integrated_liver_obj <-
+#   merged_integrated_liver_obj %>%
+#   FindNeighbors(
+#     reduction = "integrated.cca",
+#     dims = 1:n_dims,
+#     verbose = T
+#   ) %>%
+#   FindClusters(
+#     resolution = c(0.1, 0.2, 0.5),
+#     verbose = T
+#   )
 
-merged_integrated_liver_obj <-
-  IntegrateKmeansClustering(
-    object = merged_integrated_liver_obj,
-    clusters = 6,
-    integrationMethod = "cca",
-    seed.use = 42
-  )
+# merged_integrated_liver_obj <-
+#   IntegrateKmeansClustering(
+#     object = merged_integrated_liver_obj,
+#     clusters = 6,
+#     integrationMethod = "cca",
+#     seed.use = 42
+#   )
 
 # sapply(merged_integrated_liver_obj@meta.data, dplyr::n_distinct)
 
@@ -727,11 +763,11 @@ merged_integrated_liver_obj <-
 #   }
 # )
 
-qs_save(
-  merged_integrated_liver_obj,
-  "merged_integrated_seurat_obj.qs2",
-  nthreads = 4
-)
+# qs_save(
+#   merged_integrated_liver_obj,
+#   "merged_integrated_seurat_obj.qs2",
+#   nthreads = 4
+# )
 # qs_save(
 #   markers_list,
 #   "IH_vs_RA_markers_list.qs2",

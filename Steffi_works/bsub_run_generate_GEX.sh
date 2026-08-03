@@ -1,18 +1,18 @@
 #! /bin/bash
 
 mkdir -p main_log
-#BSUB -n 40
+#BSUB -n 20
 #BSUB -R "rusage[mem=15G]"
-# Keep all 40 slots on ONE host so OpenMP/Rtsne threads (and the forked future
-# workers) can actually use them; without this LSF may spread -n 40 across nodes.
+# Keep all 20 slots on ONE host so OpenMP/Rtsne threads (and the forked future
+# workers) can actually use them; without this LSF may spread -n 20 across nodes.
 #BSUB -R "span[hosts=1]"
 
 #BSUB -q "large_mem"
-#BSUB -J "run_generate_GEX"
-#BSUB -o main_log/generate_GEX_%J.out
-#BSUB -e main_log/generate_GEX_%J.err
+#BSUB -J "run_generate_FLEX"
+#BSUB -o main_log/generate_FLEX_%J.out
+#BSUB -e main_log/generate_FLEX_%J.err
 
-# Prerequisities (all installe in the conda env):
+# Prerequisities (all installed in the conda env):
 ## samtools 1.14
 ## java >= 1.8.0_392
 
@@ -43,13 +43,13 @@ conda activate /research_jude/rgs01_jude/groups/cab/projects/automapper/common/s
 
 # 0. set up base dir
 {
-	base_dir="/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/projects/szhang_dev/test_ASoC_w_WASP/R_ASoC_analysis"
+	base_dir="/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
 	if [[ ! -d "${base_dir}" ]]; then
 		echo "ERROR: base directory not found: ${base_dir}"
 		exit 1
 	else
 		cd "${base_dir}"
-		job_log_dir="${base_dir}/job_logs"
+		job_log_dir="${base_dir}/main_log/job_logs"
 		mkdir -p "${job_log_dir}" || {
 			echo "ERROR: failed to create job log directory: ${job_log_dir}" >&2
 			exit 1
@@ -58,5 +58,5 @@ conda activate /research_jude/rgs01_jude/groups/cab/projects/automapper/common/s
 }
 # 1. set up the environment
 export OMP_NUM_THREADS=8
-Rscript generate_GEX_seurat.R
+Rscript generate_FLEX_seurat.R
 set +e
