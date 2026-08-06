@@ -54,10 +54,14 @@
 #    szhang37/projects/szhang_dev/STEREO_seq/Human_liver/R_liver"
 # )
 setwd(
-  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main"
+  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
 )
 # determine if R is running in RSTUDIO/VSCode/Positron
-if (Sys.getenv("RSTUDIO") == "1" || (Sys.getenv("TERM_PROGRAM") == "vscode")) {
+# Gate on interactive(): under Rscript/LSF this is FALSE, so a leaked
+# TERM_PROGRAM=vscode from the submit shell won't force memory-duplicating
+# multisession (each worker copies the full object -> OOM under LSF).
+if (interactive() &&
+    (Sys.getenv("RSTUDIO") == "1" || Sys.getenv("TERM_PROGRAM") == "vscode")) {
   print("Running under RStudio/VSCode/Positron IDE, use plan(multisession)")
   session_plan <- "multisession"
 } else {
@@ -145,8 +149,24 @@ if (session_plan == "multisession") {
 merged_integrated_liver_obj <-
   qs_read(
     "merged_integrated_seurat_obj.qs2",
-    nthreads = 4
+    nthreads = 8
   )
+
+DefaultAssay(merged_integrated_liver_obj) <- "RNA"
+merged_integrated_liver_obj <- NormalizeData(
+  merged_integrated_liver_obj,
+  verbose = TRUE
+)
+merged_integrated_liver_obj <- ScaleData(
+  merged_integrated_liver_obj,
+  verbose = TRUE
+)
+
+qs_save(
+  merged_integrated_liver_obj,
+  "merged_integrated_seurat_obj.qs2",
+  nthreads = 8
+)
 
 pseudobulk_liver <-
   AggregateExpression(
@@ -161,7 +181,7 @@ head(rownames(pseudobulk_liver))
 
 genes_2_plot <-
   read.table(
-    "Steffi_works/sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated_HCC_crossref_DisGeNET_yes.tsv",
+    "sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated_HCC_crossref_DisGeNET_yes.tsv",
     header = T,
     sep = "\t"
   )
@@ -174,3 +194,64 @@ df_2_plot <-
   as.data.frame(t(df_2_plot))
 rownames(df_2_plot)
 colnames(df_2_plot)
+
+df_long <-
+  df_2_plot |>
+  tibble::rownames_to_column("sample_name") |>
+  data.table::as.data.table() |>
+  data.table::melt(
+    id.vars = "sample_name",
+    variable.name = "gene_name",
+    value.name = "exp_level"
+  )
+
+head(df_long)
+df_long$category <- "Primary"
+df_long$category[str_detect(df_long$sample_name, "pre")] <- "Resistant"
+unique(df_long$sample_name)
+
+p_box <-
+  ggplot(
+    df_long,
+    aes(
+      x = gene_name,
+      y = exp_level,
+      fill = category
+    )
+  ) +
+  geom_boxplot(
+    position = position_dodge(width = 0.8),
+    width = 0.7,
+    outlier.size = 0,
+    alpha = 0.5
+  ) +
+  geom_point(
+    position = position_jitterdodge(
+      jitter.width = 0.05,
+      dodge.width = 0.7
+    ),
+    size = 1,
+    alpha = 1
+  ) +
+  # dashed horizontal line at the mean of each box
+  stat_summary(
+    fun = mean,
+    geom = "errorbar",
+    aes(ymax = after_stat(y), ymin = after_stat(y)),
+    position = position_dodge(width = 0.8),
+    width = 1,
+    # linetype = "dashed",
+    colour = "darkred"
+  ) +
+  scale_fill_manual(values = c("orange4", "darkblue")) +
+  expand_limits(y = 0) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 315, hjust = 0))
+
+ggsave(
+  "pseudobulk_liver_gene_boxplot.pdf",
+  plot = p_box,
+  width = 10,
+  height = 6
+)

@@ -24,7 +24,7 @@
   library(matrixStats)
 
   library(Seurat)
-  library(Signac)
+  # library(Signac)
   # library(loomR)
   # library(anndata)
   # library(hdf5r)
@@ -261,7 +261,7 @@ IterateIntegrateLayers <-
       SCTransform(
         verbose = T,
         method = "glmGamPoi",
-        vars.to.regress = c("orig.ident", "preparation")
+        vars.to.regress = c("percent.mt")
       ) %>%
       FindVariableFeatures(verbose = T, selection.method = "vst") %>%
       ScaleData(verbose = T) %>%
@@ -406,7 +406,7 @@ IntegrateKmeansClustering <-
       stats::kmeans(
         x = matrix_4_kmeans,
         centers = clusters,
-        nstart = 50
+        nstart = 20
       )
     GEX_seurat$kmeans_clusters <-
       kmeans_result$cluster
@@ -525,47 +525,53 @@ load_gex_seurat <-
 
 ## 5) process all samples in parallel and return a named list of Seurat objects
 
-n_cluster_workers <-
-  max(
-    1,
-    min(
-      length(h5_file_vec),
-      workers_2_use - 2
-    )
-  )
-gex_cluster <-
-  parallel::makeCluster(n_cluster_workers)
-doParallel::registerDoParallel(gex_cluster)
+# n_cluster_workers <-
+#   max(
+#     1,
+#     min(
+#       length(h5_file_vec),
+#       workers_2_use - 2
+#     )
+#   )
+# gex_cluster <-
+#   parallel::makeCluster(n_cluster_workers)
+# doParallel::registerDoParallel(gex_cluster)
+
+# raw_gex_seurat_list <-
+#   foreach(
+#     i = seq_along(h5_file_vec),
+#     .packages = c("Seurat")
+#   ) %dopar%
+#   {
+#     load_gex_seurat(
+#       h5_path = h5_file_vec[i],
+#       sample_name = names(h5_file_vec)[i]
+#     )
+#   }
+
+# parallel::stopCluster(gex_cluster)
+
+# names(raw_gex_seurat_list) <-
+#   names(h5_file_vec)
+
+# qs_save(
+#   raw_gex_seurat_list,
+#   "raw_all_samples_seurat_list.qs2",
+#   nthreads = 4
+# )
 
 raw_gex_seurat_list <-
-  foreach(
-    i = seq_along(h5_file_vec),
-    .packages = c("Seurat")
-  ) %dopar%
-  {
-    load_gex_seurat(
-      h5_path = h5_file_vec[i],
-      sample_name = names(h5_file_vec)[i]
-    )
-  }
+  qs_read(
+    "raw_all_samples_seurat_list.qs2",
+    nthreads = 8
+  )
 
-parallel::stopCluster(gex_cluster)
-
-names(raw_gex_seurat_list) <-
-  names(h5_file_vec)
-
-qs_save(
-  raw_gex_seurat_list,
-  "raw_all_samples_seurat_list.qs2",
-  nthreads = 4
-)
-
-# merged_liver_obj <-
-#   merge(
-#     x = raw_gex_seurat_list[[1]],
-#     y = raw_gex_seurat_list[2:length(raw_gex_seurat_list)],
-#     add.cell.ids = names(raw_gex_seurat_list)
-#   )
+merged_liver_obj <-
+  merge(
+    x = raw_gex_seurat_list[[1]],
+    y = raw_gex_seurat_list[2:length(raw_gex_seurat_list)],
+    add.cell.ids = names(raw_gex_seurat_list)
+  )
 
 # merged_liver_obj[["RNA"]] <-
 #   JoinLayers(merged_liver_obj[["RNA"]])
@@ -577,6 +583,10 @@ qs_save(
 #     scale.factor = 10000,
 #     verbose = T
 #   )
+# unique(merged_liver_obj$orig.ident)
+# unique(merged_liver_obj$preparation)
+merged_liver_obj$orig.ident <- as.factor(merged_liver_obj$orig.ident)
+merged_liver_obj$preparation <- as.factor(merged_liver_obj$preparation)
 
 n_dims <-
   findPcsElbow(merged_liver_obj)
