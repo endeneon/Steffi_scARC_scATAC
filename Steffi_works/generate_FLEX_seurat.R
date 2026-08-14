@@ -109,16 +109,18 @@ if (session_plan == "multisession") {
       1,
       min(
         available_cores - 1,
-        16
+        12
       )
     )
 } else {
+  # ~50 GB/worker peak on the FindIntegrationAnchors step; 16 workers ~ 800 GB,
+  # leaving margin under the 1000 GB (20 x 50 GB) LSF reservation.
   workers_2_use <-
     max(
       1,
       min(
         available_cores - 1,
-        32
+        16
       )
     )
 }
@@ -219,7 +221,8 @@ IterateIntegrateLayers <-
   function(
     object,
     normalization_method = "SCT",
-    n_dims = 20
+    n_dims = 20,
+    factor_vars = c("orig.ident", "preparation")
   ) {
     GEX_seurat <- object
     # need to run both SCT and log-normalization for all integration methods to work
@@ -585,8 +588,8 @@ merged_liver_obj <-
 #   )
 # unique(merged_liver_obj$orig.ident)
 # unique(merged_liver_obj$preparation)
-merged_liver_obj$orig.ident <- as.factor(merged_liver_obj$orig.ident)
-merged_liver_obj$preparation <- as.factor(merged_liver_obj$preparation)
+# merged_liver_obj$orig.ident <- as.factor(merged_liver_obj$orig.ident)
+# merged_liver_obj$preparation <- as.factor(merged_liver_obj$preparation)
 
 n_dims <-
   findPcsElbow(merged_liver_obj)

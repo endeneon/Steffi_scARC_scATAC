@@ -1,0 +1,19 @@
+"cluster_final","celltype_fine","celltype_broad","n_cells"
+"0","Hepatocyte","Hepatocyte",37098
+"1","Hepatocyte","Hepatocyte",34561
+"2","Macrophage_Kupffer","Macrophage",31153
+"3","T_pan","T cell",29505
+"4","Endothelial","Endothelial",29191
+"5","Hepatocyte","Hepatocyte",25800
+"6","Macrophage_Kupffer","Macrophage",18587
+"7","Hepatocyte","Hepatocyte",13779
+"8","B_cell","B/Plasma cell",13150
+"9","Endothelial","Endothelial",10287
+"10","Hepatocyte","Hepatocyte",8041
+"11","T_pan","T cell",4015
+"12","Fibroblast_HSC","Fibroblast/HSC",3166
+"13","Hepatocyte","Hepatocyte",2781
+"14","Fibroblast_HSC","Fibroblast/HSC",1933
+"15","Hepatocyte","Hepatocyte",1064
+"16","Hepatocyte","Hepatocyte",3
+"17","Hepatocyte","Hepatocyte",2

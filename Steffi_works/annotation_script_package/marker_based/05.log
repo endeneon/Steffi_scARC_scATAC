@@ -1,0 +1,19 @@
+Warning messages:
+1: package ‘Seurat’ was built under R version 4.3.3 
+2: package ‘SeuratObject’ was built under R version 4.3.3 
+3: package ‘sp’ was built under R version 4.3.3 
+4: package ‘qs2’ was built under R version 4.3.3 
+5: package ‘dplyr’ was built under R version 4.3.3 
+Hepatocyte malignant-score quartiles: Q1=-0.1233 Q3=0.2296
+Malignant status counts:
+
+   normal_hepatocyte malignant_hepatocyte            ambiguous 
+               30782                30782                61565 
+      non_hepatocyte 
+              140987 
+Saved: step5.qs2 + malignant_status_per_cluster.csv
+Warning message:
+The `slot` argument of `GetAssayData()` is deprecated as of SeuratObject 5.0.0.
+ℹ Please use the `layer` argument instead.
+ℹ The deprecated feature was likely used in the Seurat package.
+  Please report the issue at <https://github.com/satijalab/seurat/issues>. 

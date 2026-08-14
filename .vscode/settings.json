@@ -1,5 +1,9 @@
 {
     "r.lsp.promptToInstall": false,
     "github.copilot.nextEditSuggestions.extendedRange": true,
-    "github.copilot.selectedCompletionModel": "gpt-5.4-mini"
+    "github.copilot.selectedCompletionModel": "gpt-5.4-mini",
+    "assistant.preferredModel.webSearch": true,
+    "assistant.preferredModel.provider": "github",
+    "assistant.preferredModel.id": "claude-opus-4.8",
+    "assistant.enableCopilotSdk": true
 }

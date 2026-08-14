@@ -1,0 +1,122 @@
+Warning messages:
+1: package ‘Seurat’ was built under R version 4.3.3 
+2: package ‘SeuratObject’ was built under R version 4.3.3 
+3: package ‘sp’ was built under R version 4.3.3 
+4: package ‘qs2’ was built under R version 4.3.3 
+5: package ‘dplyr’ was built under R version 4.3.3 
+6: package ‘harmony’ was built under R version 4.3.3 
+7: package ‘Rcpp’ was built under R version 4.3.3 
+Macrophage subset: 49740 cells
+Warning: Number of dimensions changing from 12 to 50
+Transposing data matrix
+Initializing state using k-means centroids initialization
+Harmony 1/10
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Harmony 2/10
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Harmony 3/10
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Harmony 4/10
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Harmony 5/10
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Harmony 6/10
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Harmony converged after 6 iterations
+Warning: The default method for RunUMAP has changed from calling Python UMAP via reticulate to the R-native UWOT using the cosine metric
+To use Python UMAP via reticulate, set umap.method to 'umap-learn' and metric to 'correlation'
+This message will be shown once per session
+00:58:16 UMAP embedding parameters a = 0.9922 b = 1.112
+00:58:16 Read 49740 rows and found 30 numeric columns
+00:58:16 Using Annoy for neighbor search, n_neighbors = 30
+00:58:16 Building Annoy index with metric = cosine, n_trees = 50
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+00:58:20 Writing NN index file to temp file /tmp/RtmpVQeiA3/filef94ac3aee740b
+00:58:20 Searching Annoy index using 1 thread, search_k = 3000
+00:58:39 Annoy recall = 100%
+00:58:40 Commencing smooth kNN distance calibration using 1 thread with target n_neighbors = 30
+00:58:41 Initializing from normalized Laplacian + noise (using RSpectra)
+00:58:43 Commencing optimization for 200 epochs, with 2291024 positive edges
+00:58:43 Using rng type: pcg
+Using method 'umap'
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+00:59:06 Optimization finished
+Computing nearest neighbor graph
+Computing SNN
+Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
+
+Number of nodes: 49740
+Number of edges: 1507380
+
+Running Louvain algorithm...
+0%   10   20   30   40   50   60   70   80   90   100%
+[----|----|----|----|----|----|----|----|----|----|
+**************************************************|
+Maximum modularity in 10 random starts: 0.9031
+Number of communities: 15
+Elapsed time: 12 seconds
+Subcluster -> subtype (argmax marker module score):
+                               0                                1 
+                      "TFRC_TAM"            "Doublet_endothelial" 
+                              10                               11 
+           "Doublet_endothelial" "Doublet_hepatocyte_acute_phase" 
+                              12                               13 
+"Doublet_hepatocyte_acute_phase"             "Doublet_hepatocyte" 
+                              14                                2 
+                      "TFRC_TAM"                      "LYVE1_TRM" 
+                               3                                4 
+                 "Doublet_Tcell"                       "TFRC_TAM" 
+                               5                                6 
+                     "LYVE1_TRM"            "Doublet_endothelial" 
+                               7                                8 
+                     "LYVE1_TRM" "Doublet_hepatocyte_acute_phase" 
+                               9 
+"Doublet_hepatocyte_acute_phase" 
+                         subtype n_cells        pct
+1                      LYVE1_TRM    7050 14.1737033
+2                       TFRC_TAM   24360 48.9746683
+3             Doublet_hepatocyte     320  0.6433454
+4 Doublet_hepatocyte_acute_phase    2352  4.7285887
+5                  Doublet_Tcell    2442  4.9095296
+6            Doublet_endothelial   13216 26.5701649
+Saved: annotated_seurat.qs2 + macrophage_subtype_summary.csv
+Warning messages:
+1: The `slot` argument of `GetAssayData()` is deprecated as of SeuratObject 5.0.0.
+ℹ Please use the `layer` argument instead.
+ℹ The deprecated feature was likely used in the Seurat package.
+  Please report the issue at <https://github.com/satijalab/seurat/issues>. 
+2: package ‘future’ was built under R version 4.3.3 

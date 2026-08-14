@@ -2,15 +2,15 @@
 
 mkdir -p main_log
 #BSUB -n 20
-#BSUB -R "rusage[mem=15G]"
+#BSUB -R "rusage[mem=50G]"
 # Keep all 20 slots on ONE host so OpenMP/Rtsne threads (and the forked future
 # workers) can actually use them; without this LSF may spread -n 20 across nodes.
 #BSUB -R "span[hosts=1]"
 
 #BSUB -q "large_mem"
-#BSUB -J "run_generate_FLEX"
-#BSUB -o main_log/generate_FLEX_%J.out
-#BSUB -e main_log/generate_FLEX_%J.err
+#BSUB -J "run_annotating_GEX_FLEX"
+#BSUB -o main_log/annotating_GEX_FLEX_%J.out
+#BSUB -e main_log/annotating_GEX_FLEX_%J.err
 
 # Prerequisities (all installed in the conda env):
 ## samtools 1.14
@@ -58,5 +58,5 @@ conda activate /research_jude/rgs01_jude/groups/cab/projects/automapper/common/s
 }
 # 1. set up the environment
 export OMP_NUM_THREADS=8
-Rscript generate_FLEX_seurat.R
+Rscript annotating_GEX_FLEX.R
 set +e

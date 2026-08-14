@@ -1,0 +1,19 @@
+"cluster","fine_label","broad_label","top_score"
+"0","Hepatocyte","Hepatocyte",0.8771
+"1","Hepatocyte","Hepatocyte",1.0344
+"10","Hepatocyte","Hepatocyte",0.4668
+"11","T_pan","T cell",1.1522
+"12","Fibroblast_HSC","Fibroblast/HSC",1.2616
+"13","Hepatocyte","Hepatocyte",0.902
+"14","Fibroblast_HSC","Fibroblast/HSC",2.8399
+"15","Hepatocyte","Hepatocyte",1.7457
+"16","Hepatocyte","Hepatocyte",0.7206
+"17","Hepatocyte","Hepatocyte",0.6233
+"2","Macrophage_Kupffer","Macrophage",0.5498
+"3","T_pan","T cell",1.0584
+"4","Endothelial","Endothelial",0.6983
+"5","Hepatocyte","Hepatocyte",2.4052
+"6","Macrophage_Kupffer","Macrophage",1.2048
+"7","Hepatocyte","Hepatocyte",1.4782
+"8","B_cell","B/Plasma cell",-0.0238
+"9","Endothelial","Endothelial",1.5627
