@@ -59,7 +59,7 @@ setwd(
 # determine if R is running in RSTUDIO/VSCode/Positron
 if (
   interactive() &&
-    (Sys.getenv("RSTUDIO") == "1" || (Sys.getenv("TERM_PROGRAM") == "vscode"))
+    ((Sys.getenv("RSTUDIO") == "1" || (Sys.getenv("TERM_PROGRAM") == "vscode")))
 ) {
   print("Running under RStudio/VSCode/Positron IDE, use plan(multisession)")
   session_plan <- "multisession"
@@ -142,6 +142,10 @@ if (session_plan == "multisession") {
     session_plan, # Do NOT use "multisession" here if use LSF, use "multicore" instead
     workers = workers_2_use
   )
+  systemfonts::register_font(
+    "sans",
+    plain = systemfonts::match_fonts("DejaVu Sans")$path
+  )
 }
 
 # functions ####
@@ -165,10 +169,18 @@ if (session_plan == "multisession") {
 #   )
 # merged_liver_obj$orig.ident <- as.factor(merged_liver_obj$orig.ident)
 # merged_liver_obj$preparation <- as.factor(merged_liver_obj$preparation)
+# merged_liver_obj <-
+#   qs_read("./annotation_script_package/marker_based/step1.qs2", nthreads = 8)
 merged_liver_obj <-
-  qs_read("./annotation_script_package/marker_based/step1.qs2", nthreads = 8)
+  qs_read(
+    "annotation_script_package/reference_based/annotated_singler_reference_based.qs2",
+    nthreads = 8
+  )
 merged_liver_obj <-
-  qs_read("./annotation_script_package/marker_based/annotated_seurat.qs2", nthreads = 8)
+  qs_read(
+    "annotation_script_package/marker_based/annotated_seurat_marker_based.qs2",
+    nthreads = 8
+  )
 # merged_liver_obj <-
 #   qs_read("merged_all_samples_integrated_seurat_obj.qs2", nthreads = 8)
 # colnames(merged_liver_obj)
@@ -178,44 +190,83 @@ VlnPlot(
   features = c("percent.mt"),
   ncol = 1,
   group.by = "orig.ident",
-  pt.size = 0  
+  pt.size = 0
 )
+
+# celltype_broad vs cluster_final confusion matrix / similarity heatmap ####
+# Column-normalised: each cluster_final column sums to 1, so a cell is the
+# fraction of that cluster assigned to each broad cell type (per-cluster
+# agreement/similarity index).
+
+# conf_counts <- table(
+#   celltype_broad = merged_liver_obj$celltype_broad,
+#   cluster_final = merged_liver_obj$cluster_final
+# )
+unique(merged_liver_obj$singler_label_cell)
+merged_liver_obj$celltype_broad <-
+  str_split(
+    merged_liver_obj$singler_label_cell,
+    pattern = "\\.",
+    simplify = T
+  )[,
+    1
+  ]
+conf_counts <- table(
+  celltype_broad = merged_liver_obj$celltype_broad,
+  cluster_final = merged_liver_obj$seurat_clusters
+)
+conf_prop <- sweep(conf_counts, 2, colSums(conf_counts), "/")
+conf_prop[is.nan(conf_prop)] <- 0
+
+conf_df <- as.data.frame(conf_prop, responseName = "fraction")
+
+confusion_plot <-
+  ggplot(
+    conf_df,
+    aes(x = cluster_final, y = celltype_broad, fill = fraction)
+  ) +
+  geom_tile(color = "grey85") +
+  geom_text(
+    aes(label = ifelse(fraction > 0.01, sprintf("%.2f", fraction), "")),
+    size = 3,
+    family = "DejaVu Sans"
+  ) +
+  scale_fill_gradient(
+    low = "white",
+    high = "#2166AC",
+    limits = c(0, 1),
+    name = "Fraction\nof cluster"
+  ) +
+  labs(
+    x = "cluster_final",
+    y = "celltype_broad",
+    title = "celltype_broad vs cluster_final (column-normalised similarity)"
+  ) +
+  theme_minimal(base_size = 12, base_family = "DejaVu Sans") +
+  theme(panel.grid = element_blank())
+
+print(confusion_plot)
 
 # qs_save(
 #   merged_liver_obj,
 #   "merged_all_samples_integrated_seurat_obj.qs2",
 #   nthreads = 8
 # )
-merged_liver_obj$category <- "Primary"
-merged_liver_obj$category[str_detect(
-  merged_liver_obj$orig.ident,
-  "pre"
-)] <- "Resistant"
-merged_liver_obj$category[
-  merged_liver_obj$orig.ident %in%
-    c(
-      "BC010",
-      "BC004",
-      "BC001",
-      "BC009",
-      "BC014",
-      "BC015",
-      "BC002",
-      "BC003",
-      "BC005",
-      "BC007",
-      "BC011",
-      "BC006",
-      "BC016",
-      "BC008"
-    )
-] <- "Resistant"
-
+unique(merged_liver_obj$category)
 
 Reductions(merged_liver_obj)
 #  [1] "pca"                 "integrated.harmony"  "tsne.unintegrated"   "umap.unintegrated"   "integrated.cca"      "integrated.rpca"     "integrated.jointpca" "tsne.cca"            "tsne.rpca"
 # [10] "tsne.jointpca"       "tsne.harmony"        "umap.cca"            "umap.rpca"           "umap.jointpca"       "umap.harmony"
 colnames(merged_liver_obj@meta.data)
+
+merged_liver_obj$celltype_broad <-
+  str_split(
+    merged_liver_obj$singler_label_cell,
+    pattern = "\\.",
+    simplify = T
+  )[,
+    1
+  ]
 scCustomize::DimPlot_scCustom(
   merged_liver_obj,
   reduction = "umap.harmony",
@@ -225,19 +276,46 @@ scCustomize::DimPlot_scCustom(
   pt.size = 0.2,
   alpha = 1,
   shuffle = T,
-  colors_use = "glasbey",
-  shuffle = TRUE
+  raster = F,
+  colors_use = "glasbey"
 )
 scCustomize::DimPlot_scCustom(
   merged_liver_obj,
   reduction = "umap.harmony",
-  group.by = "celltype_fine",
+  group.by = "annotation",
+  label = F,
+  label.size = 4,
+  pt.size = 0.2,
+  alpha = 1,
+  shuffle = T,
+  raster = F,
+  colors_use = "alphabet"
+)
+# check HCC resident and circulation cell markers
+scCustomize::FeaturePlot_scCustom(
+  merged_liver_obj,
+  features = c(
+    "AFP",
+    "DCP2",
+    "GPC3",
+    "FUCA1"
+  ),
+  reduction = "umap.harmony",
+  pt.size = 0.2,
+  # alpha = 1,
+  # shuffle = T,
+  raster = F
+)
+scCustomize::DimPlot_scCustom(
+  merged_liver_obj,
+  reduction = "umap.harmony",
+  group.by = "celltype_broad",
   label = F,
   label.size = 4,
   pt.size = 0.2,
   alpha = 1,
   shuffle = TRUE,
-  colors_use = "glasbey"
+  colors_use = "ditto-seq"
 )
 scCustomize::DimPlot_scCustom(
   merged_liver_obj,
@@ -250,12 +328,28 @@ scCustomize::DimPlot_scCustom(
   colors_use = "alphabet2",
   shuffle = T
 )
-#####
-merged_hepatocyte_obj <-
+scCustomize::FeaturePlot_scCustom(
+  merged_liver_obj,
+  features = c(
+    "HNF4A",
+    "ALB",
+    "CYP2E1",
+    "ARG1"
+  ),
+  reduction = "umap.harmony",
+  pt.size = 0.2,
+  # alpha = 1,
+  # shuffle = T,
+  raster = F
+)
+# #####
+merged_subsetted_obj <-
   subset(merged_liver_obj, subset = celltype_broad == "Hepatocyte")
+# merged_subsetted_obj <-
+#   subset(merged_liver_obj, subset = celltype_broad == "Macrophage")
 df_agg <-
   AggregateExpression(
-    merged_hepatocyte_obj,
+    merged_subsetted_obj,
     assays = "RNA",
     slot = "counts",
     group.by = c("orig.ident"),
@@ -263,12 +357,12 @@ df_agg <-
     return_seurat = F
   )
 df_agg <- df_agg$RNA
-rownames(df_agg)
-colnames(df_agg)
+# rownames(df_agg)
+# colnames(df_agg)
 df_meta <-
   merged_liver_obj@meta.data
-df_meta <-
-  df_meta[!duplicated(df_meta$orig.ident), ]
+# df_meta <-
+#   df_meta[!duplicated(df_meta$orig.ident), ]
 df_meta_ordered <-
   df_meta[
     match(
@@ -276,31 +370,30 @@ df_meta_ordered <-
       gsub("_", "-", as.character(df_meta$orig.ident))
     ),
   ]
-df_meta_ordered$category <- "Primary"
-df_meta_ordered$category[str_detect(
-  df_meta_ordered$orig.ident,
-  "pre"
-)] <- "Resistant"
-df_meta_ordered$category[
-  df_meta_ordered$orig.ident %in%
-    c(
-      "BC010",
-      "BC004",
-      "BC001",
-      "BC009",
-      "BC014",
-      "BC015",
-      "BC002",
-      "BC003",
-      "BC005",
-      "BC007",
-      "BC011",
-      "BC006",
-      "BC016",
-      "BC008"
-    )
-] <- "Resistant"
-
+# df_meta_ordered$category <- "Primary"
+# df_meta_ordered$category[str_detect(
+#   df_meta_ordered$orig.ident,
+#   "pre"
+# )] <- "Resistant"
+# df_meta_ordered$category[
+#   df_meta_ordered$orig.ident %in%
+#     c(
+#       "BC010",
+#       "BC004",
+#       "BC001",
+#       "BC009",
+#       "BC014",
+#       "BC015",
+#       "BC002",
+#       "BC003",
+#       "BC005",
+#       "BC007",
+#       "BC011",
+#       "BC006",
+#       "BC016",
+#       "BC008"
+#     )
+# ] <- "Resistant"
 
 library(edgeR)
 DGE_agg <-
@@ -320,6 +413,51 @@ DGE_cpm <-
     log = TRUE,
     prior.count = 1
   )
+sum(rowSums(DGE_cpm > 1) > 10)
+DGE_agg <-
+  DGEList(
+    counts = df_agg[rowSums(DGE_cpm > 1) > 10, ],
+    samples = df_meta_ordered$orig.ident,
+    group = df_meta_ordered$category
+  )
+DGE_agg <-
+  calcNormFactors(
+    DGE_agg,
+    method = "TMM"
+  )
+
+DGE_agg$samples$category <- df_meta_ordered$category
+DGE_agg$samples$preparation <- df_meta_ordered$preparation
+
+design_matrix <-
+  model.matrix(
+    ~ 0 + category + preparation,
+    data = DGE_agg$samples
+  )
+# colnames(design_matrix) <-
+#   gsub(
+#     "group",
+#     "",
+#     colnames(design_matrix)
+#   )
+
+DGE_agg <-
+  estimateDisp(
+    DGE_agg,
+    robust = TRUE,
+    design = design_matrix
+  )
+DGE_agg <-
+  glmQLFit(
+    DGE_agg,
+    design = design_matrix,
+    robust = TRUE
+  )
+qlf_test <-
+  glmQLFTest(
+    DGE_agg,
+    contrast = c(-1, 1, 0, 0) # use Primary as reference
+  )
 
 genes_2_plot <-
   read.table(
@@ -330,12 +468,33 @@ genes_2_plot <-
 genes_2_plot <- genes_2_plot$SYMBOL
 genes_2_plot <- genes_2_plot[!duplicated(genes_2_plot)]
 
+selected_gene_exp_table <-
+  qlf_test$table
+selected_gene_exp_table$FDR <-
+  p.adjust(
+    selected_gene_exp_table$PValue,
+    method = "BH"
+  )
+selected_gene_exp_table$gene_name <-
+  rownames(selected_gene_exp_table)
+selected_gene_exp_table <-
+  selected_gene_exp_table[order(selected_gene_exp_table$PValue), ]
+selected_gene_exp_table <-
+  selected_gene_exp_table[selected_gene_exp_table$gene_name %in% genes_2_plot, ]
+write.table(
+  selected_gene_exp_table,
+  file = "DE_results_by_celltype/DE_logCPM_t_test_reference_based_Hepatocytes.tsv",
+  sep = "\t",
+  quote = F,
+  row.names = F
+)
+
 df_2_plot <-
   DGE_cpm[rownames(DGE_cpm) %in% genes_2_plot, ]
 df_2_plot <-
   as.data.frame(t(df_2_plot))
-rownames(df_2_plot)
-colnames(df_2_plot)
+# rownames(df_2_plot)
+# colnames(df_2_plot)
 
 df_long <-
   df_2_plot |>
@@ -372,14 +531,13 @@ df_long$category[
     )
 ] <- "Resistant"
 
-df_long$preparation <- "10x"
+df_long$preparation <- "10xGEX"
 df_long$preparation[str_detect(
   df_long$sample_name,
   "^BC"
-)] <- "FLEX"
+)] <- "10xFLEX"
 df_long$preparation <- as.factor(df_long$preparation)
 genes_2_plot <- unique(df_long$gene_name)
-
 
 DE_plot_list <-
   lapply(
@@ -427,6 +585,7 @@ DE_plot_list <-
           # method = "wilcox.test",
           method = "t.test",
           comparisons = list(c("Primary", "Resistant")),
+          # family = "DejaVu Sans",
           label = "p.signif" # use "p.format" to show the actual p-value instead of significance level
         ) +
         expand_limits(y = 0) +
@@ -443,10 +602,33 @@ DE_plot_list <-
     }
   )
 
+# if (!requireNamespace("httpgd", quietly = TRUE)) install.packages("httpgd")
+# httpgd::hgd()          # opens a cairo/Skia device VS Code can display
+# getOption("device"); names(dev.cur())
+# options(device = function(...) X11(type = "cairo"))   # force cairo screen device
+
+# print(
+#   patchwork::wrap_plots(DE_plot_list, ncol = 4, guides = "collect") &
+#     theme(legend.position = "right")
+# )
+# httpgd::hgd_browse()  # or open the printed URL if the pane doesn't auto-show
+
 print(
   patchwork::wrap_plots(DE_plot_list, ncol = 4, guides = "collect") &
     theme(legend.position = "right")
 )
+ggsave(
+  "DE_results_by_celltype/DE_logCPM_t_test_marker_based_Hepatocytes.pdf",
+  width = 6,
+  height = 12
+)
+ggsave(
+  "DE_results_by_celltype/DE_logCPM_t_test_marker_based_Macrophages.pdf",
+  width = 6,
+  height = 12
+)
+# what device is active?
+# then open a fresh device and re-print
 
 table(multiome_obj$orig.ident)
 # ggsave()

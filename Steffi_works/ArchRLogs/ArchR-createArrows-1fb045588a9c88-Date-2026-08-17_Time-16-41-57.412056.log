@@ -1,0 +1,227 @@
+
+           ___      .______        ______  __    __  .______      
+          /   \     |   _  \      /      ||  |  |  | |   _  \     
+         /  ^  \    |  |_)  |    |  ,----'|  |__|  | |  |_)  |    
+        /  /_\  \   |      /     |  |     |   __   | |      /     
+       /  _____  \  |  |\  \\___ |  `----.|  |  |  | |  |\  \\___.
+      /__/     \__\ | _| `._____| \______||__|  |__| | _| `._____|
+    
+Logging With ArchR!
+
+Start Time : 2026-08-17 16:41:57.993738
+
+------- ArchR Info
+
+ArchRThreads = 16
+ArchRGenome = Hg38
+
+------- System Info
+
+Computer OS = unix
+Total Cores = 64
+
+------- Session Info
+
+R version 4.3.0 (2023-04-21)
+Platform: x86_64-conda-linux-gnu (64-bit)
+Running under: Red Hat Enterprise Linux 8.10 (Ootpa)
+
+Matrix products: default
+BLAS/LAPACK: /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/Anaconda/miniconda3/envs/jwen_scRNA_singCellaR/lib/libopenblasp-r0.3.30.so;  LAPACK version 3.12.0
+
+Random number generation:
+ RNG:     L'Ecuyer-CMRG 
+ Normal:  Inversion 
+ Sample:  Rejection 
+ 
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C               LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8     LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8    LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C             LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+time zone: America/Chicago
+tzcode source: system (glibc)
+
+attached base packages:
+ [1] parallel  stats4    grid      stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] Gviz_1.46.1                              BSgenome.Hsapiens.UCSC.hg38_1.4.5        BSgenome_1.70.1                          rtracklayer_1.62.0                       BiocIO_1.12.0                           
+ [6] Biostrings_2.70.1                        XVector_0.42.0                           org.Hs.eg.db_3.18.0                      TxDb.Hsapiens.UCSC.hg38.knownGene_3.18.0 GenomicFeatures_1.54.1                  
+[11] AnnotationDbi_1.64.1                     fs_1.6.6                                 qs2_0.1.5                                snow_0.4-4                               doFuture_1.1.2                          
+[16] doParallel_1.0.17                        iterators_1.0.14                         foreach_1.5.2                            BiocParallel_1.36.0                      future_1.67.0                           
+[21] rhdf5_2.46.1                             SummarizedExperiment_1.32.0              Biobase_2.62.0                           RcppArmadillo_14.6.3-1                   Rcpp_1.1.0                              
+[26] Matrix_1.6-5                             GenomicRanges_1.54.1                     GenomeInfoDb_1.38.1                      IRanges_2.36.0                           S4Vectors_0.40.2                        
+[31] BiocGenerics_0.48.1                      sparseMatrixStats_1.14.0                 MatrixGenerics_1.14.0                    matrixStats_1.5.0                        data.table_1.17.8                       
+[36] stringr_1.5.1                            plyr_1.8.9                               magrittr_2.0.3                           gtable_0.3.6                             gtools_3.9.5                            
+[41] gridExtra_2.3                            devtools_2.4.5                           usethis_3.1.0                            ArchR_1.0.3                              gplots_3.2.0                            
+[46] Seurat_5.3.0                             SeuratObject_5.1.0                       sp_2.2-0                                 ggplot2_3.5.2                           
+
+loaded via a namespace (and not attached):
+  [1] ProtGenerics_1.34.0      spatstat.sparse_3.1-0    bitops_1.0-9             httr_1.4.7               RColorBrewer_1.1-3       backports_1.5.0          profvis_0.4.0            tools_4.3.0              sctransform_0.4.2       
+ [10] R6_2.6.1                 lazyeval_0.2.2           uwot_0.2.3               rhdf5filters_1.14.1      urlchecker_1.0.1         withr_3.0.2              prettyunits_1.2.0        progressr_0.15.1         cli_3.6.5               
+ [19] Cairo_1.6-1              spatstat.explore_3.5-2   fastDummies_1.7.5        spatstat.data_3.1-8      readr_2.1.5              ggridges_0.5.6           pbapply_1.7-4            Rsamtools_2.18.0         foreign_0.8-90          
+ [28] dichromat_2.0-0.1        parallelly_1.45.1        sessioninfo_1.2.3        rstudioapi_0.17.1        RSQLite_2.4.3            generics_0.1.4           vroom_1.6.5              ica_1.0-3                spatstat.random_3.4-1   
+ [37] dplyr_1.1.4              interp_1.1-6             abind_1.4-5              lifecycle_1.0.4          yaml_2.3.10              SparseArray_1.2.2        BiocFileCache_2.10.1     Rtsne_0.17               blob_1.2.4              
+ [46] promises_1.3.3           crayon_1.5.3             miniUI_0.1.2             lattice_0.22-7           cowplot_1.2.0            KEGGREST_1.42.0          knitr_1.50               pillar_1.11.0            rjson_0.2.23            
+ [55] future.apply_1.20.0      codetools_0.2-20         glue_1.8.0               spatstat.univar_3.1-4    remotes_2.5.0            vctrs_0.6.5              png_0.1-8                spam_2.11-1              cachem_1.1.0            
+ [64] xfun_0.53                S4Arrays_1.2.0           mime_0.13                survival_3.8-3           ellipsis_0.3.2           fitdistrplus_1.2-4       ROCR_1.0-11              nlme_3.1-168             bit64_4.6.0-1           
+ [73] progress_1.2.3           filelock_1.0.3           RcppAnnoy_0.0.22         irlba_2.3.5.1            rpart_4.1.24             KernSmooth_2.23-26       colorspace_2.1-1         DBI_1.2.3                Hmisc_5.2-3             
+ [82] nnet_7.3-20              tidyselect_1.2.1         bit_4.6.0                compiler_4.3.0           curl_7.0.0               htmlTable_2.4.3          xml2_1.5.1               DelayedArray_0.28.0      plotly_4.11.0           
+ [91] stringfish_0.17.0        checkmate_2.3.3          scales_1.4.0             caTools_1.18.3           lmtest_0.9-40            rappdirs_0.3.3           digest_0.6.37            goftest_1.2-3            spatstat.utils_3.1-5    
+[100] rmarkdown_2.29           jpeg_0.1-10              htmltools_0.5.8.1        pkgconfig_2.0.3          base64enc_0.1-3          ensembldb_2.26.0         dbplyr_2.5.0             fastmap_1.2.0            rlang_1.1.6             
+[109] htmlwidgets_1.6.4        shiny_1.11.1             farver_2.1.2             zoo_1.8-14               jsonlite_2.0.0           VariantAnnotation_1.48.1 RCurl_1.98-1.12          Formula_1.2-5            GenomeInfoDbData_1.2.11 
+[118] dotCall64_1.2            patchwork_1.3.1          Rhdf5lib_1.24.0          reticulate_1.43.0        stringi_1.7.12           zlibbioc_1.48.0          MASS_7.3-60.0.1          pkgbuild_1.4.8           listenv_0.9.1           
+[127] ggrepel_0.9.6            deldir_2.0-4             splines_4.3.0            tensor_1.5.1             hms_1.1.3                igraph_1.5.1             spatstat.geom_3.5-0      RcppHNSW_0.6.0           reshape2_1.4.4          
+[136] biomaRt_2.58.0           pkgload_1.4.0            XML_3.99-0.15            evaluate_1.0.4           latticeExtra_0.6-30      biovizBase_1.50.0        RcppParallel_5.1.9       tzdb_0.5.0               httpuv_1.6.16           
+[145] RANN_2.6.2               tidyr_1.3.1              purrr_1.1.0              polyclip_1.10-7          scattermore_1.2          xtable_1.8-4             AnnotationFilter_1.26.0  restfulr_0.0.15          RSpectra_0.16-2         
+[154] later_1.4.2              viridisLite_0.4.2        tibble_3.3.0             memoise_2.0.1            GenomicAlignments_1.38.0 cluster_2.1.8.1          globals_0.18.0          
+
+
+------- Log Info
+
+
+2026-08-17 16:41:58.207087 : createArrowFiles Input-Parameters, Class = list
+
+createArrowFiles Input-Parameters$inputFiles: length = 12
+                                                                                                                                                      X__24t 
+         "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/projects/szhang_dev/test_ASoC_w_WASP/atac_bams/24t/outs/fragments.tsv.gz" 
+                                                                                                                                                  X__pt1_pre 
+     "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/projects/szhang_dev/test_ASoC_w_WASP/atac_bams/pt1_pre/outs/fragments.tsv.gz" 
+                                                                                                                                             X__pt1_pre/outs 
+"/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/projects/szhang_dev/test_ASoC_w_WASP/atac_bams/pt1_pre/outs/outs/fragments.tsv.gz" 
+                                                                                                                                                 X__pt11_pre 
+    "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/projects/szhang_dev/test_ASoC_w_WASP/atac_bams/pt11_pre/outs/fragments.tsv.gz" 
+                                                                                                                                                  X__pt12pre 
+     "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/projects/szhang_dev/test_ASoC_w_WASP/atac_bams/pt12pre/outs/fragments.tsv.gz" 
+                                                                                                                                                  X__pt14pre 
+     "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/projects/szhang_dev/test_ASoC_w_WASP/atac_bams/pt14pre/outs/fragments.tsv.gz" 
+
+
+createArrowFiles Input-Parameters$sampleNames: length = 12
+[1] "X__24t"          "X__pt1_pre"      "X__pt1_pre/outs" "X__pt11_pre"     "X__pt12pre"      "X__pt14pre"     
+
+
+createArrowFiles Input-Parameters$outputNames: length = 12
+[1] "atac_arrow_files/X__24t"          "atac_arrow_files/X__pt1_pre"      "atac_arrow_files/X__pt1_pre/outs" "atac_arrow_files/X__pt11_pre"     "atac_arrow_files/X__pt12pre"      "atac_arrow_files/X__pt14pre"     
+
+
+createArrowFiles Input-Parameters$minTSS: length = 1
+[1] 1
+
+
+createArrowFiles Input-Parameters$minFrags: length = 1
+[1] 1000
+
+
+createArrowFiles Input-Parameters$maxFrags: length = 1
+[1] 1e+07
+
+
+createArrowFiles Input-Parameters$minFragSize: length = 1
+[1] 10
+
+
+createArrowFiles Input-Parameters$maxFragSize: length = 1
+[1] 2000
+
+
+createArrowFiles Input-Parameters$QCDir: length = 1
+[1] "QualityControl"
+
+
+createArrowFiles Input-Parameters$nucLength: length = 1
+[1] 147
+
+
+createArrowFiles Input-Parameters$promoterRegion: length = 2
+[1] 2000  100
+
+
+createArrowFiles Input-Parameters$excludeChr: length = 3
+[1] "chrM" "chrX" "chrY"
+
+
+createArrowFiles Input-Parameters$nChunk: length = 1
+[1] 5
+
+
+createArrowFiles Input-Parameters$bcTag: length = 1
+[1] "qname"
+
+
+createArrowFiles Input-Parameters$gsubExpression: length = 0
+NULL
+
+
+createArrowFiles Input-Parameters$bamFlag: length = 0
+NULL
+
+
+createArrowFiles Input-Parameters$offsetPlus: length = 1
+[1] 4
+
+
+createArrowFiles Input-Parameters$offsetMinus: length = 1
+[1] -5
+
+
+createArrowFiles Input-Parameters$addTileMat: length = 1
+[1] TRUE
+
+
+createArrowFiles Input-Parameters$addGeneScoreMat: length = 1
+[1] TRUE
+
+
+createArrowFiles Input-Parameters$force: length = 1
+[1] TRUE
+
+
+createArrowFiles Input-Parameters$threads: length = 1
+[1] 15
+
+
+createArrowFiles Input-Parameters$parallelParam: length = 0
+NULL
+
+
+createArrowFiles Input-Parameters$subThreading: length = 1
+[1] TRUE
+
+
+createArrowFiles Input-Parameters$verbose: length = 1
+[1] TRUE
+
+
+createArrowFiles Input-Parameters$cleanTmp: length = 1
+[1] TRUE
+
+
+createArrowFiles Input-Parameters$logFile: length = 1
+[1] "ArchRLogs/ArchR-createArrows-1fb045588a9c88-Date-2026-08-17_Time-16-41-57.412056.log"
+
+
+createArrowFiles Input-Parameters$filterFrags: length = 1
+[1] 1000
+
+
+createArrowFiles Input-Parameters$filterTSS: length = 1
+[1] 1
+
+
+
+2026-08-17 16:41:58.224789 : Cleaning Temporary Files
+2026-08-17 16:41:58.22953 : Batch Execution w/ safelapply!, 0 mins elapsed.
+
+2026-08-17 16:41:58.23564 : createArrowFiles has encountered an error, checking if any ArrowFiles completed..
+
+------- Completed
+
+End Time : 2026-08-17 16:41:58.237467
+Elapsed Time Minutes = 0.00405524571736654
+Elapsed Time Hours = 6.76432583067152e-05
+
+-------
+
+
+

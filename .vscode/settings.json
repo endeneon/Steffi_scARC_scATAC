@@ -5,5 +5,8 @@
     "assistant.preferredModel.webSearch": true,
     "assistant.preferredModel.provider": "github",
     "assistant.preferredModel.id": "claude-opus-4.8",
-    "assistant.enableCopilotSdk": true
+    "assistant.enableCopilotSdk": false,
+    "chat.disableAIFeatures": false,
+    "github.copilot.chat.claudeAgent.useSdkExtension": false,
+    "github.copilot.chat.switchAgent.enabled": true
 }
