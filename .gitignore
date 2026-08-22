@@ -3,6 +3,10 @@ Steffi_works/data_dir/*
 *.out.*
 *.err
 *.out
+*.coverage.h5
+*.log
+*.tar
+*.rds
 Steffi_works/merged_integrated_seurat_obj.qs2
 Steffi_works/raw_multiome_seurat_list.qs2
 Steffi_works/seurat_gex_4_identity_projection.qs2
@@ -273,3 +277,4 @@ Steffi_works/atac_arrow_files/X__pt24pre.arrow
 Steffi_works/atac_arrow_files/X__pt5_pre.arrow
 Steffi_works/atac_arrow_files/X__pt6_pre.arrow
 Steffi_works/atac_arrow_files/X__pt9_pre.arrow
+Steffi_works/ArchR_atac_obj/Embeddings/Save-Uwot-UMAP-Params-Harmony-eaaa17203570b-Date-2026-08-21_Time-12-17-43.086157.tar

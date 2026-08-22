@@ -58,5 +58,6 @@ conda activate /research_jude/rgs01_jude/groups/cab/projects/automapper/common/s
 }
 # 1. set up the environment
 export OMP_NUM_THREADS=8
-Rscript generate_ArchR_atac_obj_step1.R
+# Rscript generate_ArchR_atac_obj_step1.R
+Rscript generate_ArchR_atac_obj_step2.R
 set +e

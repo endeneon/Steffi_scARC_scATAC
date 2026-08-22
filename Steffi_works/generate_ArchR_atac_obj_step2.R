@@ -198,14 +198,23 @@ add_clusters_at_resolution <- function(proj, resolution_value) {
     resolution_value,
     " using IterativeLSI reducedDims..."
   ))
+  proj <-
+    ArchR::addClusters(
+      input = proj,
+      reducedDims = "IterativeLSI",
+      method = "Seurat",
+      name = cluster_name,
+      resolution = resolution_value,
+      force = TRUE
+    )
   n_clusters <-
     length(unique(getCellColData(proj, select = cluster_name)[, 1]))
   list(proj = proj, cluster_name = cluster_name, n_clusters = n_clusters)
 }
 
-# step 1: cluster at the starting resolution (0.5)
+# step 1: cluster at the pre-determined resolution (0.03125)
 iter_result <- add_clusters_at_resolution(projMultiome, iter_resolution)
-# projMultiome <- iter_result$proj
+projMultiome <- iter_result$proj
 iter_cluster_counts[iter_result$cluster_name] <- iter_result$n_clusters
 
 # optimum resolution = the attempt whose cluster count is nearest to 10.
@@ -225,7 +234,7 @@ print(paste0(
 
 print(paste0(
   "Adding UMAP for ",
-  length(arrow_files),
+  length(ArchR::getArrowFiles(projMultiome)),
   " samples using Harmony reducedDims..."
 ))
 projMultiome <-
@@ -249,7 +258,7 @@ print("UMAP added and ArchRProject saved successfully.")
 
 print(paste0(
   "Adding tSNE for ",
-  length(arrow_files),
+  length(ArchR::getArrowFiles(projMultiome)),
   " samples using Harmony reducedDims..."
 ))
 projMultiome <-
@@ -276,22 +285,17 @@ print("tSNE added and ArchRProject saved successfully.")
 #   embedding = "UMAP"
 # )
 
-# Prepare for peak calling by adding a pseudo-bulk replicate for each cluster, using the cluster_name_4_peak_calling determined above.
+# Reuse the peak set already called on the multiome project (projPeakSource)
+# instead of re-calling peaks with MACS2 on the ATAC-only project.
 projMultiome <-
-  ArchR::addGroupCoverages(
+  ArchR::addPeakSet(
     ArchRProj = projMultiome,
-    groupBy = cluster_name_4_peak_calling,
-    excludeChr = c("chrM", "chrX", "chrY"),
+    peakSet = ArchR::getPeakSet(projPeakSource),
     force = TRUE
   )
-
-pathToMacs2 <- findMacs2()
 projMultiome <-
-  ArchR::addReproduciblePeakSet(
+  ArchR::addPeakMatrix(
     ArchRProj = projMultiome,
-    groupBy = cluster_name_4_peak_calling,
-    pathToMacs2 = pathToMacs2,
-    excludeChr = c("chrM", "chrX", "chrY"),
     force = TRUE
   )
 projMultiome <-
@@ -301,4 +305,4 @@ projMultiome <-
     load = TRUE,
     overwrite = TRUE
   )
-print("Reproducible peak set added and ArchRProject saved successfully.")
+print("Peak set copied from projPeakSource and peak matrix added successfully.")
