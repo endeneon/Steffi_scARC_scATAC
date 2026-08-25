@@ -203,7 +203,9 @@ create_granges_from_bed <-
     return(blacklist_gr)
   }
 
-setwd("/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works")
+setwd(
+  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
+)
 
 # find all fragments.tsv.gz files in the current working directory and its subdirectories
 input_bams_dir <-
@@ -243,10 +245,13 @@ csv_barcode_files <-
     full.names = TRUE
   )
 csv_barcode_files <-
-  csv_barcode_files[str_detect(
-    csv_barcode_files,
-    pattern = "filtered_peak_bc_matrix"
-  ) & !str_detect(csv_barcode_files, pattern = "/outs/outs/")]
+  csv_barcode_files[
+    str_detect(
+      csv_barcode_files,
+      pattern = "filtered_peak_bc_matrix"
+    ) &
+      !str_detect(csv_barcode_files, pattern = "/outs/outs/")
+  ]
 names(csv_barcode_files) <-
   paste0(
     "X__",
@@ -615,7 +620,7 @@ print("Harmony added and ArchRProject saved successfully.")
 # projMultiome <-
 #   saveArchRProject(
 #     ArchRProj = projMultiome,
-    #  outputDirectory = "ArchR_atac_obj",
+#  outputDirectory = "ArchR_atac_obj",
 #     load = TRUE,
 #     overwrite = TRUE
 #   )

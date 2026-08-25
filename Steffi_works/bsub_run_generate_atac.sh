@@ -1,7 +1,7 @@
 #! /bin/bash
 
 mkdir -p main_log
-#BSUB -n 20
+#BSUB -n 32
 #BSUB -R "rusage[mem=20G]"
 # Keep all 20 slots on ONE host so OpenMP/Rtsne threads (and the forked future
 # workers) can actually use them; without this LSF may spread -n 20 across nodes.
@@ -61,5 +61,8 @@ export OMP_NUM_THREADS=8
 # Rscript generate_ArchR_atac_obj_step1.R
 # Rscript generate_ArchR_atac_obj_step2.R
 # Rscript generate_ArchR_atac_obj_step3.R
-Rscript generate_ArchR_atac_obj_step4.R
+# Rscript generate_ArchR_atac_obj_step4.R
+# Rscript generate_ArchR_atac_obj_step5.R
+# Rscript generate_ArchR_atac_obj_step6b.R
+Rscript plot_gviz_pileups_by_category.R
 set +e

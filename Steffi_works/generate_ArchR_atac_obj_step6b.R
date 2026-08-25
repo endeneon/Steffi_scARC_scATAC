@@ -189,10 +189,10 @@ projMerged <-
 colnames(projMerged@cellColData)
 unique(projMerged@cellColData$transferred_barcode)
 
-# transfer barcodes with PeakMatrix UMAP embedding
+# transfer barcodes with TileMatrix UMAP embedding
 plotEmbedding(
   ArchRProj = projMerged,
-  embedding = "UMAP_Peaks",
+  embedding = "UMAP_Tiles",
   colorBy = "cellColData",
   name = "transferred_barcode",
   size = 0.1,
@@ -207,11 +207,11 @@ plotEmbedding(
   baseSize = 10
 )
 
-# 2D density map of Hepatocytes in UMAP_Peaks space ####
-# UMAP_Peaks embedding coordinates for all cells
+## 2D density map of Hepatocytes in UMAP_Tiles space ####
+# UMAP_Tiles embedding coordinates for all cells
 umap_df <- ArchR::getEmbedding(
   ArchRProj = projMerged,
-  embedding = "UMAP_Peaks",
+  embedding = "UMAP_Tiles",
   returnDF = TRUE
 )
 colnames(umap_df) <- c("UMAP1", "UMAP2")
@@ -248,21 +248,21 @@ density_plot <-
   scale_fill_viridis_c(option = "magma") +
   geom_point(size = 0.1, alpha = 0.2, color = "grey20") +
   labs(
-    title = "UMAP_Peaks 2D density: Hepatocytes",
+    title = "UMAP_Tiles 2D density: Hepatocytes",
     x = "UMAP 1",
     y = "UMAP 2",
     fill = "Density"
   ) +
   theme_minimal()
 
-density_plot
+# density_plot
 
-projMerged@cellColData$peaks_projected_hepatocytes <- FALSE
+projMerged@cellColData$tiles_projected_hepatocytes <- FALSE
 
 # --- Project the Hepatocyte density coverage onto all cells ---------------
 # Rebuild the same 2D kernel density that stat_density_2d draws (MASS::kde2d
 # with per-axis bandwidth.nrd, matching ggplot's defaults), then flag every
-# cell whose UMAP_Peaks position falls inside the plotted coverage, i.e. where
+# cell whose UMAP_Tiles position falls inside the plotted coverage, i.e. where
 # the fitted density is >= lower_density_cutoff (the plot's lowest break).
 
 # per-axis bandwidth (same as ggplot's stat_density_2d default)
@@ -292,14 +292,50 @@ inside_barcodes <- rownames(umap_df)[
 ]
 
 coverage_flag <- rownames(projMerged@cellColData) %in% inside_barcodes
-projMerged@cellColData$peaks_projected_hepatocytes <- coverage_flag
+projMerged@cellColData$tiles_projected_hepatocytes <- coverage_flag
 
+table(projMerged@cellColData$tiles_projected_hepatocytes)
 table(projMerged@cellColData$peaks_projected_hepatocytes)
+
+confident_hepatocyte_barcodes <-
+  rownames(projMerged@cellColData)[
+    rownames(projMerged@cellColData)[
+      (projMerged@cellColData$tiles_projected_hepatocytes)
+    ] %in%
+      rownames(projMerged@cellColData)[
+        (projMerged@cellColData$peaks_projected_hepatocytes)
+      ]
+  ]
+qs_save(
+  confident_hepatocyte_barcodes,
+  "confident_hepatocyte_barcodes.qs2",
+  nthreads = 4
+)
+
+# sum(
+#   rownames(projMerged@cellColData)[
+#     rownames(projMerged@cellColData)[
+#       (projMerged@cellColData$tiles_projected_hepatocytes)
+#     ] %in%
+#       rownames(projMerged@cellColData)[
+#         (projMerged@cellColData$peaks_projected_hepatocytes)
+#       ]
+#   ] %in%
+#     rownames(projMerged@cellColData)[
+#       !projMerged@cellColData$transferred_barcode %in% "Hepatocytes"
+#     ]
+# )
+# length(rownames(projMerged@cellColData)[
+#   !(projMerged@cellColData$transferred_barcode %in% "Hepatocytes")
+# ])
+# length(rownames(projMerged@cellColData))
+# names((projMerged@cellColData$tiles_projected_hepatocytes))
+
 plotEmbedding(
   ArchRProj = projMerged,
   embedding = "UMAP_Peaks",
   colorBy = "cellColData",
-  name = "peaks_projected_hepatocytes",
+  name = "tiles_projected_hepatocytes",
   size = 0.1,
   # sampleCells = 10000,
   highlightCells = NULL,
