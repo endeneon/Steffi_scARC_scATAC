@@ -279,6 +279,7 @@ scCustomize::DimPlot_scCustom(
   raster = F,
   colors_use = "glasbey"
 )
+
 scCustomize::DimPlot_scCustom(
   merged_liver_obj,
   reduction = "umap.harmony",
@@ -819,3 +820,46 @@ table(multiome_obj$orig.ident)
 #     "IH_vs_RA_markers_list.qs2",
 #     nthreads = 4
 #   )
+scCustomize::FeaturePlot_scCustom(
+  merged_liver_obj,
+  reduction = "umap.harmony",
+  # group.by = "celltype_broad",
+  # features = c(
+  #   "CD1D",
+  #   "XPR1",
+  #   "MTR",
+  #   "MOK",
+  #   "USP22",
+  #   "MAP3K2",
+  #   "HDAC11",
+  #   "YWHAZ",
+  #   "NDRG1",
+  #   "TPD52",
+  #   "FSD1L",
+  #   "VPS45"
+  # ),
+  features = c("CHEK1", "VPS45"),
+  num_columns = 2,
+  label = F,
+  pt.size = 0.2,
+  alpha_exp = 0.5,
+  order = F,
+  # shuffle = TRUE,
+  raster = FALSE,
+  # colors_use = "glasbey"
+)
+
+ggsave(
+  "candidate_snps_gene_exp_hepatocytes.png",
+  width = 1600,
+  height = 900,
+  units = "px",
+  dpi = 72
+)
+ggsave(
+  "candidate_snps_gene_exp_hepatocytes.png",
+  width = 1600,
+  height = 900,
+  units = "px",
+  dpi = 72
+)

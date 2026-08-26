@@ -500,7 +500,15 @@ load_cytobands <-
       )))
     }
 
-    grid::grid.newpage()
+    # Start a fresh page, but only if the current one has already been drawn
+    # on. Calling grid.newpage() unconditionally emits a blank leading page on
+    # a freshly opened device (e.g. pdf(); replot_gviz_tracks(); dev.off()).
+    if (length(grid::grid.ls(print = FALSE)$name)) {
+      grid::grid.newpage()
+    } else {
+      # clear any viewports left behind without advancing the page
+      grid::upViewport(0L)
+    }
     grid::pushViewport(grid::viewport(
       y = grid::unit(legend_height, "npc"),
       height = grid::unit(1 - legend_height, "npc"),
@@ -1192,7 +1200,9 @@ plot_gviz_pileups_by_category <-
       end = to,
       genome = genome,
       name = "Genes",
-      stacking = "squish"
+      stacking = "squish",
+      # cap stacks at 1 row/gene so dense loci don't overflow the device
+      collapseTranscripts = "longest"
     )
     # map Entrez gene ids -> HGNC symbols for transcriptAnnotation = "symbol"
     if (length(Gviz::gene(gene_track))) {
@@ -1447,26 +1457,37 @@ for (i in seq_along(df_sig_snp_list$seqnames)) {
       gene_annotation
     )
 
-  tr <- plot_gviz_pileups_by_category(
-    chr = snp_chr,
-    start = snp_start,
-    end = snp_end,
-    bin_size = 50,
-    window = 2000,
-    ref_ArchR_obj = projHepatocytes,
-    slot = "category",
-    alpha = 0.85,
-    main_title = main_title
-  )
+  tryCatch(
+    {
+      tr <- plot_gviz_pileups_by_category(
+        chr = snp_chr,
+        start = snp_start,
+        end = snp_end,
+        bin_size = 50,
+        window = 2000,
+        ref_ArchR_obj = projHepatocytes,
+        slot = "category",
+        alpha = 0.85,
+        main_title = main_title
+      )
 
-  pdf(
-    file.path(
-      writeout_dir,
-      paste0(snp_id, "_", gene_symbol, "_gviz_plot.pdf")
-    ),
-    width = 11,
-    height = 8.5
+      pdf(
+        file.path(
+          writeout_dir,
+          paste0(snp_id, "_", gene_symbol, "_gviz_plot.pdf")
+        ),
+        width = 11,
+        height = 8.5
+      )
+      replot_gviz_tracks(tr)
+      dev.off()
+    },
+    error = function(e) {
+      # close any partially-opened device so the next iteration isn't broken
+      if (dev.cur() != 1) {
+        dev.off()
+      }
+      message("Skipped ", snp_id, " (", gene_symbol, "): ", conditionMessage(e))
+    }
   )
-  replot_gviz_tracks(tr)
-  dev.off()
 }
