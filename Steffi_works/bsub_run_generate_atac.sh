@@ -64,5 +64,6 @@ export OMP_NUM_THREADS=8
 # Rscript generate_ArchR_atac_obj_step4.R
 # Rscript generate_ArchR_atac_obj_step5.R
 # Rscript generate_ArchR_atac_obj_step6b.R
-Rscript plot_gviz_pileups_by_category.R
+# Rscript plot_gviz_pileups_by_category.R
+Rscript plot_subset_macrophages.R
 set +e
