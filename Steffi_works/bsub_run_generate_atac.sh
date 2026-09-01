@@ -7,14 +7,12 @@ mkdir -p main_log
 # workers) can actually use them; without this LSF may spread -n 20 across nodes.
 #BSUB -R "span[hosts=1]"
 
-#BSUB -q "large_mem"
+#BSUB -q "standard"
 #BSUB -J "run_assembling_ArchR_ATAC"
 #BSUB -o main_log/assembling_ArchR_ATAC_%J.out
 #BSUB -e main_log/assembling_ArchR_ATAC_%J.err
 
-# Prerequisities (all installed in the conda env):
-## samtools 1.14
-## java >= 1.8.0_392
+
 
 # This script is used to calibrate the WASP call vcf and run ASECountReader on it.
 # due to hard drive space constraints, we cannot store the calibrated BAM files, rather, we have to run ASECountReader on the fly.
@@ -64,6 +62,6 @@ export OMP_NUM_THREADS=8
 # Rscript generate_ArchR_atac_obj_step4.R
 # Rscript generate_ArchR_atac_obj_step5.R
 # Rscript generate_ArchR_atac_obj_step6b.R
-# Rscript plot_gviz_pileups_by_category.R
-Rscript plot_subset_macrophages.R
+Rscript plot_gviz_pileups_by_category.R
+
 set +e

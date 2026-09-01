@@ -218,14 +218,27 @@ projHepatocytes <-
 #     overwrite = TRUE
 #   )
 
+# df_sig_snp_list <-
+#   read.table(
+#     "sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated_HCC_crossref_DisGeNET_yes.tsv",
+#     sep = "\t",
+#     header = TRUE,
+#     stringsAsFactors = FALSE
+#   )
+
+# use all hepatocyte SNPs
+# quote = "" / comment.char = "": fields in the motif / TF columns contain
+# apostrophes and quotes; with R's default quoting those rows merge and only
+# ~148 of the 315 records parse. Disabling quote handling reads all 315.
 df_sig_snp_list <-
   read.table(
-    "sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated_HCC_crossref_DisGeNET_yes.tsv",
+    "sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated.tsv",
     sep = "\t",
     header = TRUE,
-    stringsAsFactors = FALSE
+    stringsAsFactors = FALSE,
+    quote = "",
+    comment.char = ""
   )
-
 
 # plot_gviz_pileups_by_category() ####
 # Build a Gviz track list (ideogram / axis / overlaid horizon coverage split by
@@ -432,6 +445,7 @@ load_cytobands <-
     sizes = NULL,
     peak_pal = NULL,
     main_title = NULL,
+    new_page = TRUE,
     ...
   ) {
     show_legend <- isTRUE(legend) && !is.null(pal) && length(pal)
@@ -503,11 +517,15 @@ load_cytobands <-
     # Start a fresh page, but only if the current one has already been drawn
     # on. Calling grid.newpage() unconditionally emits a blank leading page on
     # a freshly opened device (e.g. pdf(); replot_gviz_tracks(); dev.off()).
-    if (length(grid::grid.ls(print = FALSE)$name)) {
-      grid::grid.newpage()
-    } else {
-      # clear any viewports left behind without advancing the page
-      grid::upViewport(0L)
+    # When `new_page = FALSE` the caller has already set up a viewport (e.g. one
+    # cell of a 2x2 grid), so leave the page/viewport stack untouched.
+    if (new_page) {
+      if (length(grid::grid.ls(print = FALSE)$name)) {
+        grid::grid.newpage()
+      } else {
+        # clear any viewports left behind without advancing the page
+        grid::upViewport(0L)
+      }
     }
     grid::pushViewport(grid::viewport(
       y = grid::unit(legend_height, "npc"),
@@ -558,6 +576,7 @@ replot_gviz_tracks <-
     legend_height = NULL,
     legend_rows = NULL,
     main_title = NULL,
+    new_page = TRUE,
     ...
   ) {
     .plot_tracks_with_legend(
@@ -574,6 +593,7 @@ replot_gviz_tracks <-
       sizes = attr(tracks, "sizes"),
       peak_pal = attr(tracks, "peak_palette"),
       main_title = main_title %||% attr(tracks, "main_title"),
+      new_page = new_page,
       ...
     )
     invisible(tracks)
@@ -1440,54 +1460,200 @@ if (!dir.exists(writeout_dir)) {
   dir.create(writeout_dir, recursive = TRUE)
 }
 
-for (i in seq_along(df_sig_snp_list$seqnames)) {
-  snp_chr <- df_sig_snp_list$seqnames[i]
-  snp_start <- df_sig_snp_list$start[i]
-  snp_end <- df_sig_snp_list$end[i]
-  snp_id <- df_sig_snp_list$variantID[i]
-  gene_symbol <- df_sig_snp_list$SYMBOL[i]
-  gene_annotation <- df_sig_snp_list$annotation[i]
-  main_title <-
-    paste0(
-      snp_id,
-      " (",
-      gene_symbol,
-      ")",
-      ",",
-      gene_annotation
+# Build the Gviz track list for every SNP in parallel, then draw them into a
+# single multi-page PDF with four panels (2x2) per page.
+#
+# Only the track construction (Arrow reads + annotation lookups) is
+# parallelised: plotting must stay serial because a single PDF device can only
+# be written by one process.
+#
+# Backend is selectable via `cluster_type`:
+#   "PSOCK" - base socket cluster (parallel + doParallel). Works out of the box
+#             and can span nodes over TCP.
+#   "MPI"   - Rmpi/doMPI backend (tighter LSF integration). Requires the Rmpi
+#             and doMPI packages plus a working system MPI; the script stops
+#             with a clear message if they are missing.
+#
+# Unlike a fork cluster, PSOCK and MPI workers are FRESH R processes that do
+# not inherit the master's globals, so every object, helper function and
+# package a task needs is exported explicitly (foreach `.export` / `.packages`).
+# Because the workers are separate processes (not forks), ArchR may safely
+# multithread INSIDE each worker: keep `n_par * archr_threads_per_worker` within
+# the cores available on a node (max 60 here).
+#
+# The scatter/gather MPI pipeline (plot_gviz_pileups_mpi_worker.R) source()s
+# THIS script only to obtain its libraries, helper functions and the loaded
+# `projHepatocytes`, then runs its own doMPI driver. Setting the option
+# `gviz.pipeline.lib_only = TRUE` before sourcing skips the serial driver + PDF
+# block below so it does not run (and does not build a second cluster).
+if (!isTRUE(getOption("gviz.pipeline.lib_only", FALSE))) {
+  cluster_type <- "PSOCK" # "PSOCK" or "MPI"
+  n_snps <- length(df_sig_snp_list$seqnames)
+  n_par <- max(1L, min(20L, n_snps))
+  archr_threads_per_worker <- 2L
+
+  # objects + helper functions each worker must receive (a fork would have
+  # inherited these automatically; PSOCK/MPI must be told explicitly)
+  export_objs <- c(
+    "df_sig_snp_list",
+    "projHepatocytes",
+    "archr_threads_per_worker",
+    "plot_gviz_pileups_by_category",
+    "load_cytobands",
+    ".effective_genome_size",
+    ".arrow_lapply",
+    ".estimate_frag_length",
+    ".tile_cache",
+    ".cytoband_cache",
+    "%||%",
+    "%NA%"
+  )
+
+  # packages each worker must attach. The defaults of
+  # plot_gviz_pileups_by_category() reference the TxDb / org.Hs.eg.db packages,
+  # and ArchR internals (`ArchR:::`) need ArchR loaded on the worker.
+  export_pkgs <- c(
+    "ArchR",
+    "Gviz",
+    "GenomicRanges",
+    "IRanges",
+    "S4Vectors",
+    "Matrix",
+    "matrixStats",
+    "RColorBrewer",
+    "AnnotationDbi",
+    "TxDb.Hsapiens.UCSC.hg38.knownGene",
+    "org.Hs.eg.db",
+    "BSgenome.Hsapiens.UCSC.hg38"
+  )
+
+  if (identical(cluster_type, "MPI")) {
+    missing_mpi <- Filter(
+      function(p) !requireNamespace(p, quietly = TRUE),
+      c("Rmpi", "doMPI")
+    )
+    if (length(missing_mpi)) {
+      stop(
+        "cluster_type = 'MPI' needs the following package(s), not installed: ",
+        paste(missing_mpi, collapse = ", "),
+        ". Install them (and a working system MPI) or use cluster_type = 'PSOCK'."
+      )
+    }
+    # doMPI spawns `count` workers via Rmpi; under LSF launch this script with
+    # the site MPI wrapper so the ranks land on the allocated slots.
+    par_cl <- doMPI::startMPIcluster(count = n_par)
+    doMPI::registerDoMPI(par_cl)
+  } else {
+    # Localhost PSOCK cluster (fits n_par * archr_threads_per_worker on one node).
+    # To span multiple nodes, replace with parallelly::makeClusterPSOCK() and pass
+    # the LSF host list (e.g. from parallelly::availableWorkers()).
+    par_cl <- parallel::makePSOCKcluster(n_par)
+    doParallel::registerDoParallel(par_cl)
+  }
+
+  tr_list <-
+    foreach(
+      i = seq_len(n_snps),
+      .errorhandling = "pass",
+      .export = export_objs,
+      .packages = export_pkgs
+    ) %dopar%
+    {
+      # fresh worker process: re-apply the options/threads the master set in
+      # `init`. Gviz needs useUCSCChromosomeNames = FALSE for non-UCSC seqnames.
+      options(useUCSCChromosomeNames = FALSE)
+      ArchR::addArchRThreads(threads = archr_threads_per_worker, force = TRUE)
+      ArchR::addArchRGenome("hg38")
+      # keep ArchR's own foreach usage serial; ArchR's addArchRThreads handles
+      # within-worker parallelism, and a nested backend would contend with the
+      # outer cluster.
+      foreach::registerDoSEQ()
+
+      main_title <-
+        paste0(
+          df_sig_snp_list$variantID[i],
+          " (",
+          df_sig_snp_list$SYMBOL[i],
+          "),",
+          df_sig_snp_list$annotation[i]
+        )
+
+      tryCatch(
+        plot_gviz_pileups_by_category(
+          chr = df_sig_snp_list$seqnames[i],
+          start = df_sig_snp_list$start[i],
+          end = df_sig_snp_list$end[i],
+          bin_size = 50,
+          window = 2000,
+          ref_ArchR_obj = projHepatocytes,
+          slot = "category",
+          alpha = 0.85,
+          main_title = main_title,
+          plot = FALSE
+        ),
+        error = function(e) {
+          message(
+            "Skipped ",
+            df_sig_snp_list$variantID[i],
+            " (",
+            df_sig_snp_list$SYMBOL[i],
+            "): ",
+            conditionMessage(e)
+          )
+          NULL
+        }
+      )
+    }
+
+  if (identical(cluster_type, "MPI")) {
+    doMPI::closeCluster(par_cl)
+  } else {
+    parallel::stopCluster(par_cl)
+  }
+
+  # Keep only valid track lists (drop NULLs from failed builds and any error
+  # objects returned by foreach); real track lists carry a "chromosome" attr.
+  tr_list <-
+    Filter(
+      function(tr) !is.null(attr(tr, "chromosome", exact = TRUE)),
+      tr_list
     )
 
-  tryCatch(
-    {
-      tr <- plot_gviz_pileups_by_category(
-        chr = snp_chr,
-        start = snp_start,
-        end = snp_end,
-        bin_size = 50,
-        window = 2000,
-        ref_ArchR_obj = projHepatocytes,
-        slot = "category",
-        alpha = 0.85,
-        main_title = main_title
+  # One multi-page PDF: four panels per page arranged in a 2x2 grid.
+  panels_per_page <- 4L
+  n_pages <- ceiling(length(tr_list) / panels_per_page)
+
+  pdf(
+    file.path(writeout_dir, "hepatocyte_SNP_pileups_2x2.pdf"),
+    width = 16,
+    height = 12
+  )
+
+  for (pg in seq_len(n_pages)) {
+    grid::grid.newpage()
+    grid::pushViewport(grid::viewport(layout = grid::grid.layout(2, 2)))
+
+    idx <-
+      seq(
+        (pg - 1L) * panels_per_page + 1L,
+        min(pg * panels_per_page, length(tr_list))
       )
 
-      pdf(
-        file.path(
-          writeout_dir,
-          paste0(snp_id, "_", gene_symbol, "_gviz_plot.pdf")
-        ),
-        width = 11,
-        height = 8.5
-      )
-      replot_gviz_tracks(tr)
-      dev.off()
-    },
-    error = function(e) {
-      # close any partially-opened device so the next iteration isn't broken
-      if (dev.cur() != 1) {
-        dev.off()
-      }
-      message("Skipped ", snp_id, " (", gene_symbol, "): ", conditionMessage(e))
+    for (k in seq_along(idx)) {
+      row <- ((k - 1L) %/% 2L) + 1L
+      col <- ((k - 1L) %% 2L) + 1L
+      grid::pushViewport(grid::viewport(
+        layout.pos.row = row,
+        layout.pos.col = col
+      ))
+      # new_page = FALSE keeps the panel inside the current grid cell instead of
+      # advancing the device to a fresh page.
+      replot_gviz_tracks(tr_list[[idx[k]]], new_page = FALSE)
+      grid::popViewport()
     }
-  )
-}
+
+    grid::popViewport()
+  }
+
+  dev.off()
+} # end of the serial driver block guarded by gviz.pipeline.lib_only
