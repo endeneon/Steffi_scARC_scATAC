@@ -66,10 +66,18 @@ writeout_dir <- "gviz_hepatocyte_SNP_pileups"
 parts_dir <- file.path(writeout_dir, "parts")
 part_tsv <- file.path(parts_dir, sprintf("part_%02d.tsv", part_index))
 chunk_pdf <- file.path(parts_dir, sprintf("chunk_%02d.pdf", part_index))
+# Completion signature for resume. Only written after the PDF is fully closed on
+# disk (see the end of this script), so its mere presence certifies the chunk
+# finished. Removed up-front so an interrupted run never leaves a stale marker.
+chunk_done <- file.path(parts_dir, sprintf("chunk_%02d.done", part_index))
+suppressWarnings(if (file.exists(chunk_done)) file.remove(chunk_done))
 
 if (!file.exists(part_tsv)) {
   stop("Part file not found: ", part_tsv, " (did the split step run?)")
 }
+# md5 of the part file, recorded in the signature so a later run re-does this
+# chunk if the underlying part changed (the array script / guardian compare it).
+part_md5 <- unname(tools::md5sum(part_tsv))
 # quote = "" / comment.char = "": the motif / TF columns contain apostrophes
 # and quotes that would otherwise merge rows (matches the split step's read).
 df_part <- read.table(
@@ -239,4 +247,30 @@ if (!n_ok) {
 grDevices::dev.off()
 on.exit() # clear the handler we already ran
 message(sprintf("[part %02d] done: %s", part_index, chunk_pdf))
+
+# ---- completion signature (resume) -----------------------------------------
+# Written only now, after the device is closed and the PDF exists non-empty, so
+# the signature can never precede a finished chunk. The array script / guardian
+# skip any part whose signature is present, whose PDF is non-empty, and whose
+# recorded part_md5 still matches the current part file.
+if (file.exists(chunk_pdf) && file.info(chunk_pdf)$size > 0) {
+  writeLines(
+    c(
+      sprintf("part_index=%d", part_index),
+      sprintf("n_snps=%d", n_snps),
+      sprintf("n_built=%d", n_ok),
+      sprintf("part_md5=%s", part_md5),
+      sprintf("pdf=%s", basename(chunk_pdf)),
+      sprintf("completed_at=%s", format(Sys.time(), "%Y-%m-%dT%H:%M:%S"))
+    ),
+    chunk_done
+  )
+  message(sprintf("[part %02d] wrote signature %s", part_index, chunk_done))
+} else {
+  message(sprintf(
+    "[part %02d] PDF missing/empty; NOT writing signature (will re-run).",
+    part_index
+  ))
+}
+
 Rmpi::mpi.quit(save = "no")

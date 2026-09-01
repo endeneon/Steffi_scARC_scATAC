@@ -57,10 +57,17 @@ starts <- seq(1L, n_snps, by = chunk)
 actual_parts <- length(starts)
 
 # ---- (re)create the parts directory ----------------------------------------
+# Regenerate only the part tables and manifest. Completed chunk_XX.pdf outputs
+# and their chunk_XX.done signatures are DELIBERATELY preserved so an
+# interrupted run can resume: the worker records each part's md5 in its
+# signature, and the array script / guardian re-run only parts whose part file
+# changed (md5 mismatch) or whose PDF is missing. write.table is deterministic,
+# so an unchanged input reproduces byte-identical parts and the signatures stay
+# valid across re-splits.
 if (dir.exists(parts_dir)) {
   old <- list.files(
     parts_dir,
-    pattern = "^(part_\\d+\\.tsv|chunk_\\d+\\.pdf|manifest\\.txt)$",
+    pattern = "^(part_\\d+\\.tsv|manifest\\.txt)$",
     full.names = TRUE
   )
   if (length(old)) {
