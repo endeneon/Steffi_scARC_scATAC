@@ -205,6 +205,118 @@ message(sprintf(
 panels_per_page <- 4L
 n_pages <- max(1L, ceiling(n_ok / panels_per_page))
 
+# Unwind the grid viewport stack all the way back to the ROOT viewport.
+# replot_gviz_tracks() pushes several viewports and pops them again, but if a
+# draw aborts mid-way some are left pushed; resetting before the next panel
+# stops one failure from corrupting the layout for the others.
+# current.vpPath() is NULL only at ROOT, which is our loop terminator.
+.vp_reset_to_root <- function() {
+  repeat {
+    if (is.null(grid::current.vpPath())) {
+      break
+    }
+    grid::popViewport()
+  }
+}
+
+# Collapse every stackable track to a single ("dense") row. Gviz throws
+# "Too many stacks to draw" when a gene-/peak-dense window needs more stacking
+# rows than fit in the small 2x2 cell; forcing dense stacking guarantees the
+# panel fits (at the cost of overlapping gene models in that one panel). Data /
+# axis / ideogram tracks ignore `stacking`. OverlayTrack and HighlightTrack wrap
+# other tracks, so recurse into their trackList. The plot-window attributes are
+# preserved so replot_gviz_tracks() still finds from/to/sizes.
+.force_dense <- function(tracks) {
+  setdense <- function(x) {
+    if (inherits(x, "HighlightTrack") || inherits(x, "OverlayTrack")) {
+      x@trackList <- lapply(x@trackList, setdense)
+      return(x)
+    }
+    try(
+      {
+        Gviz::displayPars(x) <- list(stacking = "dense")
+      },
+      silent = TRUE
+    )
+    x
+  }
+  keep <- attributes(tracks)
+  out <- lapply(tracks, setdense)
+  attributes(out) <- keep
+  out
+}
+
+# Draw ONE panel into the current 2x2 cell, isolating failures so a single
+# unplottable locus cannot abort the whole chunk (which would leave no PDF /
+# signature and force the part to be recomputed). Per panel:
+#   1. try the panel as built;
+#   2. on error, reset the viewport stack and retry with dense stacking
+#      (fixes Gviz "Too many stacks to draw" on gene-dense windows);
+#   3. if it still fails, draw a small red placeholder naming the SNP.
+# The layout viewport is (re)pushed per panel and torn down to ROOT afterwards;
+# already-drawn panels persist on the device, so this does not disturb them.
+draw_panel <- function(i, row, col) {
+  push_cell <- function() {
+    grid::pushViewport(grid::viewport(layout = grid::grid.layout(2, 2)))
+    grid::pushViewport(grid::viewport(
+      layout.pos.row = row,
+      layout.pos.col = col
+    ))
+  }
+  tr <- tr_list[[i]]
+
+  ok <- tryCatch(
+    {
+      push_cell()
+      replot_gviz_tracks(tr, new_page = FALSE)
+      TRUE
+    },
+    error = function(e) {
+      message(sprintf(
+        "[part %02d] panel %d first attempt failed (%s); retrying dense.",
+        part_index,
+        i,
+        conditionMessage(e)
+      ))
+      FALSE
+    }
+  )
+  .vp_reset_to_root()
+  if (isTRUE(ok)) {
+    return(invisible(TRUE))
+  }
+
+  ok <- tryCatch(
+    {
+      push_cell()
+      replot_gviz_tracks(.force_dense(tr), new_page = FALSE)
+      TRUE
+    },
+    error = function(e) {
+      message(sprintf(
+        "[part %02d] panel %d dense retry failed (%s); placeholder.",
+        part_index,
+        i,
+        conditionMessage(e)
+      ))
+      FALSE
+    }
+  )
+  .vp_reset_to_root()
+  if (isTRUE(ok)) {
+    return(invisible(TRUE))
+  }
+
+  ttl <- attr(tr, "main_title", exact = TRUE) %||% sprintf("panel %d", i)
+  push_cell()
+  grid::grid.text(
+    paste0(ttl, "\n(could not be drawn)"),
+    gp = grid::gpar(col = "red", cex = 0.7)
+  )
+  .vp_reset_to_root()
+  invisible(FALSE)
+}
+
 pdf(chunk_pdf, width = 11, height = 8.5)
 on.exit(grDevices::dev.off(), add = TRUE)
 
@@ -217,28 +329,16 @@ if (!n_ok) {
 } else {
   for (pg in seq_len(n_pages)) {
     grid::grid.newpage()
-    grid::pushViewport(grid::viewport(layout = grid::grid.layout(2, 2)))
-
     idx <-
       seq(
         (pg - 1L) * panels_per_page + 1L,
         min(pg * panels_per_page, n_ok)
       )
-
     for (k in seq_along(idx)) {
       row <- ((k - 1L) %/% 2L) + 1L
       col <- ((k - 1L) %% 2L) + 1L
-      grid::pushViewport(grid::viewport(
-        layout.pos.row = row,
-        layout.pos.col = col
-      ))
-      # new_page = FALSE keeps the panel inside the current grid cell instead of
-      # advancing the device to a fresh page.
-      replot_gviz_tracks(tr_list[[idx[k]]], new_page = FALSE)
-      grid::popViewport()
+      draw_panel(idx[k], row, col)
     }
-
-    grid::popViewport()
   }
 }
 

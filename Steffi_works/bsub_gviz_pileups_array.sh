@@ -5,9 +5,13 @@
 # Element k runs plot_gviz_pileups_mpi_worker.R on part_<k>.tsv, launching
 #   n_workers + 1 MPI ranks (rank 0 master, the rest compute workers), each
 #   worker forking `threads_per_worker` cores for the Arrow reads.
-# With 8 workers x 6 threads = 48 cores, pinned to ONE node (span[hosts=1]) so
-# the MPI ranks and their fork pools stay co-located and no cross-node launch
-# (blaunch/ssh) is needed. 48 <= 60 cores/node with headroom to schedule sooner.
+# MULTI-NODE layout: 5 workers x 6 threads. Each MPI rank is placed on its OWN
+# host (mpirun --map-by node), and span[ptile=6] reserves exactly 6 slots per
+# host -- room for that rank's 6-core fork pool. So instead of waiting for ONE
+# node with 32 free cores, LSF only needs 6 free cores on each of 6 nodes, which
+# schedules much faster. -n 36 = 6 ranks x 6 slots (the master's node is lightly
+# used). Cross-node launch needs an explicit hostfile + env forwarding (see the
+# mpirun call below) because this OpenMPI build does not read the LSF host list.
 #
 # The array range MUST match the number of parts written by
 # plot_gviz_pileups_split.R (manifest.txt). The guardian
@@ -17,17 +21,20 @@
 mkdir -p main_log
 
 #BSUB -J "gviz_pileup[1-8]"
-#BSUB -n 48
-#BSUB -R "span[hosts=1]"
+#BSUB -n 36
+#BSUB -R "span[ptile=6]"
 #BSUB -R "rusage[mem=6G]"
 #BSUB -q "standard"
 #BSUB -o main_log/gviz_pileup_%J_%I.out
 #BSUB -e main_log/gviz_pileup_%J_%I.err
 
-# ---- knobs (keep n_workers * threads_per_worker <= cores on one node) ------
-n_workers=8           # doMPI compute workers (SNPs run in parallel across these)
-threads_per_worker=6  # inner ArchR fork pool per worker (Arrow-file reads)
-n_ranks=$((n_workers + 1))  # + 1 for the doMPI master (rank 0)
+# ---- knobs -----------------------------------------------------------------
+# Keep n_ranks == number of hosts (so --map-by node puts one rank per host) and
+# threads_per_worker == ptile (each host has exactly one rank's fork pool).
+# i.e. -n must equal n_ranks * threads_per_worker, and ptile == threads_per_worker.
+n_workers=5           # doMPI compute workers (SNPs run in parallel across these)
+threads_per_worker=6  # inner ArchR fork pool per worker (Arrow-file reads) == ptile
+n_ranks=$((n_workers + 1))  # + 1 for the doMPI master (rank 0); one rank per host
 
 set -e
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
@@ -82,13 +89,32 @@ if [[ -f "${chunk_done}" && -s "${chunk_pdf}" && -f "${part_tsv}" ]]; then
 	echo "Part ${part_index}: signature stale (part file changed); re-running."
 fi
 
-echo "Array element ${part_index}: launching ${n_ranks} MPI ranks (${n_workers} workers x ${threads_per_worker} threads) on host(s): ${LSB_HOSTS}"
+echo "Array element ${part_index}: launching ${n_ranks} MPI ranks (${n_workers} workers x ${threads_per_worker} threads), one rank per host."
 
-# --bind-to none: do NOT pin each rank to a single core, otherwise the rank's
-# fork pool would be confined to one core. All ranks are on one node here.
-mpirun -n "${n_ranks}" --bind-to none \
-	Rscript plot_gviz_pileups_mpi_worker.R \
+# Cross-node launch (validated on this cluster): OpenMPI/PRRTE does NOT read the
+# LSF multi-host allocation, so hand it an explicit hostfile built from
+# LSB_MCPU_HOSTS ("host1 n1 host2 n2 ..."). --map-by node round-robins the ranks
+# so each worker lands on its own host; --bind-to none lets that rank's fork pool
+# use all 6 slots there. Remotely-spawned ranks get a BARE shell, so call Rscript
+# by ABSOLUTE path (shared /research_jude FS) and forward PATH + LD_LIBRARY_PATH
+# with -x so the conda env's R / Rmpi / libmpi are found on every host.
+hostfile="$(mktemp "${base_dir}/main_log/hostfile.${LSB_JOBID}_${part_index}.XXXXXX")"
+awk '{ for (i = 1; i <= NF; i += 2) print $i " slots=" $(i + 1) }' \
+	<<<"${LSB_MCPU_HOSTS}" >"${hostfile}"
+rscript_bin="$(command -v Rscript)"
+echo "--- hostfile ---"
+cat "${hostfile}"
+echo "--- Rscript: ${rscript_bin} ---"
+
+mpi_rc=0
+mpirun --hostfile "${hostfile}" -n "${n_ranks}" \
+	--map-by node --bind-to none \
+	-x PATH -x LD_LIBRARY_PATH \
+	"${rscript_bin}" plot_gviz_pileups_mpi_worker.R \
 	--part-index "${part_index}" \
-	--threads "${threads_per_worker}"
+	--threads "${threads_per_worker}" ||
+	mpi_rc=$?
 
+rm -f "${hostfile}"
 set +e
+exit "${mpi_rc}"
