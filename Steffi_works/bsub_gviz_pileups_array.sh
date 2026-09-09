@@ -24,7 +24,7 @@ mkdir -p main_log
 #BSUB -n 36
 #BSUB -R "span[ptile=6]"
 #BSUB -R "rusage[mem=6G]"
-#BSUB -q "standard"
+#BSUB -q "large_mem"
 #BSUB -o main_log/gviz_pileup_%J_%I.out
 #BSUB -e main_log/gviz_pileup_%J_%I.err
 
@@ -66,6 +66,16 @@ cd "${base_dir}"
 # the CMA single-copy path that does not tolerate fork().
 export OMPI_MCA_mpi_warn_on_fork=0
 export OMPI_MCA_btl_vader_single_copy_mechanism=none
+
+# PRTE/OpenMPI segfaults (exit 139) at launch when its session directory lands
+# on a shared filesystem (the default $TMPDIR, and also /lustre_scratch, are
+# shared). Give PRTE a genuinely NODE-LOCAL session dir on each host instead.
+# The dir need NOT be shared across nodes: PRTE coordinates over the network, so
+# per-node /tmp is exactly what it wants. This build ignores the OMPI_MCA_prte_*
+# env vars, so the tmpdir base is passed as explicit --prtemca flags on the
+# mpirun line below (prte_local_tmpdir_base = head node, prte_remote_tmpdir_base
+# = all other ranks). Each host creates its own /tmp/<...> on first use.
+node_tmp="/tmp/gviz_pileup.${LSB_JOBID}_${LSB_JOBINDEX}"
 
 part_index="${LSB_JOBINDEX}"
 
@@ -109,6 +119,9 @@ echo "--- Rscript: ${rscript_bin} ---"
 mpi_rc=0
 mpirun --hostfile "${hostfile}" -n "${n_ranks}" \
 	--map-by node --bind-to none \
+	--prtemca prte_local_tmpdir_base "${node_tmp}" \
+	--prtemca prte_remote_tmpdir_base "${node_tmp}" \
+	--prtemca prte_silence_shared_fs 1 \
 	-x PATH -x LD_LIBRARY_PATH \
 	"${rscript_bin}" plot_gviz_pileups_mpi_worker.R \
 	--part-index "${part_index}" \
@@ -116,5 +129,7 @@ mpirun --hostfile "${hostfile}" -n "${n_ranks}" \
 	mpi_rc=$?
 
 rm -f "${hostfile}"
+# PRTE removes its own per-node session dirs on a clean shutdown; nothing to
+# clean up here since node_tmp lives on each host's local /tmp, not a shared FS.
 set +e
 exit "${mpi_rc}"
