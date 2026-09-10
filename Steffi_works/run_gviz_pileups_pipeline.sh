@@ -14,6 +14,11 @@
 # work happens in the array jobs):
 #     bash run_gviz_pileups_pipeline.sh [n_parts]
 #
+# writeout_dir_path / df_sig_snp_list_file_path / archr_obj_path are assigned
+# directly below (the single place you edit per cell type) and forwarded to
+# bsub_gviz_pileups_array.sh via `bsub -env`, so both scripts always agree on
+# which dataset/output directory they are processing.
+#
 # Safe to re-run: the split step recreates the parts directory each time.
 
 set -euo pipefail
@@ -23,9 +28,38 @@ poll_seconds=60
 
 base_dir="/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
 array_script="bsub_gviz_pileups_array.sh"
-writeout_dir="gviz_hepatocyte_SNP_pileups"
+
+cd "${base_dir}"
+
+# ---- dataset config (edit per cell type) ------------------------------------
+writeout_dir_path="gviz_macrophage_SNP_pileups"
+df_sig_snp_list_file_path="sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv"
+archr_obj_path="ArchR_macrophages"
+
+# writeout_dir_path / df_sig_snp_list_file_path / archr_obj_path may be absolute
+# or relative (to base_dir); resolve to absolute up front, same rule as
+# bsub_gviz_pileups_array.sh (plain concatenation would silently mangle an
+# already-absolute value). Passing already-absolute values through -env means
+# the array job's own resolution logic is a no-op, so there is no ambiguity
+# about which directory it runs against.
+if [[ "${writeout_dir_path}" = /* ]]; then
+	writeout_dir="${writeout_dir_path}"
+else
+	writeout_dir="${base_dir}/${writeout_dir_path}"
+fi
+if [[ "${df_sig_snp_list_file_path}" = /* ]]; then
+	df_sig_snp_list_file_path_abs="${df_sig_snp_list_file_path}"
+else
+	df_sig_snp_list_file_path_abs="${base_dir}/${df_sig_snp_list_file_path}"
+fi
+if [[ "${archr_obj_path}" = /* ]]; then
+	archr_obj_path_abs="${archr_obj_path}"
+else
+	archr_obj_path_abs="${base_dir}/${archr_obj_path}"
+fi
+
 parts_dir="${writeout_dir}/parts"
-master_pdf="${writeout_dir}/hepatocyte_SNP_pileups_2x2.pdf"
+master_pdf="${writeout_dir}/SNP_pileups_2x2.pdf"
 
 # conda's module + activation scripts reference unbound variables (e.g.
 # LD_LIBRARY_PATH_backup in the env's deactivate hook), which trip `set -u`.
@@ -44,7 +78,10 @@ cd "${base_dir}"
 
 # ---- 1. split --------------------------------------------------------------
 echo ">> [1/4] splitting SNP table into ${n_parts} part(s) ..."
-Rscript plot_gviz_pileups_split.R "${n_parts}"
+Rscript plot_gviz_pileups_split.R \
+	-i "${df_sig_snp_list_file_path_abs}" \
+	-o "${writeout_dir}" \
+	-n "${n_parts}"
 
 if [[ ! -f "${parts_dir}/manifest.txt" ]]; then
 	echo "ERROR: ${parts_dir}/manifest.txt not written by the split step." >&2
@@ -89,7 +126,9 @@ else
 		echo "${todo[*]}"
 	)"
 	echo ">> [2/4] submitting job array gviz_pileup[${idx_list}] (${#todo[@]} of ${N} part(s)) ..."
-	submit_out="$(bsub -J "gviz_pileup[${idx_list}]" <"${array_script}")"
+	submit_out="$(bsub -J "gviz_pileup[${idx_list}]" \
+		-env "all, writeout_dir_path=${writeout_dir}, df_sig_snp_list_file_path=${df_sig_snp_list_file_path_abs}, archr_obj_path=${archr_obj_path_abs}" \
+		<"${array_script}")"
 	echo "   ${submit_out}"
 	job_id="$(sed -n 's/^Job <\([0-9]\+\)>.*/\1/p' <<<"${submit_out}")"
 	if [[ -z "${job_id}" ]]; then
@@ -104,27 +143,27 @@ if [[ -z "${job_id}" ]]; then
 	echo ">> [3/4] nothing submitted; proceeding straight to merge."
 else
 	echo ">> [3/4] polling every ${poll_seconds}s until all elements finish ..."
-while true; do
-	# One STAT per array element; count those still active (PEND/RUN/etc.).
-	stats="$(bjobs -a -noheader -o "stat" "${job_id}" 2>/dev/null || true)"
-	if [[ -z "${stats}" ]]; then
-		# element records aged out of bjobs -> treat as finished.
-		echo "   bjobs returned no records; assuming the array has finished."
-		break
-	fi
-	total="$(wc -l <<<"${stats}")"
-	active="$(grep -Ec 'PEND|RUN|PROV|WAIT|USUSP|SSUSP|PSUSP' <<<"${stats}" || true)"
-	done_n="$(grep -c 'DONE' <<<"${stats}" || true)"
-	exit_n="$(grep -c 'EXIT' <<<"${stats}" || true)"
-	echo "   [$(date +%H:%M:%S)] ${done_n} DONE, ${exit_n} EXIT, ${active} active (of ${total})"
-	[[ "${active}" -eq 0 ]] && break
-	sleep "${poll_seconds}"
-done
+	while true; do
+		# One STAT per array element; count those still active (PEND/RUN/etc.).
+		stats="$(bjobs -a -noheader -o "stat" "${job_id}" 2>/dev/null || true)"
+		if [[ -z "${stats}" ]]; then
+			# element records aged out of bjobs -> treat as finished.
+			echo "   bjobs returned no records; assuming the array has finished."
+			break
+		fi
+		total="$(wc -l <<<"${stats}")"
+		active="$(grep -Ec 'PEND|RUN|PROV|WAIT|USUSP|SSUSP|PSUSP' <<<"${stats}" || true)"
+		done_n="$(grep -c 'DONE' <<<"${stats}" || true)"
+		exit_n="$(grep -c 'EXIT' <<<"${stats}" || true)"
+		echo "   [$(date +%H:%M:%S)] ${done_n} DONE, ${exit_n} EXIT, ${active} active (of ${total})"
+		[[ "${active}" -eq 0 ]] && break
+		sleep "${poll_seconds}"
+	done
 
-if [[ -n "${exit_n:-}" ]] && [[ "${exit_n}" -gt 0 ]]; then
-	echo "WARNING: ${exit_n} array element(s) reported EXIT; their chunk PDF(s)" >&2
-	echo "         may be missing. Check main_log/gviz_pileup_${job_id}_*.err" >&2
-fi
+	if [[ -n "${exit_n:-}" ]] && [[ "${exit_n}" -gt 0 ]]; then
+		echo "WARNING: ${exit_n} array element(s) reported EXIT; their chunk PDF(s)" >&2
+		echo "         may be missing. Check main_log/gviz_pileup_${job_id}_*.err" >&2
+	fi
 fi # end of the poll branch (job_id non-empty)
 
 # ---- 4. merge --------------------------------------------------------------

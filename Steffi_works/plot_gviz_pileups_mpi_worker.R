@@ -1,10 +1,11 @@
 #! /usr/bin/env Rscript
 
-# MPI worker for ONE part of the hepatocyte ASoC SNP set.
+# MPI worker for ONE part of an ASoC SNP set.
 #
 # Launched (once per job-array element) as:
 #   mpirun -n <n_workers + 1> --bind-to none \
-#     Rscript plot_gviz_pileups_mpi_worker.R --part-index <k> --threads <t>
+#     Rscript plot_gviz_pileups_mpi_worker.R --part-index <k> --threads <t> \
+#       --writeout-dir <dir> --df-sig-snp-list-file-path <tsv> --archr-obj-path <dir>
 #
 # Two nested levels of parallelism:
 #   * OUTER  - doMPI ranks spread this part's SNPs across <n_workers> workers.
@@ -18,20 +19,23 @@
 #
 # Because we launch SPMD, every rank runs the code BEFORE startMPIcluster(),
 # including the source() below -- so every worker already has the helper
-# functions and the loaded `projHepatocytes` in its own memory. We therefore do
-# NOT ship that (large) ArchRProject over MPI (`.noexport = "projHepatocytes"`);
+# functions and the loaded `ref_archr_proj` in its own memory. We therefore do
+# NOT ship that (large) ArchRProject over MPI (`.noexport = "ref_archr_proj"`);
 # each worker uses its local copy.
 #
 # The master (rank 0) collects the per-SNP Gviz track lists and draws this
 # part's panels, 4 per landscape US-Letter page (11 in wide x 8.5 in tall), into
-# gviz_hepatocyte_SNP_pileups/parts/chunk_<k>.pdf. The guardian later merges the
-# per-part chunk PDFs into the master PDF.
+# <writeout-dir>/parts/chunk_<k>.pdf. The guardian later merges the per-part
+# chunk PDFs into the master PDF.
 
 # ---- parse args ------------------------------------------------------------
 # Minimal flag parser (no optparse dependency). Recognised:
-#   --part-index <int>  (falls back to $LSB_JOBINDEX, then 1)
-#   --threads <int>     ArchR / inner-fork threads per worker (default 6)
-#   --n-parts <int>     total parts, for messaging only (optional)
+#   --part-index <int>            (falls back to $LSB_JOBINDEX, then 1)
+#   --threads <int>                ArchR / inner-fork threads per worker (default 6)
+#   --n-parts <int>                total parts, for messaging only (optional)
+#   --writeout-dir <path>          required; PDFs/parts output directory
+#   --df-sig-snp-list-file-path <path>  required; SNP list TSV
+#   --archr-obj-path <path>        required; ArchRProject directory
 .get_flag <- function(flag, default = NULL) {
   a <- commandArgs(trailingOnly = TRUE)
   hit <- match(flag, a)
@@ -49,11 +53,30 @@ if (!is.finite(threads_per_worker) || threads_per_worker < 1L) {
   threads_per_worker <- 1L
 }
 
-# ---- load the shared functions + projHepatocytes (lib-only) ----------------
+writeout_dir_path <- .get_flag("--writeout-dir")
+df_sig_snp_list_file_path <- .get_flag("--df-sig-snp-list-file-path")
+archr_obj_path <- .get_flag("--archr-obj-path")
+if (
+  is.null(writeout_dir_path) ||
+    is.null(df_sig_snp_list_file_path) ||
+    is.null(archr_obj_path)
+) {
+  stop(
+    "--writeout-dir, --df-sig-snp-list-file-path, and --archr-obj-path are all required."
+  )
+}
+
+# ---- load the shared functions + ref_archr_proj (lib-only) -----------------
 # gviz.pipeline.lib_only = TRUE makes plot_gviz_pileups_by_category.R stop after
-# defining its functions and loading `projHepatocytes`, i.e. it does NOT run its
-# own (serial / PSOCK) driver + PDF block. This runs on EVERY MPI rank.
-options(gviz.pipeline.lib_only = TRUE)
+# defining its functions and loading `ref_archr_proj`, i.e. it does NOT run its
+# own (serial / PSOCK) driver + PDF block. This runs on EVERY MPI rank. The
+# path options forward this worker's CLI flags into that script.
+options(
+  gviz.pipeline.lib_only = TRUE,
+  gviz.pipeline.writeout_dir = writeout_dir_path,
+  gviz.pipeline.df_sig_snp_list_file_path = df_sig_snp_list_file_path,
+  gviz.pipeline.archr_obj_path = archr_obj_path
+)
 source("plot_gviz_pileups_by_category.R", local = FALSE)
 
 suppressPackageStartupMessages({
@@ -62,7 +85,7 @@ suppressPackageStartupMessages({
 })
 
 # ---- this part's SNPs ------------------------------------------------------
-writeout_dir <- "gviz_hepatocyte_SNP_pileups"
+writeout_dir <- writeout_dir_path
 parts_dir <- file.path(writeout_dir, "parts")
 part_tsv <- file.path(parts_dir, sprintf("part_%02d.tsv", part_index))
 chunk_pdf <- file.path(parts_dir, sprintf("chunk_%02d.pdf", part_index))
@@ -107,8 +130,8 @@ message(sprintf(
 ))
 
 # packages every worker must have attached to build a track list. (The helper
-# functions and projHepatocytes are already present on each worker from the
-# source() above; projHepatocytes is explicitly NOT re-shipped.)
+# functions and ref_archr_proj are already present on each worker from the
+# source() above; ref_archr_proj is explicitly NOT re-shipped.)
 export_pkgs <- c(
   "ArchR",
   "Gviz",
@@ -130,7 +153,7 @@ tr_list <-
   foreach(
     i = seq_len(n_snps),
     .errorhandling = "pass",
-    .noexport = "projHepatocytes",
+    .noexport = "ref_archr_proj",
     .packages = export_pkgs
   ) %dopar%
   {
@@ -160,7 +183,7 @@ tr_list <-
         end = df_part$end[i],
         bin_size = 50,
         window = 2000,
-        ref_ArchR_obj = projHepatocytes,
+        ref_ArchR_obj = ref_archr_proj,
         slot = "category",
         alpha = 0.85,
         main_title = main_title,

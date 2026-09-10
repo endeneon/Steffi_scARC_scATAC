@@ -93,14 +93,57 @@ print(paste0(
 print("All settings initialized successfully.")
 
 
-
 # ---- parameters -------------------------------------------------------------
-snp_summary_file <- "hepatocyte_ASoC_genotypes_GT_summary_min3.tsv"
-snp_genotype_file <- "hepatocyte_ASoC_genotypes_GT_only.tsv"
+# snp_summary_file <- "hepatocyte_ASoC_genotypes_GT_summary_min3.tsv"
+# snp_genotype_file <- "hepatocyte_ASoC_genotypes_GT_only.tsv"
+# snp_annotation_file <-
+#   "sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated.tsv"
+# archr_project_dir <- "ArchR_hepato"
+# writeout_dir <- "hepatocyte_ASoC_peak_category_lm"
+# plot_dir <- file.path(writeout_dir, "plots")
+
+snp_summary_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_GT_summary_min3.tsv"
+snp_genotype_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_GT_only.tsv"
 snp_annotation_file <-
-  "sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated.tsv"
-archr_project_dir <- "ArchR_hepato"
-writeout_dir <- "hepatocyte_ASoC_peak_category_lm"
+  "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv"
+archr_project_dir <- "ArchR_macrophages"
+
+# Fail-fast: every required input must exist before we start. Report ALL
+# missing paths at once (files checked as files, the ArchR project as a dir),
+# resolved to absolute paths so it's obvious WHERE we looked, rather than dying
+# on the first one.
+local({
+  required_files <- c(snp_summary_file, snp_genotype_file, snp_annotation_file)
+  missing_files <- required_files[!file.exists(required_files)]
+  missing_dirs <- archr_project_dir[!dir.exists(archr_project_dir)]
+  if (length(missing_files) || length(missing_dirs)) {
+    abs <- function(p) {
+      # normalizePath() leaves nonexistent relative paths relative, so anchor
+      # them to the working dir ourselves before normalising.
+      p <- ifelse(
+        grepl("^(/|[A-Za-z]:)", p),
+        p,
+        file.path(getwd(), p)
+      )
+      normalizePath(p, mustWork = FALSE)
+    }
+    stop(
+      "Missing required input(s) (working dir: ",
+      getwd(),
+      "):\n",
+      paste0("  [file] ", abs(missing_files), collapse = "\n"),
+      if (length(missing_files) && length(missing_dirs)) "\n",
+      paste0("  [dir]  ", abs(missing_dirs), collapse = "\n"),
+      call. = FALSE
+    )
+  }
+})
+
+
+writeout_dir <- "macrophage_ASoC_peak_category_lm"
+if (!dir.exists(writeout_dir)) {
+  dir.create(writeout_dir, recursive = TRUE)
+}
 plot_dir <- file.path(writeout_dir, "plots")
 
 gt_levels <- c("0/0", "0/1", "1/1")
@@ -735,7 +778,11 @@ page_files <-
       wil_lab <- if (is.null(p_wil) || is.na(p_wil)) {
         "ns"
       } else {
-        sprintf("%s (p=%s)", .p_stars(p_wil), formatC(p_wil, format = "g", digits = 2))
+        sprintf(
+          "%s (p=%s)",
+          .p_stars(p_wil),
+          formatC(p_wil, format = "g", digits = 2)
+        )
       }
       show_bracket <- nlevels(d$category) == 2L
 

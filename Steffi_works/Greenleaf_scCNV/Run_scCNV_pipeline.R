@@ -353,7 +353,7 @@ makeWindows <- function(
     future.seed = TRUE
   )
   names(windowsBL) <- paste0("w", seq_along(windowsBL))
-  windowsBL <- unlist(GenomicRangesList(windowsBL), use.names = TRUE)
+  windowsBL <- unlist(GRangesList(windowsBL), use.names = TRUE)
   mcols(windowsBL)$name <- names(windowsBL)
   message("Adding Nucleotide Information...")
   windowSplit <- split(windowsBL, as.character(seqnames(windowsBL)))
@@ -375,7 +375,7 @@ makeWindows <- function(
     },
     future.seed = TRUE
   ) %>%
-    GenomicRangesList %>%
+    GRangesList %>%
     unlist %>%
     sortSeqlevels %>%
     sort
@@ -430,7 +430,7 @@ scCNA <- function(
     },
     future.seed = TRUE
   )
-  windowSummary <- unlist(GenomicRangesList(lapply(summaryList, `[[`, "wo")))
+  windowSummary <- unlist(GRangesList(lapply(summaryList, `[[`, "wo")))
   countSummary <- do.call(rbind, lapply(summaryList, `[[`, "counts"))
 
   #Keep only regions with less than 0.1% N

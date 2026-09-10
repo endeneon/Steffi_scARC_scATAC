@@ -17,7 +17,7 @@
 # plot_gviz_pileups_split.R (manifest.txt). The guardian
 # (run_gviz_pileups_pipeline.sh) fills it in and submits this script for you;
 # if you submit by hand, set the [1-N] range to N = `cat parts/manifest.txt`.
-
+cd "/home/szhang37/CAB_workspace/pulled_git_repos/Multiome_main/Steffi_works"
 mkdir -p main_log
 
 #BSUB -J "gviz_pileup[1-8]"
@@ -25,22 +25,46 @@ mkdir -p main_log
 #BSUB -R "span[ptile=6]"
 #BSUB -R "rusage[mem=6G]"
 #BSUB -q "large_mem"
-#BSUB -o main_log/gviz_pileup_%J_%I.out
-#BSUB -e main_log/gviz_pileup_%J_%I.err
+#BSUB -o main_log/gviz_macro_pileup_%J_%I.out
+#BSUB -e main_log/gviz_macro_pileup_%J_%I.err
 
 # ---- knobs -----------------------------------------------------------------
 # Keep n_ranks == number of hosts (so --map-by node puts one rank per host) and
 # threads_per_worker == ptile (each host has exactly one rank's fork pool).
 # i.e. -n must equal n_ranks * threads_per_worker, and ptile == threads_per_worker.
-n_workers=5           # doMPI compute workers (SNPs run in parallel across these)
-threads_per_worker=6  # inner ArchR fork pool per worker (Arrow-file reads) == ptile
-n_ranks=$((n_workers + 1))  # + 1 for the doMPI master (rank 0); one rank per host
+n_workers=5                # doMPI compute workers (SNPs run in parallel across these)
+threads_per_worker=6       # inner ArchR fork pool per worker (Arrow-file reads) == ptile
+n_ranks=$((n_workers + 1)) # + 1 for the doMPI master (rank 0); one rank per host
+
+# ---- required paths ---------------------------------------------------------
+# writeout_dir_path / df_sig_snp_list_file_path / archr_obj_path are normally
+# injected as environment variables by the guardian (run_gviz_pileups_pipeline.sh,
+# via `bsub -env`), which is the single place you edit per cell type. To submit
+# this script by hand instead, replace the ":-}" defaults below with literal
+# values.
+#   writeout_dir_path        : path (relative to base_dir, or absolute) where
+#                               this run's PDFs and parts/ live.
+#   df_sig_snp_list_file_path: path to the SNP list TSV read by
+#                               plot_gviz_pileups_by_category.R.
+#   archr_obj_path            : path to the ArchRProject loaded by
+#                               plot_gviz_pileups_by_category.R.
+# All three are forwarded to plot_gviz_pileups_mpi_worker.R as CLI flags, which
+# in turn passes df_sig_snp_list_file_path / archr_obj_path to
+# plot_gviz_pileups_by_category.R via options() before sourcing it.
+writeout_dir_path="${writeout_dir_path:-}"
+df_sig_snp_list_file_path="${df_sig_snp_list_file_path:-}"
+archr_obj_path="${archr_obj_path:-}"
 
 set -e
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 _on_exit() {
 	local ec=$?
-	[[ ${ec} -ne 0 ]] && echo "\"${last_command}\" command failed with exit code ${ec}." >&2
+	# NOT "[[ ec -ne 0 ]] && echo ...": under set -e, a false [[ ]] test as the
+	# trap's last command has its own (nonzero) status silently override an
+	# explicit `exit 0` that triggered this trap, turning success into failure.
+	if [[ ${ec} -ne 0 ]]; then
+		echo "\"${last_command}\" command failed with exit code ${ec}." >&2
+	fi
 }
 trap '_on_exit' EXIT
 shopt -s nullglob
@@ -60,6 +84,53 @@ if [[ ! -d "${base_dir}" ]]; then
 	exit 1
 fi
 cd "${base_dir}"
+
+if [[ -z "${df_sig_snp_list_file_path}" || -z "${archr_obj_path}" ]]; then
+	echo "ERROR: df_sig_snp_list_file_path and archr_obj_path must all be set (see the top of this script)." >&2
+	exit 1
+fi
+
+# writeout_dir_path may be given as absolute or relative (to base_dir).
+# Resolve to absolute up front: plain "${base_dir}/${writeout_dir_path}"
+# concatenation below would silently produce a bogus nested path if
+# writeout_dir_path were already absolute (unlike R's file.path(), bash does
+# not special-case an absolute second component).
+if [[ "${writeout_dir_path}" = /* ]]; then
+	writeout_dir_abs="${writeout_dir_path}"
+else
+	writeout_dir_abs="${base_dir}/${writeout_dir_path}"
+fi
+mkdir -p "${writeout_dir_abs}"
+
+# df_sig_snp_list_file_path may likewise be absolute or relative; resolve it
+# the same way, then fail fast if it points at a directory instead of a file.
+if [[ "${df_sig_snp_list_file_path}" = /* ]]; then
+	df_sig_snp_list_file_path_abs="${df_sig_snp_list_file_path}"
+else
+	df_sig_snp_list_file_path_abs="${base_dir}/${df_sig_snp_list_file_path}"
+fi
+if [[ -d "${df_sig_snp_list_file_path_abs}" ]]; then
+	echo "ERROR: df_sig_snp_list_file_path must be a file, not a directory: ${df_sig_snp_list_file_path_abs}" >&2
+	exit 1
+fi
+
+# archr_obj_path may likewise be absolute or relative; resolve it the same
+# way, then fail fast if it points at a file instead of a directory.
+if [[ "${archr_obj_path}" = /* ]]; then
+	archr_obj_path_abs="${archr_obj_path}"
+else
+	archr_obj_path_abs="${base_dir}/${archr_obj_path}"
+fi
+if [[ -f "${archr_obj_path_abs}" ]]; then
+	echo "ERROR: archr_obj_path must be a directory, not a file: ${archr_obj_path_abs}" >&2
+	exit 1
+fi
+
+# The split step (plot_gviz_pileups_split.R) is run ONCE, upfront, by the
+# guardian (run_gviz_pileups_pipeline.sh) before it submits this array -- not
+# here, since every array element sourcing this script would otherwise race to
+# delete-and-rewrite the same part_*.tsv/manifest.txt concurrently. If you
+# submit this script by hand, run plot_gviz_pileups_split.R yourself first.
 
 # OpenMPI + fork(): the workers fork a node-local pool for the Arrow reads. Those
 # children never call MPI, so this is safe, but silence the warning and disable
@@ -85,7 +156,11 @@ part_index="${LSB_JOBINDEX}"
 # signature's recorded part_md5 still matches the current part_XX.tsv. The
 # worker writes the signature only after fully closing the PDF, so this cannot
 # skip a half-written chunk.
-parts_dir="${base_dir}/gviz_hepatocyte_SNP_pileups/parts"
+parts_dir="${writeout_dir_abs}/parts"
+if [[ -z "${parts_dir}" || ! -d "${parts_dir}" ]]; then
+	echo "ERROR: parts_dir is empty or does not exist: ${parts_dir} (did the guardian's plot_gviz_pileups_split.R step run?)" >&2
+	exit 1
+fi
 chunk_pdf="$(printf '%s/chunk_%02d.pdf' "${parts_dir}" "${part_index}")"
 chunk_done="$(printf '%s/chunk_%02d.done' "${parts_dir}" "${part_index}")"
 part_tsv="$(printf '%s/part_%02d.tsv' "${parts_dir}" "${part_index}")"
@@ -116,17 +191,35 @@ echo "--- hostfile ---"
 cat "${hostfile}"
 echo "--- Rscript: ${rscript_bin} ---"
 
+# exit 139 (128+SIGSEGV) is the PRTE launch-time segfault documented above; it
+# is transient node-contention flakiness, not an application bug, so retry a
+# few times before giving up (a real worker failure exits with another code).
+max_mpi_attempts=3
+mpi_attempt=1
 mpi_rc=0
-mpirun --hostfile "${hostfile}" -n "${n_ranks}" \
-	--map-by node --bind-to none \
-	--prtemca prte_local_tmpdir_base "${node_tmp}" \
-	--prtemca prte_remote_tmpdir_base "${node_tmp}" \
-	--prtemca prte_silence_shared_fs 1 \
-	-x PATH -x LD_LIBRARY_PATH \
-	"${rscript_bin}" plot_gviz_pileups_mpi_worker.R \
-	--part-index "${part_index}" \
-	--threads "${threads_per_worker}" ||
-	mpi_rc=$?
+while true; do
+	mpi_rc=0
+	mpirun --hostfile "${hostfile}" -n "${n_ranks}" \
+		--map-by node --bind-to none \
+		--prtemca prte_local_tmpdir_base "${node_tmp}" \
+		--prtemca prte_remote_tmpdir_base "${node_tmp}" \
+		--prtemca prte_silence_shared_fs 1 \
+		-x PATH -x LD_LIBRARY_PATH \
+		"${rscript_bin}" plot_gviz_pileups_mpi_worker.R \
+		--part-index "${part_index}" \
+		--threads "${threads_per_worker}" \
+		--writeout-dir "${writeout_dir_abs}" \
+		--df-sig-snp-list-file-path "${df_sig_snp_list_file_path_abs}" \
+		--archr-obj-path "${archr_obj_path_abs}" ||
+		mpi_rc=$?
+	if [[ "${mpi_rc}" -eq 139 && "${mpi_attempt}" -lt "${max_mpi_attempts}" ]]; then
+		echo "Part ${part_index}: mpirun segfaulted (exit 139), attempt ${mpi_attempt}/${max_mpi_attempts}; retrying." >&2
+		mpi_attempt=$((mpi_attempt + 1))
+		sleep 10
+		continue
+	fi
+	break
+done
 
 rm -f "${hostfile}"
 # PRTE removes its own per-node session dirs on a clean shutdown; nothing to

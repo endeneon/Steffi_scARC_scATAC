@@ -193,27 +193,37 @@ print("All settings initialized successfully.")
 # confident_hepatocyte_barcodes <-
 #   qs_read("confident_hepatocyte_barcodes.qs2", nthreads = 4)
 
-# projHepatocytes <-
+# ref_archr_proj <-
 #   subsetArchRProject(
 #     ArchRProj = projMerged,
 #     cells = confident_hepatocyte_barcodes,
-#     outputDirectory = "ArchR_hepato",
+#     outputDirectory = archr_obj_path,
 #     force = TRUE
 #   )
-projHepatocytes <-
-  ArchR::loadArchRProject(path = "ArchR_hepato")
-# colnames(projHepatocytes@cellColData)
+# archr_obj_path: ArchRProject directory to load, e.g. "ArchR_hepato". Must be
+# set via options(gviz.pipeline.archr_obj_path = ...) before sourcing this
+# script (plot_gviz_pileups_mpi_worker.R does this from its CLI flag).
+archr_obj_path <- getOption("gviz.pipeline.archr_obj_path")
+if (is.null(archr_obj_path) || !nzchar(archr_obj_path)) {
+  stop(
+    "`archr_obj_path` is required: set options(gviz.pipeline.archr_obj_path",
+    " = <path>) before sourcing this script."
+  )
+}
+ref_archr_proj <-
+  ArchR::loadArchRProject(path = archr_obj_path)
+# colnames(ref_archr_proj@cellColData)
 
-# projHepatocytes@cellColData$category <- "Primary"
-# projHepatocytes@cellColData$category[str_detect(
-#   as.character(projHepatocytes@cellColData$Sample),
+# ref_archr_proj@cellColData$category <- "Primary"
+# ref_archr_proj@cellColData$category[str_detect(
+#   as.character(ref_archr_proj@cellColData$Sample),
 #   pattern = "pre$",
 #   negate = F
 # )] <- "Resistant"
-# projHepatocytes <-
+# ref_archr_proj <-
 #   saveArchRProject(
-#     ArchRProj = projHepatocytes,
-#     outputDirectory = "ArchR_hepato",
+#     ArchRProj = ref_archr_proj,
+#     outputDirectory = archr_obj_path,
 #     load = TRUE,
 #     overwrite = TRUE
 #   )
@@ -226,13 +236,24 @@ projHepatocytes <-
 #     stringsAsFactors = FALSE
 #   )
 
-# use all hepatocyte SNPs
+# use all SNPs in the list
 # quote = "" / comment.char = "": fields in the motif / TF columns contain
 # apostrophes and quotes; with R's default quoting those rows merge and only
 # ~148 of the 315 records parse. Disabling quote handling reads all 315.
+# df_sig_snp_list_file_path: SNP list TSV path, e.g.
+# "sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated.tsv". Must be set via
+# options(gviz.pipeline.df_sig_snp_list_file_path = ...) before sourcing this
+# script (plot_gviz_pileups_mpi_worker.R does this from its CLI flag).
+df_sig_snp_list_file_path <- getOption("gviz.pipeline.df_sig_snp_list_file_path")
+if (is.null(df_sig_snp_list_file_path) || !nzchar(df_sig_snp_list_file_path)) {
+  stop(
+    "`df_sig_snp_list_file_path` is required: set options(",
+    "gviz.pipeline.df_sig_snp_list_file_path = <path>) before sourcing this script."
+  )
+}
 df_sig_snp_list <-
   read.table(
-    "sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated.tsv",
+    df_sig_snp_list_file_path,
     sep = "\t",
     header = TRUE,
     stringsAsFactors = FALSE,
@@ -1442,7 +1463,7 @@ plot_gviz_pileups_by_category <-
 #   end = df_sig_snp_list$end[1],
 #   bin_size = 50,
 #   window = 1000,
-#   ref_ArchR_obj = projHepatocytes,
+#   ref_ArchR_obj = ref_archr_proj,
 #   main_title = paste0(
 #     df_sig_snp_list$variantID[1],
 #     " (",
@@ -1455,7 +1476,16 @@ plot_gviz_pileups_by_category <-
 #   alpha = 0.85
 # )
 
-writeout_dir <- "gviz_hepatocyte_SNP_pileups"
+# writeout_dir: PDFs/parts output directory, e.g. "gviz_hepatocyte_SNP_pileups".
+# Must be set via options(gviz.pipeline.writeout_dir = ...) before sourcing
+# this script (plot_gviz_pileups_mpi_worker.R does this from its CLI flag).
+writeout_dir <- getOption("gviz.pipeline.writeout_dir")
+if (is.null(writeout_dir) || !nzchar(writeout_dir)) {
+  stop(
+    "`writeout_dir` is required: set options(gviz.pipeline.writeout_dir = ",
+    "<path>) before sourcing this script."
+  )
+}
 if (!dir.exists(writeout_dir)) {
   dir.create(writeout_dir, recursive = TRUE)
 }
@@ -1483,9 +1513,11 @@ if (!dir.exists(writeout_dir)) {
 #
 # The scatter/gather MPI pipeline (plot_gviz_pileups_mpi_worker.R) source()s
 # THIS script only to obtain its libraries, helper functions and the loaded
-# `projHepatocytes`, then runs its own doMPI driver. Setting the option
+# `ref_archr_proj`, then runs its own doMPI driver. Setting the option
 # `gviz.pipeline.lib_only = TRUE` before sourcing skips the serial driver + PDF
 # block below so it does not run (and does not build a second cluster).
+# (It also forwards gviz.pipeline.writeout_dir / df_sig_snp_list_file_path /
+# archr_obj_path, read above, from its own CLI flags.)
 if (!isTRUE(getOption("gviz.pipeline.lib_only", FALSE))) {
   cluster_type <- "PSOCK" # "PSOCK" or "MPI"
   n_snps <- length(df_sig_snp_list$seqnames)
@@ -1496,7 +1528,7 @@ if (!isTRUE(getOption("gviz.pipeline.lib_only", FALSE))) {
   # inherited these automatically; PSOCK/MPI must be told explicitly)
   export_objs <- c(
     "df_sig_snp_list",
-    "projHepatocytes",
+    "ref_archr_proj",
     "archr_threads_per_worker",
     "plot_gviz_pileups_by_category",
     "load_cytobands",
@@ -1585,7 +1617,7 @@ if (!isTRUE(getOption("gviz.pipeline.lib_only", FALSE))) {
           end = df_sig_snp_list$end[i],
           bin_size = 50,
           window = 2000,
-          ref_ArchR_obj = projHepatocytes,
+          ref_ArchR_obj = ref_archr_proj,
           slot = "category",
           alpha = 0.85,
           main_title = main_title,
@@ -1624,7 +1656,7 @@ if (!isTRUE(getOption("gviz.pipeline.lib_only", FALSE))) {
   n_pages <- ceiling(length(tr_list) / panels_per_page)
 
   pdf(
-    file.path(writeout_dir, "hepatocyte_SNP_pileups_2x2.pdf"),
+    file.path(writeout_dir, "SNP_pileups_2x2.pdf"),
     width = 16,
     height = 12
   )
