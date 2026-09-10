@@ -7,6 +7,7 @@ Steffi_works/data_dir/*
 *.log
 *.tar
 *.rds
+*whitelist.tsv
 Steffi_works/merged_integrated_seurat_obj.qs2
 Steffi_works/raw_multiome_seurat_list.qs2
 Steffi_works/seurat_gex_4_identity_projection.qs2

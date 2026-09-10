@@ -28,19 +28,22 @@ while IFS=$'\t' read -r barcode_file fragment_file sample_name; do
 		-o "logs/${sample_name}.%J.out" \
 		-e "logs/${sample_name}.%J.err" \
 		-env "all" <<-EOF
-			module load conda3/202402
-			conda activate /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/Anaconda/miniconda3/envs/r_45_python_312
-			export OMP_NUM_THREADS=8
-			cd "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/scAMP_CNV"
-			scamp atac-cnv \
-				fragment-file "${fragment_file}" \
-				--sample-name "${sample_name}" \
-				--whitelist-file "${barcode_file}" \
-				--window-size 3000000 \
-				--step-size 1000000 \
-				--n-neighbors 200 \
-				--cores-per-sample 18 \
-				--reference-genome-name "hg38"
+			source ~/.bashrc
+				module load conda3/202402
+				conda activate /research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/Anaconda/miniconda3/envs/r_45_python_312
+				export OMP_NUM_THREADS=8
+				cd "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/scAMP_CNV"
+				mkdir -p "results/${sample_name}"
+				scamp atac-cnv \
+					"results/${sample_name}" \
+					--fragment-file "${fragment_file}" \
+					--sample-name "${sample_name}" \
+					--whitelist-file "${barcode_file}" \
+					--window-size 3000000 \
+					--step-size 1000000 \
+					--n-neighbors 200 \
+					--cores-per-sample 18 \
+					--reference-genome-name "hg38"
 		EOF
 done <sample_list_w_barcodes.tsv
 # Disable nullglob if not needed globally
