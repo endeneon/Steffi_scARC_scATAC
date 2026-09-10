@@ -876,3 +876,10 @@ print(paste0(
   plot_dir
 ))
 print("Done.")
+
+# test_obj <-
+#   qs_read(
+#     "merged_all_samples_integrated_seurat_obj_annotated.qs2",
+#     nthreads = 8
+#   )
+# unique(test_obj$orig.ident)
