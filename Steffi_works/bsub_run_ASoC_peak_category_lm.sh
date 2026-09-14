@@ -50,6 +50,12 @@ export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 
-Rscript run_ASoC_peak_category_lm.R
+python \
+	test_ASoC_w_WASP/generate_GT_outputs.py \
+	-i ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_extended.tsv \
+	-o test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output
 
+Rscript run_ASoC_peak_category_lm.R
+Rscript run_ASoC_peak_genotype_category_gam.R
+Rscript run_ASoC_peak_genotype_lm.R
 set +e

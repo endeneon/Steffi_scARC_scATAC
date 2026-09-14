@@ -250,6 +250,9 @@ ref_obj <-
   ScaleData(verbose = T) %>%
   RunPCA(npcs = 50, verbose = T)
 
+
+qs_save(ref_obj, "seurat_gex_with_predicted_annotation.qs2", nthreads = 8)
+
 ## Choose transfer dims from the reference PCA elbow
 n_dims <-
   findPcsElbow(ref_obj)
@@ -327,6 +330,41 @@ print(prediction_score_summary)
 
 qs_save(
   merged_liver_obj,
-  "merged_all_samples_integrated_seurat_obj_annotated.qs2",
+  "merged_all_samples_integrated_seurat_obj_annotated_v2.qs2",
   nthreads = 8
 )
+
+# merged_liver_obj <-
+#   qs_read(
+#     "merged_all_samples_integrated_seurat_obj_annotated_v2.qs2",
+#     nthreads = 8
+#   )
+
+# scCustomize::FeaturePlot_scCustom(
+#   merged_liver_obj,
+#   features = c(
+#     "ERCC1",
+#     "MAMBA",
+#     "PADI4",
+#     "PSMG2",
+#     "PXDC1"
+#   ),
+#   reduction = "umap.harmony",
+#   label = F,
+#   num_columns = 2,
+#   pt.size = 0.1,
+#   combine = T,
+#   raster = F
+# ) +
+#   theme(
+#     legend.position = "right",
+#     legend.key.height = unit(0.5, "cm"),
+#     legend.key.width = unit(0.5, "cm")
+#   )
+
+# scCustomize::DimPlot_scCustom(
+#   merged_liver_obj,
+#   group.by = "annotation",
+#   reduction = "umap.harmony",
+#   label = T
+# )

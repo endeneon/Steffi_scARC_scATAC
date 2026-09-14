@@ -7,7 +7,7 @@ mkdir -p main_log
 # workers) can actually use them; without this LSF may spread -n 20 across nodes.
 #BSUB -R "span[hosts=1]"
 
-#BSUB -q "large_mem"
+#BSUB -q "standard"
 #BSUB -J "run_annotating_GEX_FLEX"
 #BSUB -o main_log/annotating_GEX_FLEX_%J.out
 #BSUB -e main_log/annotating_GEX_FLEX_%J.err

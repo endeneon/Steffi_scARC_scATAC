@@ -106,7 +106,7 @@ snp_summary_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macropha
 snp_genotype_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_GT_only.tsv"
 snp_annotation_file <-
   "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv"
-archr_project_dir <- "ArchR_macrophages"
+archr_project_dir <- "ArchR_hepato"
 
 # Fail-fast: every required input must exist before we start. Report ALL
 # missing paths at once (files checked as files, the ArchR project as a dir),
@@ -127,20 +127,25 @@ local({
       )
       normalizePath(p, mustWork = FALSE)
     }
+    # Both branches must stay zero-length-safe: ifelse() on an empty vector
+    # returns logical(0) (which breaks normalizePath) and paste0() on an empty
+    # vector still emits one element.
+    msg_lines <- c(
+      if (length(missing_files)) paste0("  [file] ", abs(missing_files)),
+      if (length(missing_dirs)) paste0("  [dir]  ", abs(missing_dirs))
+    )
     stop(
       "Missing required input(s) (working dir: ",
       getwd(),
       "):\n",
-      paste0("  [file] ", abs(missing_files), collapse = "\n"),
-      if (length(missing_files) && length(missing_dirs)) "\n",
-      paste0("  [dir]  ", abs(missing_dirs), collapse = "\n"),
+      paste(msg_lines, collapse = "\n"),
       call. = FALSE
     )
   }
 })
 
 
-writeout_dir <- "macrophage_ASoC_peak_category_lm"
+writeout_dir <- "hepato_macrophage_ASoC_peak_category_lm"
 if (!dir.exists(writeout_dir)) {
   dir.create(writeout_dir, recursive = TRUE)
 }
