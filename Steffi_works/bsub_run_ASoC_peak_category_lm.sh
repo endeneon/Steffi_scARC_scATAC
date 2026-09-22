@@ -52,7 +52,7 @@ export MKL_NUM_THREADS=1
 
 python \
 	test_ASoC_w_WASP/generate_GT_outputs.py \
-	-i ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_extended.tsv \
+	-i test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_extended.tsv \
 	-o test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output
 
 Rscript run_ASoC_peak_category_lm.R

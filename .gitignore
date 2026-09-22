@@ -7,6 +7,7 @@ Steffi_works/data_dir/*
 *.log
 *.tar
 *.rds
+*.arrow
 *whitelist.tsv
 Steffi_works/scAMP_CNV/results/*
 /*.g.vcf.gz
