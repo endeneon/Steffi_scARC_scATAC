@@ -2,34 +2,35 @@
 
 # init
 {
-  library(Seurat)
-  library(gplots)
+  # library(Seurat)
+  # library(gplots)
   library(ArchR)
   library(future)
   library(stringr)
   # library(pheatmap)
 
-  library(BiocParallel)
+  # library(BiocParallel)
   # library(BiocParallel.FutureParam)
-  library(parallel)
+  # library(parallel)
   library(foreach)
-  library(doParallel)
+  # library(doParallel)
   library(doFuture)
-  library(snow)
+  # library(snow)
 
-  library(Matrix)
-  library(matrixStats)
+  # library(Matrix)
+  # library(matrixStats)
 
-  library(qs2)
-  library(fs)
+  # library(qs2)
+  # library(fs)
 
   library(GenomicRanges)
   library(TxDb.Hsapiens.UCSC.hg38.knownGene)
   library(org.Hs.eg.db)
-  library(BSgenome.Hsapiens.UCSC.hg38)
+  # library(BSgenome.Hsapiens.UCSC.hg38)
 
-  library(ggplot2)
+  # library(ggplot2)
   library(Gviz)
+  library(dplyr)
 
   if (
     interactive() &&
@@ -50,7 +51,7 @@
 
 
 setwd(
-  "Steffi_works"
+  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
 )
 # determine if R is running in RSTUDIO/VSCode/Positron
 if (Sys.getenv("RSTUDIO") == "1" || (Sys.getenv("TERM_PROGRAM") == "vscode")) {
@@ -170,249 +171,58 @@ if (
     (Sys.getenv("TERM_PROGRAM") == "vscode")
 ) {
   print("Running under IDE, use 1 ArchR Thread")
-  addArchRThreads(threads = 1)
+  ArchR::addArchRThreads(threads = 1)
 } else {
   print("Running under Rscript, use all usable ArchR Threads")
-  addArchRThreads(threads = workers_2_use)
+  ArchR::addArchRThreads(threads = workers_2_use)
 }
-addArchRGenome("hg38")
+ArchR::addArchRGenome("hg38")
 print(paste0(
   "ArchR threads set to ",
-  getArchRThreads(),
+  ArchR::getArchRThreads(),
   " and genome set to ",
-  getArchRGenome()
+  ArchR::getArchRGenome()
 ))
 print("All settings initialized successfully.")
 
-projMerged <-
-  ArchR::loadArchRProject(path = "ArchR_merged_ATAC_multiome_obj")
-colnames(projMerged@cellColData)
-unique(projMerged@cellColData$transferred_barcode)
-
-selected_cells_obj <-
-  qs_read(
-    "annotation_script_package/reference_based/annotated_singler_reference_based.qs2",
-    nthreads = 8
-  )
-selected_cells_obj$simplified_singler_label <-
-  str_split(
-    selected_cells_obj$singler_label_cell,
-    pattern = "\\.",
-    simplify = TRUE
-  )[, 1]
-qs_save(
-  selected_cells_obj,
-  "annotation_script_package/reference_based/annotated_singler_reference_based.qs2",
-  nthreads = 8
-)
-
-# use cluster-based
-selected_cells_obj <-
-  qs_read(
-    "annotation_script_package/marker_based/step5.qs2",
-    nthreads = 8
-  )
-
-df_barcodes_w_ident <-
-  data.frame(
-    barcodes_w_ident = colnames(selected_cells_obj),
-    celltype_broad = selected_cells_obj$celltype_broad
-  )
-df_barcodes_w_ident$barcodes_w_ident_transfer <-
-  sub(
-    "^([^_]*__[^_]*)_",
-    "\\1#",
-    df_barcodes_w_ident$barcodes_w_ident
-  )
-
-sum(
-  rownames(projMerged@cellColData) %in%
-    df_barcodes_w_ident$barcodes_w_ident_transfer
-)
-
-# add transferred_barcode column to cellColData and fill the rest with NA
-projMerged@cellColData$transferred_celltype_multiple <- NA
-idx <- match(
-  rownames(projMerged@cellColData),
-  df_barcodes_w_ident$barcodes_w_ident_transfer
-)
-projMerged@cellColData$transferred_celltype_multiple <- as.character(
-  df_barcodes_w_ident$celltype_broad
-)[idx]
-# sum(!is.na(idx))
-
-# transfer barcodes with PeakMatrix UMAP embedding
-# plotEmbedding(
-#   ArchRProj = projMerged,
-#   embedding = "UMAP_Peaks",
-#   colorBy = "cellColData",
-#   name = "transferred_barcode",
-#   size = 0.1,
-#   # sampleCells = 10000,
-#   highlightCells = NULL,
-#   rastr = FALSE,
-#   quantCut = c(0.01, 0.99),
-#   discreteSet = NULL,
-#   continuousSet = NULL,
-#   randomize = TRUE,
-#   keepAxis = FALSE,
-#   baseSize = 10
-# )
-
-# name the extended barcode idents to "projected_barcodes_multiple_cell_types"
-projMerged@cellColData$projected_barcodes_multiple_cell_types <- NA
-
-# 2D density map of Hepatocytes in UMAP_Peaks space ####
-# UMAP_Peaks embedding coordinates for all cells
-umap_df <- ArchR::getEmbedding(
-  ArchRProj = projMerged,
-  embedding = "UMAP_Peaks",
-  returnDF = TRUE
-)
-colnames(umap_df) <- c("UMAP1", "UMAP2")
-
-# align cellColData and subset to Hepatocytes
-cell_meta <- as.data.frame(projMerged@cellColData)
-umap_df$transferred_celltype_multiple <- cell_meta[
-  rownames(umap_df),
-  "transferred_celltype_multiple"
-]
-
-unique_cell_types <-
-  unique(umap_df$transferred_celltype_multiple)[
-    !is.na(unique(umap_df$transferred_celltype_multiple))
-  ]
-
-# --- Project each cell type's density onto all cells ----------------------
-# For every cell type, rebuild the same 2D kernel density that
-# stat_density_2d draws (MASS::kde2d with per-axis bandwidth.nrd, matching
-# ggplot's defaults) on that type's labeled cells, over a grid spanning ALL
-# cells, and evaluate the fitted density at every cell's UMAP_Peaks position.
-
-# nearest grid cell indices are the same for every cell type (shared grid)
-# skip cell types with too few cells or degenerate bandwidths (kde2d errors)
-min_cells_for_kde <- 25
-density_mat <- sapply(unique_cell_types, function(ct) {
-  ct_df <- umap_df[
-    !is.na(umap_df$transferred_celltype_multiple) &
-      umap_df$transferred_celltype_multiple == ct,
-  ]
-  bw <- c(
-    MASS::bandwidth.nrd(ct_df$UMAP1),
-    MASS::bandwidth.nrd(ct_df$UMAP2)
-  )
-  if (nrow(ct_df) < min_cells_for_kde || any(!is.finite(bw)) || any(bw <= 0)) {
-    warning(
-      "Skipping cell type '",
-      ct,
-      "': too few cells (",
-      nrow(ct_df),
-      ") or degenerate bandwidth for kde2d"
-    )
-    return(rep(NA_real_, nrow(umap_df)))
-  }
-  kde_fit <- MASS::kde2d(
-    x = ct_df$UMAP1,
-    y = ct_df$UMAP2,
-    h = bw,
-    n = 200,
-    lims = c(range(umap_df$UMAP1), range(umap_df$UMAP2))
-  )
-  ix <- findInterval(umap_df$UMAP1, kde_fit$x, all.inside = TRUE)
-  iy <- findInterval(umap_df$UMAP2, kde_fit$y, all.inside = TRUE)
-  kde_fit$z[cbind(ix, iy)]
-})
-rownames(density_mat) <- rownames(umap_df)
-
-# drop skipped cell types so downstream winner/cutoff logic sees no NAs
-kept <- colSums(is.na(density_mat)) < nrow(density_mat)
-density_mat <- density_mat[, kept, drop = FALSE]
-unique_cell_types <- unique_cell_types[kept]
-
-# per-cell winner: cell type with the highest fitted density
-winner_idx <- max.col(density_mat, ties.method = "first")
-winner_type <- unique_cell_types[winner_idx]
-winner_density <- density_mat[cbind(seq_len(nrow(density_mat)), winner_idx)]
-
-# per-cell lower cut-off:
-# (a) the 2nd-smallest of this cell's per-type densities
-second_lowest <- apply(density_mat, 1, function(v) sort(v)[2])
-# (b) the 5% quantile (across all cells) of the density of this cell's
-#     lowest-density cell type
-lowest_type_idx <- apply(density_mat, 1, which.min)
-type_q05 <- apply(density_mat, 2, quantile, probs = 0.05, na.rm = TRUE)
-q05_of_lowest_type <- type_q05[lowest_type_idx]
-# take whichever is lower
-cutoff <- pmin(second_lowest, q05_of_lowest_type)
-
-# assign the winning cell type only where its density clears the cut-off
-projected <- ifelse(winner_density >= cutoff, winner_type, NA)
-projMerged@cellColData$projected_barcodes_multiple_cell_types <-
-  projected[match(rownames(projMerged@cellColData), rownames(umap_df))]
-
-table(
-  projMerged@cellColData$projected_barcodes_multiple_cell_types,
-  useNA = "ifany"
-)
-
-plotEmbedding(
-  ArchRProj = projMerged,
-  embedding = "UMAP_Peaks",
-  colorBy = "cellColData",
-  name = "projected_barcodes_multiple_cell_types",
-  size = 0.1,
-  # sampleCells = 10000,
-  highlightCells = NULL,
-  rastr = FALSE,
-  quantCut = c(0.01, 0.99),
-  discreteSet = NULL,
-  continuousSet = NULL,
-  randomize = TRUE,
-  keepAxis = FALSE,
-  baseSize = 10
-) +
-  ggplot2::theme(legend.text = ggplot2::element_text(size = 12))
-
-plotEmbedding(
-  ArchRProj = projMerged,
-  embedding = "UMAP_Tiles",
-  colorBy = "cellColData",
-  name = "projected_barcodes_multiple_cell_types",
-  size = 0.1,
-  # sampleCells = 10000,
-  highlightCells = NULL,
-  rastr = FALSE,
-  quantCut = c(0.01, 0.99),
-  discreteSet = NULL,
-  continuousSet = NULL,
-  randomize = TRUE,
-  keepAxis = FALSE,
-  baseSize = 10
-) +
-  ggplot2::theme(legend.text = ggplot2::element_text(size = 12))
-
-projMerged <-
-  saveArchRProject(
-    ArchRProj = projMerged,
-    outputDirectory = "ArchR_merged_ATAC_multiome_obj_multiple_cell_types",
-    load = TRUE,
-    overwrite = TRUE
-  )
-
-# Gviz pileups around rs2298881, one track per projected cell type ####
-# Adapted from plot_gviz_SPI1_macrophage.R, but instead of overlaying all
-# pileups in one panel, each level of projected_barcodes_multiple_cell_types
-# gets its own DataTrack, stacked vertically. Coverage is re-binned region-
-# locally at 50 bp from the fragments (nothing written back to Arrow files),
-# RPGC-normalized per cell type, and drawn on a shared y-axis.
 
 projMerged <-
   ArchR::loadArchRProject(
     path = "ArchR_merged_ATAC_multiome_obj_multiple_cell_types"
   )
-library(Gviz)
-library(TxDb.Hsapiens.UCSC.hg38.knownGene)
-library(org.Hs.eg.db)
+
+df_raw <-
+  read.table(
+    "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv",
+    sep = "\t",
+    header = TRUE,
+    stringsAsFactors = FALSE,
+    # annotation fields contain apostrophes; disable quote handling so
+    # read.table() doesn't hit "EOF within quoted string" and drop rows
+    quote = ""
+  )
+
+df_2_plot <-
+  df_raw[, c(
+    "seqnames",
+    "start",
+    "variantID",
+    "SYMBOL"
+  )]
+
+df_2_plot$annot <-
+  stringr::str_c(
+    df_2_plot$SYMBOL,
+    ", ",
+    df_2_plot$variantID,
+    " (",
+    df_2_plot$seqnames,
+    ":",
+    df_2_plot$start,
+    ") +/- 5 kb, 50 bp bins (RPGC)",
+    sep = ""
+  )
+
 
 # ---- helpers (inlined from plot_gviz_SPI1_macrophage.R) ----------------------
 `%||%` <- function(x, y) if (is.null(x)) y else x
@@ -810,19 +620,108 @@ plot_snp_tracks <- function(
   )
 }
 
-# rs150652488
-plot_snp_tracks(
-  snp_chr = "chr19",
-  snp_pos = 45479071,
-  gviz_window = 5000,
-  gviz_bin_size = 50,
-  main = "ERCC1, rs150652488 (chr19:45479071) +/- 5 kb, 50 bp bins (RPGC)"
-)
 
-plot_snp_tracks(
-  snp_chr = "chr19",
-  snp_pos = 45479071,
-  gviz_window = 1000,
-  gviz_bin_size = 50,
-  main = "ERCC1, rs150652488 (chr19:45479071) +/- 1 kb, 50 bp bins (RPGC)"
+# # rs150652488
+# plot_snp_tracks(
+#   snp_chr = "chr19",
+#   snp_pos = 45479071,
+#   gviz_window = 5000,
+#   gviz_bin_size = 50,
+#   main = "ERCC1, rs150652488 (chr19:45479071) +/- 5 kb, 50 bp bins (RPGC)"
+# )
+
+# plot_snp_tracks(
+#   snp_chr = "chr19",
+#   snp_pos = 45479071,
+#   gviz_window = 1000,
+#   gviz_bin_size = 50,
+#   main = "ERCC1, rs150652488 (chr19:45479071) +/- 1 kb, 50 bp bins (RPGC)"
+# )
+
+# ---- batch SNP track panels -> 3x3 multipage PDF ----------------------------
+
+gviz_window <- 5000
+gviz_bin_size <- 50
+
+# Capture each row's plotTracks() output as a grid grob (plotTracks draws to a
+# device, so grid.grabExpr() records it without opening one). Built in parallel
+# over the foreach/doFuture backend registered above; each worker re-derives its
+# own Arrow handles inside plot_snp_tracks() (HDF5 handles can't cross processes).
+if (!foreach::getDoParRegistered()) {
+  doFuture::registerDoFuture()
+  future::plan(session_plan, workers = workers_2_use)
+}
+
+i <- NULL # silence R CMD check note for the foreach variable
+`%dopar%` <- foreach::`%dopar%`
+gviz_grobs <- foreach::foreach(
+  i = seq_len(nrow(df_2_plot)),
+  .packages = c("Gviz", "grid", "gridExtra", "ArchR", "GenomicRanges"),
+  .errorhandling = "stop"
+) %dopar%
+  {
+    row <- df_2_plot[i, ]
+    main_i <- sprintf(
+      "%s, %s (%s:%s) +/- %s bp, %s bp bins (RPGC)",
+      row$SYMBOL,
+      row$variantID,
+      row$seqnames,
+      format(row$start, big.mark = ","),
+      format(gviz_window, big.mark = ","),
+      gviz_bin_size
+    )
+    panel <- grid::grid.grabExpr(
+      plot_snp_tracks(
+        snp_chr = row$seqnames,
+        snp_pos = row$start,
+        gviz_window = gviz_window,
+        gviz_bin_size = gviz_bin_size,
+        main = main_i
+      ),
+      # Gviz reuses grob names across its per-track panels; without wrapping,
+      # grid.grabExpr() silently overwrites all but one coverage track (the grab
+      # is "not faithful"), collapsing the 6 cell-type tracks to a single panel.
+      wrap.grobs = TRUE
+    )
+    # attach a short label (SYMBOL, variantID, chr:pos) as a per-panel subtitle
+    subtitle_i <- sprintf(
+      "%s, %s (%s:%s)",
+      row$SYMBOL,
+      row$variantID,
+      row$seqnames,
+      format(row$start, big.mark = ",")
+    )
+    gridExtra::arrangeGrob(
+      panel,
+      bottom = grid::textGrob(subtitle_i, gp = grid::gpar(fontsize = 5))
+    )
+  }
+
+out_dir <- "macrophage_SNP_by_cell_type"
+if (!dir.exists(out_dir)) {
+  dir.create(out_dir, recursive = TRUE)
+}
+
+# 2x2 grid per landscape page; larger page keeps the 6 stacked tracks legible.
+pdf(
+  file.path(out_dir, "macrophage_SNP_by_cell_type_panels.pdf"),
+  width = 14,
+  height = 10.5
 )
+per_page <- 4
+n_pages <- ceiling(length(gviz_grobs) / per_page)
+for (pg in seq_len(n_pages)) {
+  idx <- seq((pg - 1) * per_page + 1, min(pg * per_page, length(gviz_grobs)))
+  gridExtra::grid.arrange(
+    grobs = gviz_grobs[idx],
+    nrow = 2,
+    ncol = 2,
+    bottom = grid::textGrob(
+      sprintf("Page %d of %d", pg, n_pages),
+      x = 0.98,
+      hjust = 1,
+      gp = grid::gpar(fontsize = 8, col = "grey40")
+    )
+  )
+}
+invisible(dev.off())

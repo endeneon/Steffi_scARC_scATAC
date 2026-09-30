@@ -177,6 +177,7 @@ df_cpm <-
     log = FALSE
   ))
 
+### Wnt effectors ####
 genes_2_plot <-
   c(
     "APC2",
@@ -193,6 +194,7 @@ genes_2_plot <-
     "SNAI2"
   )
 
+### Dopaminergic neuron markers ####
 genes_2_plot <-
   c(
     "TH",
@@ -210,7 +212,6 @@ genes_2_plot <-
     "ASCL1",
     "NEUROG2"
   )
-
 
 cpm_writeout <-
   df_cpm[
@@ -255,6 +256,217 @@ df_2_plot$Group <-
     )
   )
 
+df_2_plot$Treatment <-
+  factor(
+    df_2_plot$Treatment,
+    levels = c("noChir", "Chir")
+  )
+df_2_plot$Condition <-
+  factor(
+    df_2_plot$Condition,
+    levels = c("ctrl", "KO2", "KO3")
+  )
+
+## w/o significance #####
+
+df_2_plot |>
+  summarise(
+    CPM_mean = mean(CPM),
+    CPM_sem = sd(CPM) / sqrt(n()),
+    .by = c(Condition, Treatment, Group, Gene)
+  ) |>
+  ggplot(
+    aes(
+      x = Treatment,
+      y = CPM_mean,
+      fill = Treatment,
+      alpha = Condition,
+      shape = Condition,
+      group = Condition
+    )
+  ) +
+  geom_hline(yintercept = 0, linewidth = 0.5, color = "black") +
+  geom_col(
+    position = position_dodge(width = 0.7),
+    width = 0.65,
+    color = "black"
+  ) +
+  scale_fill_manual(
+    values = c("noChir" = "orange", "Chir" = "pink")
+  ) +
+  geom_errorbar(
+    aes(ymin = CPM_mean - CPM_sem, ymax = CPM_mean + CPM_sem),
+    position = position_dodge(width = 0.7),
+    width = 0.3,
+    alpha = 1
+  ) +
+  geom_point(
+    data = df_2_plot,
+    aes(y = CPM),
+    position = position_jitterdodge(
+      jitter.width = 0.25,
+      dodge.width = 0.7
+    ),
+    size = 1,
+    color = "black",
+    alpha = 1
+  ) +
+  scale_shape_manual(values = c("ctrl" = 1, "KO2" = 2, "KO3" = 5)) +
+  scale_alpha_manual(values = c("ctrl" = 0, "KO2" = 0.5, "KO3" = 1)) +
+  scale_x_discrete(expand = expansion(add = 0.5)) +
+  scale_y_continuous(
+    name = "Mean CPM",
+    expand = expansion(mult = c(0, 0.1))
+  ) +
+  theme_classic() +
+  facet_wrap(~Gene, scales = "free_y") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+## w/ significance #####
+{
+  # significance stars from p value
+  sig_labeller <- function(p) {
+    dplyr::case_when(
+      p < 0.001 ~ "***",
+      p < 0.01 ~ "**",
+      p < 0.05 ~ "*",
+      TRUE ~ NA_character_
+    )
+  }
+
+  # all pairwise two-sample t-tests among the 6 Groups, within each Gene
+  compute_pairwise_t <- function(dat) {
+    groups <- levels(factor(dat$Group))
+    res <- data.frame(
+      group1 = character(),
+      group2 = character(),
+      p = numeric()
+    )
+    for (pair in combn(groups, 2, simplify = FALSE)) {
+      v1 <- dat$CPM[dat$Group == pair[1]]
+      v2 <- dat$CPM[dat$Group == pair[2]]
+      if (length(v1) < 2 || length(v2) < 2) {
+        next
+      }
+      p <- tryCatch(t.test(v1, v2)$p.value, error = function(e) NA_real_)
+      res <- rbind(res, data.frame(group1 = pair[1], group2 = pair[2], p = p))
+    }
+    res
+  }
+
+  # numeric x position of each dodged column on the discrete Treatment axis
+  dodge_w <- 0.7
+  cond_levels <- levels(df_2_plot$Condition)
+  treat_levels <- levels(df_2_plot$Treatment)
+  n_cond <- length(cond_levels)
+  cond_offset <- (seq_len(n_cond) - (n_cond + 1) / 2) * dodge_w / n_cond
+
+  group_pos <-
+    expand.grid(
+      Condition = cond_levels,
+      Treatment = treat_levels,
+      stringsAsFactors = FALSE
+    ) |>
+    mutate(
+      Group = paste(Condition, Treatment, sep = "_"),
+      x = match(Treatment, treat_levels) +
+        cond_offset[match(Condition, cond_levels)]
+    )
+
+  # per-gene top of the data, used to stack the brackets
+  y_base <-
+    df_2_plot |>
+    summarise(y_top = max(CPM, na.rm = TRUE), .by = Gene)
+
+  stat_df <-
+    df_2_plot |>
+    group_by(Gene) |>
+    group_modify(~ compute_pairwise_t(.x)) |>
+    ungroup() |>
+    filter(!is.na(p), p < 0.05) |>
+    mutate(
+      label = sig_labeller(p),
+      xmin = group_pos$x[match(group1, group_pos$Group)],
+      xmax = group_pos$x[match(group2, group_pos$Group)],
+      xleft = pmin(xmin, xmax),
+      xright = pmax(xmin, xmax),
+      xmid = (xleft + xright) / 2
+    ) |>
+    left_join(y_base, join_by(Gene)) |>
+    arrange(Gene, xleft, xright) |>
+    mutate(
+      y.position = y_top * (1.05 + 0.09 * (row_number() - 1)),
+      .by = Gene
+    )
+
+  df_2_plot |>
+    summarise(
+      CPM_mean = mean(CPM),
+      CPM_sem = sd(CPM) / sqrt(n()),
+      .by = c(Condition, Treatment, Group, Gene)
+    ) |>
+    ggplot(
+      aes(
+        x = Treatment,
+        y = CPM_mean,
+        fill = Treatment,
+        alpha = Condition,
+        shape = Condition,
+        group = Condition
+      )
+    ) +
+    geom_hline(yintercept = 0, linewidth = 0.5, color = "black") +
+    geom_col(
+      position = position_dodge(width = 0.7),
+      width = 0.65,
+      color = "black"
+    ) +
+    scale_fill_manual(
+      values = c("noChir" = "orange", "Chir" = "pink")
+    ) +
+    geom_errorbar(
+      aes(ymin = CPM_mean - CPM_sem, ymax = CPM_mean + CPM_sem),
+      position = position_dodge(width = 0.7),
+      width = 0.3,
+      alpha = 1
+    ) +
+    geom_point(
+      data = df_2_plot,
+      aes(y = CPM),
+      position = position_jitterdodge(
+        jitter.width = 0.25,
+        dodge.width = 0.7
+      ),
+      size = 1,
+      color = "black",
+      alpha = 1
+    ) +
+    geom_segment(
+      data = stat_df,
+      aes(x = xleft, xend = xright, y = y.position, yend = y.position),
+      inherit.aes = FALSE,
+      linewidth = 0.3
+    ) +
+    geom_text(
+      data = stat_df,
+      aes(x = xmid, y = y.position, label = label),
+      inherit.aes = FALSE,
+      vjust = -0.1,
+      size = 3
+    ) +
+    scale_shape_manual(values = c("ctrl" = 1, "KO2" = 2, "KO3" = 5)) +
+    scale_alpha_manual(values = c("ctrl" = 0, "KO2" = 0.5, "KO3" = 1)) +
+    scale_x_discrete(expand = expansion(add = 0.4)) +
+    scale_y_continuous(
+      name = "Mean CPM",
+      expand = expansion(mult = c(0, 0.15))
+    ) +
+    theme_classic() +
+    facet_wrap(~Gene, scales = "free_y") +
+    theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+}
+
+###
 df_2_plot |>
   summarise(
     CPM_mean = mean(CPM),
@@ -265,15 +477,18 @@ df_2_plot |>
     aes(
       x = Group,
       y = CPM_mean,
-      fill = Condition,
+      fill = Treatment,
       alpha = Treatment,
       shape = Condition
     )
   ) +
-  geom_col(position = position_dodge(width = 0.9), width = 0.8) +
+  geom_col(
+    position = position_dodge(width = 1),
+    width = 0.8
+  ) +
   geom_errorbar(
     aes(ymin = CPM_mean - CPM_sem, ymax = CPM_mean + CPM_sem),
-    position = position_dodge(width = 0.9),
+    position = position_dodge(width = 1),
     width = 0.3,
     alpha = 1
   ) +
@@ -289,7 +504,7 @@ df_2_plot |>
   ) +
   scale_shape_manual(values = c("ctrl" = 1, "KO2" = 2, "KO3" = 5)) +
   scale_fill_manual(
-    values = c("ctrl" = "steelblue", "KO2" = "orange", "KO3" = "darkred")
+    values = c("noChir" = "orange", "Chir" = "pink")
   ) +
   scale_alpha_manual(values = c("noChir" = 0.5, "Chir" = 1)) +
   scale_y_continuous(

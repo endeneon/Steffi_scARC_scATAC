@@ -7,13 +7,13 @@ mkdir -p main_log
 # stay local; without this LSF may spread -n 32 across nodes.
 #BSUB -R "span[hosts=1]"
 #BSUB -q "large_mem"
-#BSUB -J "run_ASoC_peak_category_lm_PICALM"
-#BSUB -o main_log/ASoC_peak_category_lm_%J_PICALM.out
-#BSUB -e main_log/ASoC_peak_category_lm_%J_PICALM.err
+#BSUB -J "run_ASoC_peak_genotype_PICALM"
+#BSUB -o main_log/ASoC_peak_genotype_PICALM_%J.out
+#BSUB -e main_log/ASoC_peak_genotype_PICALM_%J.err
 
-# Compare per-sample peak RPGC between sample categories (Primary vs Resistant,
-# Resistant reference) with a linear model and a Wilcoxon test, and draw the
-# per-peak box-and-whisker panels. See run_ASoC_peak_category_lm.R.
+# Draw per-SNP-peak genotype x category sample-count column graphs and fit a
+# binomial GAM of category on allele dosage. See
+# run_ASoC_peak_genotype_category_gam.R.
 
 # set error trap
 # exit when any command fails
@@ -50,13 +50,7 @@ export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
 export MKL_NUM_THREADS=1
 
-# python \
-# 	test_ASoC_w_WASP/generate_GT_outputs.py \
-# 	-i test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_extended.tsv \
-# 	-o test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output
-
-Rscript run_ASoC_peak_category_lm.R
-Rscript run_ASoC_peak_genotype_category_gam.R
+# Rscript run_ASoC_peak_genotype_category_gam.R
+# Rscript run_ASoC_peak_genotype_category_lm.R
 Rscript run_ASoC_peak_genotype_lm.R
-
 set +e

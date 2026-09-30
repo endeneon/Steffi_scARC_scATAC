@@ -53,9 +53,11 @@
 #   "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/
 #    szhang37/projects/szhang_dev/STEREO_seq/Human_liver/R_liver"
 # )
-setwd(
-  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
-)
+# setwd(
+#   "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
+# )
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
 # determine if R is running in RSTUDIO/VSCode/Positron
 if (
   interactive() &&
@@ -863,3 +865,273 @@ ggsave(
   units = "px",
   dpi = 72
 )
+
+# investigate why FLEX samples miss some clusters ####
+merged_liver_obj <-
+  qs_read(
+    "merged_all_samples_integrated_seurat_obj_annotated_v2.qs2",
+    nthreads = 8
+  )
+colnames(merged_liver_obj@meta.data)
+
+
+scCustomize::FeaturePlot_scCustom(
+  merged_liver_obj,
+  features = c(
+    "nCount_RNA",
+    "nFeature_RNA",
+    "percent.mt"
+  ),
+  reduction = "umap.unintegrated",
+  pt.size = 0.2,
+  split.by = "preparation",
+  num_columns = 3,
+  # alpha = 1,
+  # shuffle = T,
+  raster = F
+)
+colnames(merged_liver_obj@meta.data)
+
+steffi_obj <-
+  qs_read(
+    "merged_all_samples_integrated_seurat_obj_annotated_scRNAwithflex.qs2",
+    nthreads = 8
+  )
+Reductions(steffi_obj)
+colnames(steffi_obj@meta.data)
+
+mye_clean <-
+  readRDS("allsample_filtered_mye_clean.rds")
+Reductions(mye_clean)
+colnames(mye_clean@meta.data)
+scCustomize::FeaturePlot_scCustom(
+  mye_clean,
+  features = c(
+    "nCount_RNA",
+    "nFeature_RNA",
+    "percent.mt"
+  ),
+  reduction = "umap",
+  pt.size = 0.2,
+  split.by = "preparation",
+  num_columns = 3,
+  # alpha = 1,
+  # shuffle = T,
+  raster = F
+)
+
+
+table(mye_clean$celltype2)
+table(mye_clean$celltype)
+head(colnames(mye_clean))
+
+mye_clean <-
+  mye_clean %>%
+  Seurat::NormalizeData(
+    assay = "RNA",
+    normalization.method = "LogNormalize",
+    scale.factor = 10000,
+    verbose = T
+  ) %>%
+  Seurat::ScaleData(
+    assay = "RNA",
+    verbose = T
+  )
+
+mye_clean <-
+  RunHarmony(
+    mye_clean,
+    group.by.vars = "orig.ident",
+    reduction.save = "myeloid.harmony",
+    nclust = 20,
+    assay.use = "RNA"
+  )
+
+ElbowPlot(mye_clean, ndims = 50, reduction = "myeloid.harmony")
+
+mye_clean <-
+  mye_clean %>%
+  RunUMAP(
+    reduction = "myeloid.harmony",
+    dims = 1:15,
+    reduction.name = "umap.myeloid",
+    reduction.key = "UMAPmyeloid_"
+  )
+
+qs_save(
+  mye_clean,
+  file = "mye_clean_w_new_harmony_umap_tsne.qs2",
+  nthreads = 8
+)
+
+mye_clean <-
+  qs_read("mye_clean_w_new_harmony_umap_tsne.qs2", nthreads = 8)
+
+p1 <-
+  scCustomize::DimPlot_scCustom(
+    mye_clean,
+    group.by = "preparation",
+    reduction = "umap.myeloid",
+    pt.size = 0.01,
+    # num_columns = 3,
+    shuffle = T,
+    colors_use = c("darkred", "green", "darkblue"),
+    alpha = 0.5,
+    # shuffle = T,
+    raster = F
+  ) +
+  ggtitle("Harmony UMAP run on myeloids only, colored by preparation")
+
+p2 <-
+  scCustomize::DimPlot_scCustom(
+    mye_clean,
+    group.by = "preparation",
+    reduction = "umap.harmony",
+    pt.size = 0.01,
+    # num_columns = 3,
+    shuffle = T,
+    colors_use = c("darkred", "green", "darkblue"),
+    alpha = 0.5,
+    # alpha = 1,
+    # shuffle = T,
+    raster = F
+  ) +
+  ggtitle("Harmony UMAP colored by preparation")
+
+p1 + p2
+
+scCustomize::FeaturePlot_scCustom(
+  mye_clean,
+  features = c(
+    "nCount_RNA",
+    "nFeature_RNA",
+    "percent.mt"
+  ),
+  reduction = "umap.myeloid",
+  pt.size = 0.2,
+  split.by = "preparation",
+  num_columns = 3,
+  # alpha = 1,
+  # shuffle = T,
+  raster = F
+)
+
+mye_clean <-
+  mye_clean %>%
+  FindNeighbors(
+    reduction = "myeloid.harmony",
+    dims = 1:15,
+    verbose = T
+  ) %>%
+  FindClusters(
+    resolution = 0.2,
+    verbose = T
+  )
+
+scCustomize::DimPlot_scCustom(
+  mye_clean,
+  group.by = "RNA_snn_res.0.2",
+  split.by = "preparation",
+  reduction = "umap.myeloid",
+  pt.size = 0.01,
+  # num_columns = 3,
+  shuffle = T,
+  colors_use = scCustomize::DiscretePalette_scCustomize(
+    num_colors = nlevels(mye_clean$RNA_snn_res.0.2),
+    palette = "glasbey"
+  ),
+  alpha = 0.5,
+  # shuffle = T,
+  raster = F
+) +
+  ggtitle("Harmony UMAP run on myeloids only, colored by RNA_snn_res.0.2")
+
+scCustomize::VlnPlot_scCustom(
+  mye_clean,
+  features = c(
+    "nCount_RNA",
+    "nFeature_RNA",
+    "percent.mt"
+  ),
+  split.by = "RNA_snn_res.0.2",
+  group.by = "preparation",
+  colors_use = scCustomize::DiscretePalette_scCustomize(
+    num_colors = nlevels(mye_clean$RNA_snn_res.0.2),
+    palette = "glasbey"
+  ),
+  pt.size = 0,
+  num_columns = 3
+)
+
+p1 <-
+  scCustomize::Proportion_Plot(
+    mye_clean,
+    group.by = "RNA_snn_res.0.2",
+    split.by = "preparation",
+    colors_use = scCustomize::DiscretePalette_scCustomize(
+      num_colors = nlevels(mye_clean$RNA_snn_res.0.2),
+      palette = "glasbey"
+    ),
+    plot_type = "bar",
+    plot_scale = "count"
+  )
+
+p2 <-
+  scCustomize::Proportion_Plot(
+    mye_clean,
+    group.by = "RNA_snn_res.0.2",
+    split.by = "preparation",
+    colors_use = scCustomize::DiscretePalette_scCustomize(
+      num_colors = nlevels(mye_clean$RNA_snn_res.0.2),
+      palette = "glasbey"
+    ),
+    plot_type = "bar",
+    plot_scale = "percent"
+  )
+
+p1 + p2
+
+
+#######
+
+head(colnames(merged_liver_obj))
+
+merged_liver_obj$steffi_myeloid <- NA
+merged_liver_obj$steffi_myeloid[
+  colnames(merged_liver_obj) %in% colnames(mye_clean)
+] <- "Myeloid"
+merged_liver_obj$steffi_myeloid_preparation <-
+  str_c(
+    merged_liver_obj$steffi_myeloid,
+    merged_liver_obj$preparation,
+    sep = "_"
+  )
+unique(merged_liver_obj$steffi_myeloid_preparation)
+
+scCustomize::DimPlot_scCustom(
+  merged_liver_obj,
+  group.by = "steffi_myeloid_preparation",
+  reduction = "umap.harmony",
+  pt.size = 0.2,
+  # num_columns = 3,
+  shuffle = T,
+  colors_use = c("grey", "darkred", "darkblue", "green"),
+  # alpha = 1,
+  # shuffle = T,
+  raster = F
+) +
+  ggtitle("Raw UMAP colored by steffi_myeloid_preparation")
+
+scCustomize::DimPlot_scCustom(
+  steffi_obj,
+  group.by = "celltype",
+  reduction = "umap",
+  pt.size = 0.2,
+  # num_columns = 3,
+  shuffle = T,
+  colors_use = "glasbey",
+  # alpha = 1,
+  # shuffle = T,
+  raster = F
+) +
+  ggtitle("Raw UMAP colored by celltype")

@@ -85,8 +85,8 @@ print(paste0(
 snp_summary_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_GT_summary_min3.tsv"
 snp_genotype_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_GT_only.tsv"
 snp_annotation_file <-
-  "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv"
-archr_project_dir <- "ArchR_hepato"
+  "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated_PICALM.tsv"
+archr_project_dir <- "ArchR_macrophages"
 
 # Fail-fast: every required input must exist before we start. Report ALL
 # missing paths at once (files checked as files, the ArchR project as a dir),
@@ -123,7 +123,7 @@ local({
     )
   }
 })
-writeout_dir <- "hepato_macrophage_ASoC_peak_genotype_category_gam"
+writeout_dir <- "macrophage_ASoC_peak_genotype_category_gam"
 if (!dir.exists(writeout_dir)) {
   dir.create(writeout_dir, recursive = TRUE)
 }
@@ -133,6 +133,10 @@ gt_levels <- c("0/0", "0/1", "1/1")
 # "Resistant" is the reference (0) level; "Primary" is the modelled event (1).
 category_levels <- c("Primary", "Resistant")
 min_samples_per_fit <- 6L
+# Half-width of the de novo window built for SNPs that fall in no called peak:
+# POS +/- denovo_flank gives a (2*denovo_flank + 1) bp interval (501 bp here).
+# Accessibility is not modelled here, so the window is only a panel annotation.
+denovo_flank <- 250L
 
 panels_per_row <- 6L
 panels_per_col <- 6L
@@ -311,19 +315,65 @@ snp_gr <- GenomicRanges::GRanges(
 )
 
 hits <- GenomicRanges::findOverlaps(snp_gr, peak_gr, ignore.strand = TRUE)
-if (!length(hits)) {
-  stop("None of the SNPs overlap a called peak.")
-}
 
-df_pairs <- data.frame(
+# SNPs inside a called peak use that peak. SNPs with NO overlapping peak are no
+# longer dropped: each gets a de novo window centred on the SNP
+# (POS +/- denovo_flank, a 2*denovo_flank + 1 bp interval). Peak accessibility
+# is not modelled here, so the window is only an annotation; its panel is
+# flagged in the title so it is clear no real called peak was found.
+df_pairs_peak <- data.frame(
   snp_row = S4Vectors::queryHits(hits),
   peak_row = S4Vectors::subjectHits(hits),
   stringsAsFactors = FALSE
 )
-df_pairs <- cbind(
-  df_sig_snp_list[df_pairs$snp_row, c("CHROM", "POS", "REF", "ALT")],
-  df_pairs[, c("snp_row", "peak_row")]
-)
+if (nrow(df_pairs_peak)) {
+  df_pairs_peak <- cbind(
+    df_sig_snp_list[df_pairs_peak$snp_row, c("CHROM", "POS", "REF", "ALT")],
+    df_pairs_peak[, c("snp_row", "peak_row")]
+  )
+  df_pairs_peak$peak_chr <- feat_all$seqnames[df_pairs_peak$peak_row]
+  df_pairs_peak$peak_start <- feat_all$start[df_pairs_peak$peak_row]
+  df_pairs_peak$peak_end <- feat_all$end[df_pairs_peak$peak_row]
+  df_pairs_peak$is_denovo <- FALSE
+} else {
+  df_pairs_peak <- data.frame(
+    CHROM = character(0),
+    POS = integer(0),
+    REF = character(0),
+    ALT = character(0),
+    snp_row = integer(0),
+    peak_row = integer(0),
+    peak_chr = character(0),
+    peak_start = integer(0),
+    peak_end = integer(0),
+    is_denovo = logical(0),
+    stringsAsFactors = FALSE
+  )
+}
+
+no_peak_snp_rows <- setdiff(seq_along(snp_gr), S4Vectors::queryHits(hits))
+if (length(no_peak_snp_rows)) {
+  win_start <- df_sig_snp_list$POS[no_peak_snp_rows] - denovo_flank
+  win_start[win_start < 1L] <- 1L
+  df_pairs_denovo <- data.frame(
+    df_sig_snp_list[no_peak_snp_rows, c("CHROM", "POS", "REF", "ALT")],
+    snp_row = no_peak_snp_rows,
+    peak_row = NA_integer_,
+    peak_chr = df_sig_snp_list$CHROM[no_peak_snp_rows],
+    peak_start = win_start,
+    peak_end = df_sig_snp_list$POS[no_peak_snp_rows] + denovo_flank,
+    is_denovo = TRUE,
+    stringsAsFactors = FALSE
+  )
+} else {
+  df_pairs_denovo <- df_pairs_peak[0, , drop = FALSE]
+}
+
+df_pairs <- rbind(df_pairs_peak, df_pairs_denovo)
+if (!nrow(df_pairs)) {
+  stop("No SNPs available to model (empty SNP list).")
+}
+
 pair_key <- paste(df_pairs$CHROM, df_pairs$POS, sep = ":")
 df_pairs$variantID <- unname(annot_lookup$variantID[pair_key])
 df_pairs$SYMBOL <- unname(annot_lookup$SYMBOL[pair_key])
@@ -336,9 +386,6 @@ if (anyNA(df_pairs$variantID)) {
     "; variantID/SYMBOL/annotation left as NA."
   )
 }
-df_pairs$peak_chr <- feat_all$seqnames[df_pairs$peak_row]
-df_pairs$peak_start <- feat_all$start[df_pairs$peak_row]
-df_pairs$peak_end <- feat_all$end[df_pairs$peak_row]
 df_pairs$peak_id <- paste0(
   df_pairs$peak_chr,
   ":",
@@ -353,8 +400,10 @@ print(paste0(
   " SNP-peak pair(s) from ",
   length(unique(df_pairs$snp_row)),
   " SNP(s); ",
-  nrow(df_sig_snp_list) - length(unique(df_pairs$snp_row)),
-  " SNP(s) had no overlapping peak and were dropped."
+  sum(df_pairs$is_denovo),
+  " SNP(s) had no overlapping peak and use a de novo ",
+  (2L * denovo_flank + 1L),
+  " bp window."
 ))
 
 # ---- 3. per-pair genotype x category composition + binomial GAM -------------
@@ -396,6 +445,7 @@ prep_one <-
       peak_start = df_pairs$peak_start[[i]],
       peak_end = df_pairs$peak_end[[i]],
       peak_id = df_pairs$peak_id[[i]],
+      is_denovo = df_pairs$is_denovo[[i]],
       n_samples = nrow(d),
       n_00 = sum(d$genotype == "0/0"),
       n_01 = sum(d$genotype == "0/1"),
@@ -483,7 +533,7 @@ short_annotation <-
 panel_titles <- vapply(
   plot_stats,
   function(st) {
-    sprintf(
+    title <- sprintf(
       "%s (%s)\n%s:%s %s>%s | %s\npeak %s\nbeta=%s p=%s",
       st$variantID %NA% "NA",
       st$SYMBOL %NA% "NA",
@@ -504,6 +554,16 @@ panel_titles <- vapply(
         formatC(st$p_value_gam, format = "g", digits = 3)
       )
     )
+    if (isTRUE(st$is_denovo)) {
+      title <- paste0(
+        title,
+        sprintf(
+          "\n[no overlapping peak: de novo +/-%d bp window]",
+          denovo_flank
+        )
+      )
+    }
+    title
   },
   character(1)
 )
@@ -577,7 +637,7 @@ page_files <-
     )
     out_file <- file.path(
       plot_dir,
-      sprintf("ASoC_peak_genotype_category_columns_page_%02d.pdf", pg)
+      sprintf("ASoC_peak_genotype_category_columns_page_%02d_PICALM.pdf", pg)
     )
     ggplot2::ggsave(
       out_file,

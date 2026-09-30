@@ -106,7 +106,7 @@ snp_summary_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macropha
 snp_genotype_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_GT_only.tsv"
 snp_annotation_file <-
   "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv"
-archr_project_dir <- "ArchR_hepato"
+archr_project_dir <- "ArchR_macrophages"
 
 # Fail-fast: every required input must exist before we start. Report ALL
 # missing paths at once (files checked as files, the ArchR project as a dir),
@@ -145,7 +145,7 @@ local({
 })
 
 
-writeout_dir <- "hepato_macrophage_ASoC_peak_category_lm"
+writeout_dir <- "macrophage_ASoC_peak_category_lm"
 if (!dir.exists(writeout_dir)) {
   dir.create(writeout_dir, recursive = TRUE)
 }
@@ -157,6 +157,9 @@ category_levels <- c("Primary", "Resistant")
 frag_len_cells <- 300L # cells sampled per arrow when estimating fragment length
 frag_len_chrs <- c("chr1", "chr2")
 min_samples_per_fit <- 6L
+# Half-width of the de novo window built for SNPs that fall in no called peak:
+# POS +/- denovo_flank gives a (2*denovo_flank + 1) bp interval (501 bp here).
+denovo_flank <- 250L
 
 panels_per_row <- 6L
 panels_per_col <- 6L
@@ -234,6 +237,46 @@ normalise_gt <-
       return(NA_real_)
     }
     mean(widths)
+  }
+
+# Direct fragment counts for a set of windows, used for SNPs that fall in no
+# called peak (there is no PeakMatrix row to read). For every window, count the
+# fragments (over the supplied cells) that overlap it, reading one chromosome at
+# a time. Returns a numeric vector aligned to windows_gr.
+.count_windows_arrow <-
+  function(arrow_file, cells, windows_gr) {
+    n <- length(windows_gr)
+    if (!n) {
+      return(numeric(0))
+    }
+    avail <- ArchR:::.availableCells(arrow_file, "PeakMatrix")
+    cl <- intersect(cells, avail)
+    counts <- numeric(n)
+    if (!length(cl)) {
+      return(counts)
+    }
+    win_chr <- as.character(GenomicRanges::seqnames(windows_gr))
+    for (cc in unique(win_chr)) {
+      w_idx <- which(win_chr == cc)
+      fr <- tryCatch(
+        ArchR:::.getFragsFromArrow(
+          arrow_file,
+          chr = cc,
+          out = "GRanges",
+          cellNames = cl
+        ),
+        error = function(e) NULL
+      )
+      if (is.null(fr) || !length(fr)) {
+        next
+      }
+      counts[w_idx] <- as.numeric(GenomicRanges::countOverlaps(
+        windows_gr[w_idx],
+        fr,
+        ignore.strand = TRUE
+      ))
+    }
+    counts
   }
 
 # Overall model p-value from the F statistic; NULL for an intercept-only fit.
@@ -408,19 +451,66 @@ snp_gr <- GenomicRanges::GRanges(
 )
 
 hits <- GenomicRanges::findOverlaps(snp_gr, peak_gr, ignore.strand = TRUE)
-if (!length(hits)) {
-  stop("None of the SNPs overlap a called peak.")
-}
 
-df_pairs <- data.frame(
+# SNPs inside a called peak use that peak. SNPs with NO overlapping peak are no
+# longer dropped: each gets a de novo window centred on the SNP
+# (POS +/- denovo_flank, a 2*denovo_flank + 1 bp interval) whose fragment counts
+# are read straight from the Arrow files (there is no PeakMatrix row for them).
+# Their panels are flagged in the title so it is clear the window was built de
+# novo rather than being a real called peak.
+df_pairs_peak <- data.frame(
   snp_row = S4Vectors::queryHits(hits),
   peak_row = S4Vectors::subjectHits(hits),
   stringsAsFactors = FALSE
 )
-df_pairs <- cbind(
-  df_sig_snp_list[df_pairs$snp_row, c("CHROM", "POS", "REF", "ALT")],
-  df_pairs[, c("snp_row", "peak_row")]
-)
+if (nrow(df_pairs_peak)) {
+  df_pairs_peak <- cbind(
+    df_sig_snp_list[df_pairs_peak$snp_row, c("CHROM", "POS", "REF", "ALT")],
+    df_pairs_peak[, c("snp_row", "peak_row")]
+  )
+  df_pairs_peak$peak_chr <- feat_all$seqnames[df_pairs_peak$peak_row]
+  df_pairs_peak$peak_start <- feat_all$start[df_pairs_peak$peak_row]
+  df_pairs_peak$peak_end <- feat_all$end[df_pairs_peak$peak_row]
+  df_pairs_peak$is_denovo <- FALSE
+} else {
+  df_pairs_peak <- data.frame(
+    CHROM = character(0),
+    POS = integer(0),
+    REF = character(0),
+    ALT = character(0),
+    snp_row = integer(0),
+    peak_row = integer(0),
+    peak_chr = character(0),
+    peak_start = integer(0),
+    peak_end = integer(0),
+    is_denovo = logical(0),
+    stringsAsFactors = FALSE
+  )
+}
+
+no_peak_snp_rows <- setdiff(seq_along(snp_gr), S4Vectors::queryHits(hits))
+if (length(no_peak_snp_rows)) {
+  win_start <- df_sig_snp_list$POS[no_peak_snp_rows] - denovo_flank
+  win_start[win_start < 1L] <- 1L
+  df_pairs_denovo <- data.frame(
+    df_sig_snp_list[no_peak_snp_rows, c("CHROM", "POS", "REF", "ALT")],
+    snp_row = no_peak_snp_rows,
+    peak_row = NA_integer_,
+    peak_chr = df_sig_snp_list$CHROM[no_peak_snp_rows],
+    peak_start = win_start,
+    peak_end = df_sig_snp_list$POS[no_peak_snp_rows] + denovo_flank,
+    is_denovo = TRUE,
+    stringsAsFactors = FALSE
+  )
+} else {
+  df_pairs_denovo <- df_pairs_peak[0, , drop = FALSE]
+}
+
+df_pairs <- rbind(df_pairs_peak, df_pairs_denovo)
+if (!nrow(df_pairs)) {
+  stop("No SNPs available to model (empty SNP list).")
+}
+
 pair_key <- paste(df_pairs$CHROM, df_pairs$POS, sep = ":")
 df_pairs$variantID <- unname(annot_lookup$variantID[pair_key])
 df_pairs$SYMBOL <- unname(annot_lookup$SYMBOL[pair_key])
@@ -433,9 +523,6 @@ if (anyNA(df_pairs$variantID)) {
     "; variantID/SYMBOL/annotation left as NA."
   )
 }
-df_pairs$peak_chr <- feat_all$seqnames[df_pairs$peak_row]
-df_pairs$peak_start <- feat_all$start[df_pairs$peak_row]
-df_pairs$peak_end <- feat_all$end[df_pairs$peak_row]
 df_pairs$peak_id <- paste0(
   df_pairs$peak_chr,
   ":",
@@ -450,12 +537,14 @@ print(paste0(
   " SNP-peak pair(s) from ",
   length(unique(df_pairs$snp_row)),
   " SNP(s); ",
-  nrow(df_sig_snp_list) - length(unique(df_pairs$snp_row)),
-  " SNP(s) had no overlapping peak and were dropped."
+  sum(df_pairs$is_denovo),
+  " SNP(s) had no overlapping peak and use a de novo ",
+  (2L * denovo_flank + 1L),
+  " bp window."
 ))
 
-# unique peaks to pull out of the Arrow files
-peak_rows <- sort(unique(df_pairs$peak_row))
+# real called peaks to pull out of the Arrow files via the PeakMatrix
+peak_rows <- sort(unique(df_pairs$peak_row[!df_pairs$is_denovo]))
 feat_sel <- feat_all[peak_rows, c("seqnames", "idx", "start", "end")]
 feat_sel_ids <- paste0(
   feat_sel$seqnames,
@@ -464,6 +553,18 @@ feat_sel_ids <- paste0(
   "-",
   feat_sel$end
 )
+
+# de novo windows (one per no-overlap SNP), counted directly from fragments
+denovo_pairs <- df_pairs[df_pairs$is_denovo, , drop = FALSE]
+denovo_ids <- denovo_pairs$peak_id
+denovo_gr <- GenomicRanges::GRanges(
+  seqnames = denovo_pairs$peak_chr,
+  ranges = IRanges::IRanges(
+    start = denovo_pairs$peak_start,
+    end = denovo_pairs$peak_end
+  )
+)
+names(denovo_gr) <- denovo_ids
 
 # ---- 3. per-sample peak counts -> RPGC ---------------------------------------
 egs <- .effective_genome_size(projHepatocytes)
@@ -487,7 +588,7 @@ per_sample <-
   foreach(
     s = use_samples,
     .errorhandling = "pass",
-    .export = ".estimate_frag_length_arrow",
+    .export = c(".estimate_frag_length_arrow", ".count_windows_arrow"),
     .packages = c("ArchR", "Matrix", "GenomicRanges")
   ) %dopar%
   {
@@ -501,24 +602,40 @@ per_sample <-
       ArchR:::.availableCells(af, "PeakMatrix")
     )
     if (!length(cells_s)) {
-      return(list(sample = s, counts = NULL, frag_len = NA_real_))
+      return(list(
+        sample = s,
+        counts = NULL,
+        window_counts = NULL,
+        frag_len = NA_real_
+      ))
     }
 
-    m <- ArchR:::.getMatFromArrow(
-      ArrowFile = af,
-      featureDF = feat_sel,
-      binarize = FALSE,
-      useMatrix = "PeakMatrix",
-      cellNames = cells_s
-    )
-    # .getMatFromArrow reorders rows back to the featureDF passed in and then
-    # drops the rownames, so the result is positionally aligned with feat_sel.
-    cnt <- Matrix::rowSums(m)
+    # Real called peaks: read straight from the PeakMatrix (skipped when every
+    # SNP fell back to a de novo window, i.e. feat_sel has no rows).
+    if (nrow(feat_sel)) {
+      m <- ArchR:::.getMatFromArrow(
+        ArrowFile = af,
+        featureDF = feat_sel,
+        binarize = FALSE,
+        useMatrix = "PeakMatrix",
+        cellNames = cells_s
+      )
+      # .getMatFromArrow reorders rows back to the featureDF passed in and then
+      # drops the rownames, so the result is positionally aligned with feat_sel.
+      cnt <- as.numeric(Matrix::rowSums(m))
+    } else {
+      cnt <- numeric(0)
+    }
     stopifnot(length(cnt) == nrow(feat_sel))
+
+    # De novo windows: no PeakMatrix row, so count overlapping fragments direct.
+    cnt_windows <- .count_windows_arrow(af, cells_s, denovo_gr)
+    stopifnot(length(cnt_windows) == length(denovo_gr))
 
     list(
       sample = s,
-      counts = as.numeric(cnt),
+      counts = cnt,
+      window_counts = cnt_windows,
       n_cells = length(cells_s),
       frag_len = .estimate_frag_length_arrow(
         af,
@@ -540,11 +657,19 @@ if (any(bad)) {
 }
 names(per_sample) <- vapply(per_sample, `[[`, character(1), "sample")
 
-mat_counts <- matrix(
+# Real peaks and de novo windows are stacked into one count matrix keyed by
+# peak_id; both share the same per-sample RPGC scale factor below.
+mat_counts_peaks <- matrix(
   0,
   nrow = nrow(feat_sel),
   ncol = length(use_samples),
   dimnames = list(feat_sel_ids, use_samples)
+)
+mat_counts_windows <- matrix(
+  0,
+  nrow = length(denovo_ids),
+  ncol = length(use_samples),
+  dimnames = list(denovo_ids, use_samples)
 )
 frag_len_by_sample <- setNames(
   rep(NA_real_, length(use_samples)),
@@ -552,12 +677,18 @@ frag_len_by_sample <- setNames(
 )
 for (s in use_samples) {
   res <- per_sample[[s]]
-  if (is.null(res$counts)) {
+  if (is.null(res$counts) && is.null(res$window_counts)) {
     next
   }
-  mat_counts[, s] <- res$counts
+  if (!is.null(res$counts) && length(res$counts)) {
+    mat_counts_peaks[, s] <- res$counts
+  }
+  if (!is.null(res$window_counts) && length(res$window_counts)) {
+    mat_counts_windows[, s] <- res$window_counts
+  }
   frag_len_by_sample[[s]] <- res$frag_len
 }
+mat_counts <- rbind(mat_counts_peaks, mat_counts_windows)
 
 # fall back to the cohort mean where a sample yielded no fragments to measure
 frag_len_by_sample[!is.finite(frag_len_by_sample)] <-
@@ -596,12 +727,11 @@ write.table(
 
 # ---- 4. per-peak category models --------------------------------------------
 # For each SNP-peak pair, model RPGC ~ category (Resistant reference) and run a
-# two-group Wilcoxon rank-sum test on the same two groups.
-peak_row_lookup <- setNames(seq_along(peak_rows), as.character(peak_rows))
-
+# two-group Wilcoxon rank-sum test on the same two groups. Rows of mat_rpgc are
+# keyed by peak_id, so real peaks and de novo windows are looked up the same way.
 fit_one <-
   function(i) {
-    peak_i <- peak_row_lookup[[as.character(df_pairs$peak_row[[i]])]]
+    peak_i <- df_pairs$peak_id[[i]]
 
     # genotype kept only for the panel-title annotation
     gt_row <- match(
@@ -635,6 +765,7 @@ fit_one <-
       peak_start = df_pairs$peak_start[[i]],
       peak_end = df_pairs$peak_end[[i]],
       peak_id = df_pairs$peak_id[[i]],
+      is_denovo = df_pairs$is_denovo[[i]],
       n_samples = nrow(d),
       n_resistant = sum(d$category == "Resistant"),
       n_primary = sum(d$category == "Primary"),
@@ -715,11 +846,13 @@ plot_stats <- plot_stats[keep_panel]
 short_annotation <-
   function(x) sub(" \\(ENST[^)]*\\)$", "", x)
 
-# lm R^2 / p go in the panel title (as in the reference script).
+# lm R^2 / p go in the panel title (as in the reference script). SNPs with no
+# overlapping called peak get an extra line flagging that the peak window was
+# built de novo (POS +/- denovo_flank) rather than being a real called peak.
 panel_titles <- vapply(
   plot_stats,
   function(st) {
-    sprintf(
+    title <- sprintf(
       "%s (%s)\n%s:%s %s>%s | %s\npeak %s\nR2=%s p=%s",
       st$variantID %NA% "NA",
       st$SYMBOL %NA% "NA",
@@ -740,6 +873,16 @@ panel_titles <- vapply(
         formatC(st$p_value_lm, format = "g", digits = 3)
       )
     )
+    if (isTRUE(st$is_denovo)) {
+      title <- paste0(
+        title,
+        sprintf(
+          "\n[no overlapping peak: de novo +/-%d bp window]",
+          denovo_flank
+        )
+      )
+    }
+    title
   },
   character(1)
 )
@@ -857,7 +1000,7 @@ page_files <-
     )
     out_file <- file.path(
       plot_dir,
-      sprintf("ASoC_peak_category_boxplots_page_%02d.pdf", pg)
+      sprintf("ASoC_peak_category_boxplots_page_%02d_PICALM.pdf", pg)
     )
     ggplot2::ggsave(
       out_file,

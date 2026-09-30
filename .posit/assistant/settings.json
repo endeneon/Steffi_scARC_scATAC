@@ -1,0 +1,19 @@
+{
+  "permission": {
+    "bash": {
+      "cd *": "allow",
+      "pdftoppm *": "allow",
+      "ls *": "allow"
+    },
+    "external_directory": {
+      "/tmp/*": "allow",
+      "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/*": "allow"
+    },
+    "executeCode": {
+      "*": "allow"
+    },
+    "edit": {
+      "*.R": "allow"
+    }
+  }
+}
