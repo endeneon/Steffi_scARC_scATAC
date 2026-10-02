@@ -261,11 +261,10 @@ print("All settings initialized successfully.")
 ### end skip ###
 
 #####
+# loadArchRProject() asserts every GroupCoverages h5 still exists and 9 were
+# deleted; only the peak set is needed here, so read the saved object directly.
 projMultiome_annotated_celltype <-
-  loadArchRProject(
-    path = "ArchR_multiome_annotated_celltype_obj",
-    showLogo = FALSE
-  )
+  readRDS("ArchR_multiome_annotated_celltype_obj/Save-ArchR-Project.rds")
 
 # extract the new peak sets from the ArchR object as GRanges
 peak_sets <- getPeakSet(projMultiome_annotated_celltype)
@@ -409,6 +408,23 @@ for (celltype in peaks_by_group@partitioning@NAMES) {
     )]
   )
 
+  # remove all SNPs that have TSS distance < 500 bp (remove promoter-bound SNPs)
+  sig_ASoC_in_peaks <- sig_ASoC_in_peaks[abs(sig_ASoC_in_peaks$distanceToTSS) >= 500]
+  if (length(sig_ASoC_in_peaks) == 0) {
+    message("  No significant ASoC variants in ", celltype, " peaks after removing promoter-bound SNPs; skipping.")
+    summary_rows[[celltype]] <- data.frame(
+      celltype = celltype,
+      n_peaks = length(peaks_by_group[[celltype]]),
+      n_ASoC_in_peaks = length(ASoC_in_peaks),
+      n_sig_ASoC = 0L,
+      n_with_motif_match = 0L,
+      n_with_any_disruption = 0L,
+      n_with_strong_disruption = 0L,
+      pct_strong_disruption = NA_real_
+    )
+    next
+  }
+
   # motifmatchr: which JASPAR motifs are present in the surrounding peak
   peak_ranges <- GRanges(
     seqnames = seqnames(sig_ASoC_in_peaks),
@@ -492,7 +508,7 @@ for (celltype in peaks_by_group@partitioning@NAMES) {
   # Save one qs2 + one TSV per cell type (sanitized names already applied above)
   out_base <- file.path(
     out_dir_asoc,
-    paste0("sig_ASoC_in_", celltype, "_annotated")
+    paste0("sig_ASoC_in_", celltype, "_annotated_nopromoter")
   )
   qs_save(
     sig_ASoC_in_peaks,
@@ -546,7 +562,7 @@ celltype_summary <- celltype_summary[
 
 write.table(
   celltype_summary,
-  file = file.path(out_dir_asoc, "sig_ASoC_celltype_summary.tsv"),
+  file = file.path(out_dir_asoc, "sig_ASoC_celltype_summary_nopromoter.tsv"),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE

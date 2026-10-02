@@ -193,7 +193,7 @@ projMerged <-
 
 df_raw <-
   read.table(
-    "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv",
+    "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated_nopromoter.tsv",
     sep = "\t",
     header = TRUE,
     stringsAsFactors = FALSE,
@@ -704,7 +704,7 @@ if (!dir.exists(out_dir)) {
 
 # 2x2 grid per landscape page; larger page keeps the 6 stacked tracks legible.
 pdf(
-  file.path(out_dir, "macrophage_SNP_by_cell_type_panels.pdf"),
+  file.path(out_dir, "macrophage_SNP_by_cell_type_panels_nopromoter.pdf"),
   width = 14,
   height = 10.5
 )
