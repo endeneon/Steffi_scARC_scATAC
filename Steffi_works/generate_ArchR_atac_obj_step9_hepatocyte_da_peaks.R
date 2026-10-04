@@ -187,7 +187,6 @@ print(paste0(
 print("All settings initialized successfully.")
 
 
-# load up the projMacrophage and projMerged
 # decide whether to add the GWAS track above the coverage tracks
 annot_vcf_EAS <- "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/HCC_GWAS/GRCh38/hcc_ea_011123.vcf.gz"
 annot_vcf_EUR <- "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/HCC_GWAS/GRCh38/hcc_eur_200324.vcf.gz"
@@ -199,26 +198,16 @@ projMerged <-
   )
 
 df_raw <-
-  rbind(
-    read.table(
-      "sig_ASoC_by_celltype/sig_ASoC_in_Monocyte_annotated.tsv",
-      sep = "\t",
-      header = TRUE,
-      stringsAsFactors = FALSE,
-      # annotation fields contain apostrophes; disable quote handling so
-      # read.table() doesn't hit "EOF within quoted string" and drop rows
-      quote = ""
-    ),
-    read.table(
-      "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv",
-      sep = "\t",
-      header = TRUE,
-      stringsAsFactors = FALSE,
-      # annotation fields contain apostrophes; disable quote handling so
-      # read.table() doesn't hit "EOF within quoted string" and drop rows
-      quote = ""
-    )
+  read.table(
+    "sig_ASoC_by_celltype/sig_ASoC_in_Hepatocyte_annotated.tsv",
+    sep = "\t",
+    header = TRUE,
+    stringsAsFactors = FALSE,
+    # annotation fields contain apostrophes; disable quote handling so
+    # read.table() doesn't hit "EOF within quoted string" and drop rows
+    quote = ""
   )
+
 df_raw <-
   df_raw <- df_raw[!duplicated(df_raw$variantID), ]
 
@@ -230,9 +219,9 @@ df_2_plot <-
     "SYMBOL"
   )]
 
-# count the Macrophage-specific DA intervals
-# ---- Macrophage-specificity filter on +/- 250 bp SNP windows (RPGC) ---------
-# Window = [start - 249, start + 249] (500 bp; the 501st bp is dropped so the
+
+# count the Hepatocyte-specific DA intervals
+# ---- Hepatocyte-specificity filter on +/- 250 bp SNP windows (RPGC) ---------
 # window splits into exactly 10 x 50 bp bins). Fragments are assigned to bins
 # by midpoint and scaled per group as in plot_snp_tracks():
 #   RPGC = count * egs / (n_frags_grp * frag_len)
@@ -241,8 +230,8 @@ out_dir <- "DA_SNP_by_cell_type"
 if (!dir.exists(out_dir)) {
   dir.create(out_dir, recursive = TRUE)
 }
-target_group <- "Macrophage"
-fold_cutoff <- 1.9
+target_group <- "Hepatocyte"
+fold_cutoff <- 2.5
 min_frags_window <- 10 # min raw fragment count in window, summed over groups
 win_up <- 249
 win_down <- 249
@@ -446,14 +435,14 @@ df_windows$keep <- df_windows$target_rpgc > 0 &
 colnames(win_rpgc) <- paste0("rpgc_", colnames(win_rpgc))
 write.table(
   cbind(df_windows, win_rpgc),
-  file.path(out_dir, "SNP_window_RPGC_macrophage_filter.tsv"),
+  file.path(out_dir, "SNP_window_RPGC_hepatocyte_filter.tsv"),
   sep = "\t",
   quote = FALSE,
   row.names = FALSE
 )
 
 print(paste0(
-  "Macrophage filter kept ",
+  "Hepatocyte filter kept ",
   sum(df_windows$keep),
   " of ",
   nrow(df_windows),
@@ -788,11 +777,12 @@ plot_snp_tracks <- function(
     )
   })
 
-  # peak annotation from the ArchR_macrophages project's peak set
-  projMacrophages <-
-    ArchR::loadArchRProject(path = "ArchR_macrophages")
+  # peak annotation from the ArchR_hepato project's peak set
+  # (ArchR_hepatocytes_subset has no Save-ArchR-Project.rds and cannot be loaded)
+  projPeakAnnot <-
+    ArchR::loadArchRProject(path = "ArchR_hepato")
   peak_track <- NULL
-  ps <- tryCatch(ArchR::getPeakSet(projMacrophages), error = function(e) NULL)
+  ps <- tryCatch(ArchR::getPeakSet(projPeakAnnot), error = function(e) NULL)
   if (!is.null(ps) && length(ps)) {
     ps <- IRanges::subsetByOverlaps(ps, region_gr)
   }
@@ -1028,7 +1018,7 @@ gviz_grobs <- foreach::foreach(
   {
     row <- df_2_plot[i, ]
     main_i <- sprintf(
-      "%s, %s (%s:%s) +/- %s bp, %s bp bins (RPGC), \nMacrophage fold vs others = %s",
+      "%s, %s (%s:%s) +/- %s bp, %s bp bins (RPGC), \nHepatocyte fold vs others = %s",
       row$SYMBOL,
       row$variantID,
       row$seqnames,
@@ -1096,7 +1086,7 @@ if (!dir.exists(out_dir)) {
 
 # 2x2 grid per landscape page; larger page keeps the 6 stacked tracks legible.
 pdf(
-  file.path(out_dir, "DA_SNP_by_cell_type_panels_macrophage.pdf"),
+  file.path(out_dir, "DA_SNP_by_cell_type_panels_hepatocyte.pdf"),
   width = 14,
   height = 10.5
 )
