@@ -504,3 +504,11 @@ Steffi_works/scAMP_CNV/results/pt9_pre/pkl_files/pt9_pre_windowstats.pkl
 Steffi_works/scAMP_CNV/results/pt9_pre/pt9_pre_cnv.tsv
 Steffi_works/merged_all_samples_integrated_seurat_obj_annotated_scRNAwithflex.qs2
 Steffi_works/mye_clean_w_new_harmony_umap_tsne.qs2
+Steffi_works/HCC_GWAS/GRCh38/hcc_eur_200324.vcf.gz
+Steffi_works/HCC_GWAS/GRCh38/hcc_ea_011123.vcf.gz
+Steffi_works/HCC_GWAS/GRCh37/hcc_eur_200324.vcf.gz
+Steffi_works/HCC_GWAS/GRCh37/hcc_ea_011123.vcf.gz
+Steffi_works/HCC_GWAS/GRCh37/hcc_ea_011123.txt
+Steffi_works/HCC_GWAS/GRCh37/hcc_eur_200324.txt
+**/*_SNP_by_cell_type/*.pdf
+*.tbi

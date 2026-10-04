@@ -2,35 +2,37 @@
 
 # init
 {
-  # library(Seurat)
-  # library(gplots)
+  library(Seurat)
+  library(gplots)
   library(ArchR)
   library(future)
   library(stringr)
   # library(pheatmap)
 
-  # library(BiocParallel)
+  library(BiocParallel)
   # library(BiocParallel.FutureParam)
-  # library(parallel)
+  library(parallel)
   library(foreach)
-  # library(doParallel)
+  library(doParallel)
   library(doFuture)
-  # library(snow)
+  library(snow)
 
-  # library(Matrix)
-  # library(matrixStats)
+  library(Matrix)
+  library(matrixStats)
 
-  # library(qs2)
-  # library(fs)
+  library(qs2)
+  library(fs)
 
   library(GenomicRanges)
   library(TxDb.Hsapiens.UCSC.hg38.knownGene)
   library(org.Hs.eg.db)
-  # library(BSgenome.Hsapiens.UCSC.hg38)
+  library(BSgenome.Hsapiens.UCSC.hg38)
 
-  # library(ggplot2)
+  library(ggplot2)
   library(Gviz)
-  library(dplyr)
+  # library(Gviz)
+  # library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+  # library(org.Hs.eg.db)
 
   if (
     interactive() &&
@@ -48,7 +50,6 @@
     showtext::showtext_auto()
   }
 }
-
 
 setwd(
   "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
@@ -171,26 +172,26 @@ if (
     (Sys.getenv("TERM_PROGRAM") == "vscode")
 ) {
   print("Running under IDE, use 1 ArchR Thread")
-  ArchR::addArchRThreads(threads = 1)
+  addArchRThreads(threads = 1)
 } else {
   print("Running under Rscript, use all usable ArchR Threads")
-  ArchR::addArchRThreads(threads = workers_2_use)
+  addArchRThreads(threads = workers_2_use)
 }
-ArchR::addArchRGenome("hg38")
+addArchRGenome("hg38")
 print(paste0(
   "ArchR threads set to ",
-  ArchR::getArchRThreads(),
+  getArchRThreads(),
   " and genome set to ",
-  ArchR::getArchRGenome()
+  getArchRGenome()
 ))
 print("All settings initialized successfully.")
 
+
+# load up the projMacrophage and projMerged
 # decide whether to add the GWAS track above the coverage tracks
 annot_vcf_EAS <- "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/HCC_GWAS/GRCh38/hcc_ea_011123.vcf.gz"
 annot_vcf_EUR <- "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works/HCC_GWAS/GRCh38/hcc_eur_200324.vcf.gz"
 use_GWAS_track <- TRUE
-
-# require_peak_intersection <- TRUE
 
 projMerged <-
   ArchR::loadArchRProject(
@@ -198,15 +199,28 @@ projMerged <-
   )
 
 df_raw <-
-  read.table(
-    "sig_ASoC_by_celltype/sig_ASoC_in_Monocyte_annotated.tsv",
-    sep = "\t",
-    header = TRUE,
-    stringsAsFactors = FALSE,
-    # annotation fields contain apostrophes; disable quote handling so
-    # read.table() doesn't hit "EOF within quoted string" and drop rows
-    quote = ""
+  rbind(
+    read.table(
+      "sig_ASoC_by_celltype/sig_ASoC_in_Monocyte_annotated.tsv",
+      sep = "\t",
+      header = TRUE,
+      stringsAsFactors = FALSE,
+      # annotation fields contain apostrophes; disable quote handling so
+      # read.table() doesn't hit "EOF within quoted string" and drop rows
+      quote = ""
+    ),
+    read.table(
+      "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv",
+      sep = "\t",
+      header = TRUE,
+      stringsAsFactors = FALSE,
+      # annotation fields contain apostrophes; disable quote handling so
+      # read.table() doesn't hit "EOF within quoted string" and drop rows
+      quote = ""
+    )
   )
+df_raw <-
+  df_raw <- df_raw[!duplicated(df_raw$variantID), ]
 
 df_2_plot <-
   df_raw[, c(
@@ -215,6 +229,240 @@ df_2_plot <-
     "variantID",
     "SYMBOL"
   )]
+
+# count the Macrophage-specific DA intervals
+# ---- Macrophage-specificity filter on +/- 250 bp SNP windows (RPGC) ---------
+# Window = [start - 249, start + 249] (500 bp; the 501st bp is dropped so the
+# window splits into exactly 10 x 50 bp bins). Fragments are assigned to bins
+# by midpoint and scaled per group as in plot_snp_tracks():
+#   RPGC = count * egs / (n_frags_grp * frag_len)
+# Self-contained: helpers defined further below are not used here.
+out_dir <- "DA_SNP_by_cell_type"
+if (!dir.exists(out_dir)) {
+  dir.create(out_dir, recursive = TRUE)
+}
+target_group <- "Macrophage"
+fold_cutoff <- 5
+min_frags_window <- 10 # min raw fragment count in window, summed over groups
+win_up <- 249
+win_down <- 249
+filt_bin_size <- 50
+
+df_windows <- data.frame(
+  variantID = df_2_plot$variantID,
+  seqnames = as.character(df_2_plot$seqnames),
+  snp_pos = as.integer(df_2_plot$start),
+  win_start = as.integer(df_2_plot$start) - win_up,
+  win_end = as.integer(df_2_plot$start) + win_down
+)
+
+filt_cells <- rownames(projMerged@cellColData)
+filt_groups <- as.character(
+  projMerged@cellColData$projected_barcodes_multiple_cell_types
+)
+filt_keep <- !is.na(filt_groups)
+filt_cells <- filt_cells[filt_keep]
+filt_groups <- filt_groups[filt_keep]
+filt_levels <- sort(unique(filt_groups))
+stopifnot(target_group %in% filt_levels)
+
+# one row per 50 bp bin per window
+n_bins_win <- (win_up + win_down + 1) %/% filt_bin_size
+bins_df <- data.frame(
+  win_idx = rep(seq_len(nrow(df_windows)), each = n_bins_win),
+  seqnames = rep(df_windows$seqnames, each = n_bins_win),
+  bin_start = rep(df_windows$win_start, each = n_bins_win) +
+    rep((seq_len(n_bins_win) - 1L) * filt_bin_size, nrow(df_windows))
+)
+bins_gr <- GenomicRanges::GRanges(
+  bins_df$seqnames,
+  IRanges::IRanges(start = bins_df$bin_start, width = filt_bin_size)
+)
+filt_chrs <- unique(bins_df$seqnames)
+filt_arrows <- ArchR::getArrowFiles(projMerged)
+
+# Count fragments for one Arrow file: read once per chromosome, count all
+# windows at once. Each worker opens its own Arrow file (HDF5 handles cannot be
+# shared across processes) and returns a bins x groups count matrix.
+count_arrow_bins <- function(af) {
+  counts <- matrix(
+    0,
+    nrow = length(bins_gr),
+    ncol = length(filt_levels),
+    dimnames = list(NULL, filt_levels)
+  )
+  cells_af <- intersect(filt_cells, ArchR:::.availableCells(af, "TileMatrix"))
+  if (!length(cells_af)) {
+    return(counts)
+  }
+  for (chr in filt_chrs) {
+    fr <- tryCatch(
+      ArchR:::.getFragsFromArrow(
+        af,
+        chr = chr,
+        out = "GRanges",
+        cellNames = cells_af
+      ),
+      error = function(e) NULL
+    )
+    if (is.null(fr) || !length(fr)) {
+      next
+    }
+    # fragment midpoint; floor() keeps x.5 midpoints in the same bin as
+    # findInterval() does in plot_snp_tracks()
+    mids <- floor(GenomicRanges::start(fr) + (GenomicRanges::width(fr) - 1) / 2)
+    mid_gr <- GenomicRanges::GRanges(chr, IRanges::IRanges(mids, width = 1))
+    hits <- GenomicRanges::findOverlaps(mid_gr, bins_gr)
+    if (!length(hits)) {
+      next
+    }
+    frag_grp <- filt_groups[match(
+      as.character(S4Vectors::mcols(fr)$RG)[S4Vectors::queryHits(hits)],
+      filt_cells
+    )]
+    ok <- !is.na(frag_grp)
+    tab <- table(
+      factor(S4Vectors::subjectHits(hits)[ok], levels = seq_along(bins_gr)),
+      factor(frag_grp[ok], levels = filt_levels)
+    )
+    counts <- counts + unclass(tab)
+  }
+  counts
+}
+
+use_par_filt <- foreach::getDoParRegistered() &&
+  foreach::getDoParWorkers() > 1 &&
+  length(filt_arrows) > 1
+if (use_par_filt) {
+  `%dopar%` <- foreach::`%dopar%`
+  bin_counts_list <- foreach::foreach(
+    af = filt_arrows,
+    .packages = c("ArchR", "GenomicRanges", "S4Vectors", "IRanges"),
+    # export only what the worker needs; keeps projMerged out of the globals
+    .export = c(
+      "count_arrow_bins",
+      "bins_gr",
+      "filt_cells",
+      "filt_groups",
+      "filt_levels",
+      "filt_chrs"
+    ),
+    .noexport = "projMerged",
+    .errorhandling = "stop"
+  ) %dopar%
+    suppressPackageStartupMessages(suppressMessages(count_arrow_bins(af)))
+} else {
+  bin_counts_list <- lapply(filt_arrows, count_arrow_bins)
+}
+bin_counts <- Reduce(`+`, bin_counts_list)
+rm(bin_counts_list)
+
+# RPGC scale factors per group
+filt_ga <- ArchR::getGenomeAnnotation(projMerged)
+filt_egs <- sum(as.numeric(GenomicRanges::width(filt_ga$chromSizes)))
+if (!is.null(filt_ga$blacklist) && length(filt_ga$blacklist)) {
+  filt_egs <- filt_egs -
+    sum(as.numeric(GenomicRanges::width(
+      GenomicRanges::reduce(filt_ga$blacklist)
+    )))
+}
+
+# mean fragment length estimated once (most frequent SNP chromosome), reused
+set.seed(5813)
+frag_len_chr <- names(sort(table(df_windows$seqnames), decreasing = TRUE))[1]
+frag_sample <- unlist(lapply(filt_levels, function(lv) {
+  cl <- filt_cells[filt_groups == lv]
+  if (length(cl) > 300) sample(cl, 300) else cl
+}))
+# per-Arrow width sum and count (not raw widths) to keep worker returns small;
+# sum/n pooled across Arrow files gives the same mean as pooling the widths
+width_stats_arrow <- function(af) {
+  cl <- intersect(frag_sample, ArchR:::.availableCells(af, "TileMatrix"))
+  if (!length(cl)) {
+    return(c(sum = 0, n = 0))
+  }
+  fr <- tryCatch(
+    ArchR:::.getFragsFromArrow(
+      af,
+      chr = frag_len_chr,
+      out = "GRanges",
+      cellNames = cl
+    ),
+    error = function(e) NULL
+  )
+  if (is.null(fr) || !length(fr)) {
+    return(c(sum = 0, n = 0))
+  }
+  w <- as.numeric(GenomicRanges::width(fr))
+  c(sum = sum(w), n = length(w))
+}
+
+if (use_par_filt) {
+  width_stats <- foreach::foreach(
+    af = filt_arrows,
+    .packages = c("ArchR", "GenomicRanges"),
+    .export = c("width_stats_arrow", "frag_sample", "frag_len_chr"),
+    .noexport = "projMerged",
+    .errorhandling = "stop"
+  ) %dopar%
+    suppressPackageStartupMessages(suppressMessages(width_stats_arrow(af)))
+} else {
+  width_stats <- lapply(filt_arrows, width_stats_arrow)
+}
+width_stats <- Reduce(`+`, width_stats)
+filt_frag_len <- if (width_stats[["n"]] > 0) {
+  width_stats[["sum"]] / width_stats[["n"]]
+} else {
+  warning("Could not estimate fragment length; falling back to 100 bp.")
+  100
+}
+
+filt_n_frags <- vapply(
+  filt_levels,
+  function(lv) {
+    sum(as.numeric(
+      projMerged@cellColData[filt_cells[filt_groups == lv], "nFrags"]
+    ))
+  },
+  numeric(1)
+)
+filt_scale <- filt_egs / (filt_n_frags * filt_frag_len)
+bin_rpgc <- sweep(bin_counts, 2, filt_scale[colnames(bin_counts)], `*`)
+
+# per-window sums over the 10 bins
+win_rpgc <- rowsum(bin_rpgc, bins_df$win_idx, reorder = TRUE)
+win_frags <- rowSums(rowsum(bin_counts, bins_df$win_idx, reorder = TRUE))
+
+other_levels <- setdiff(filt_levels, target_group)
+df_windows$total_frags <- win_frags
+df_windows$target_rpgc <- win_rpgc[, target_group]
+df_windows$others_mean_rpgc <- rowMeans(win_rpgc[, other_levels, drop = FALSE])
+df_windows$fold_vs_others <- df_windows$target_rpgc /
+  df_windows$others_mean_rpgc
+df_windows$keep <- df_windows$target_rpgc > 0 &
+  df_windows$total_frags >= min_frags_window &
+  df_windows$target_rpgc >= fold_cutoff * df_windows$others_mean_rpgc
+
+colnames(win_rpgc) <- paste0("rpgc_", colnames(win_rpgc))
+write.table(
+  cbind(df_windows, win_rpgc),
+  file.path(out_dir, "SNP_window_RPGC_macrophage_filter.tsv"),
+  sep = "\t",
+  quote = FALSE,
+  row.names = FALSE
+)
+
+print(paste0(
+  "Macrophage filter kept ",
+  sum(df_windows$keep),
+  " of ",
+  nrow(df_windows),
+  " SNPs."
+))
+# carry fold_vs_others (same values as the TSV) for the panel titles
+df_2_plot$fold_vs_others <- df_windows$fold_vs_others
+df_2_plot <- df_2_plot[df_windows$keep, , drop = FALSE]
+
 
 df_2_plot$annot <-
   stringr::str_c(
@@ -780,13 +1028,15 @@ gviz_grobs <- foreach::foreach(
   {
     row <- df_2_plot[i, ]
     main_i <- sprintf(
-      "%s, %s (%s:%s) +/- %s bp, %s bp bins (RPGC)",
+      "%s, %s (%s:%s) +/- %s bp, %s bp bins (RPGC), Macrophage fold vs others = %s",
       row$SYMBOL,
       row$variantID,
       row$seqnames,
       format(row$start, big.mark = ","),
       format(gviz_window, big.mark = ","),
-      gviz_bin_size
+      gviz_bin_size,
+      # Inf when all other groups are 0
+      formatC(row$fold_vs_others, format = "f", digits = 2)
     )
     panel <- grid::grid.grabExpr(
       plot_snp_tracks(
@@ -839,14 +1089,14 @@ if (any(failed)) {
   gviz_grobs <- gviz_grobs[!failed]
 }
 
-out_dir <- "monocyte_SNP_by_cell_type"
+out_dir <- "DA_SNP_by_cell_type"
 if (!dir.exists(out_dir)) {
   dir.create(out_dir, recursive = TRUE)
 }
 
 # 2x2 grid per landscape page; larger page keeps the 6 stacked tracks legible.
 pdf(
-  file.path(out_dir, "monocyte_SNP_by_cell_type_panels.pdf"),
+  file.path(out_dir, "DA_SNP_by_cell_type_panels.pdf"),
   width = 14,
   height = 10.5
 )
@@ -867,3 +1117,20 @@ for (pg in seq_len(n_pages)) {
   )
 }
 invisible(dev.off())
+
+# # rs150652488
+# plot_snp_tracks(
+#   snp_chr = "chr19",
+#   snp_pos = 45479071,
+#   gviz_window = 5000,
+#   gviz_bin_size = 50,
+#   main = "ERCC1, rs150652488 (chr19:45479071) +/- 5 kb, 50 bp bins (RPGC)"
+# )
+
+# plot_snp_tracks(
+#   snp_chr = "chr19",
+#   snp_pos = 45479071,
+#   gviz_window = 1000,
+#   gviz_bin_size = 50,
+#   main = "ERCC1, rs150652488 (chr19:45479071) +/- 1 kb, 50 bp bins (RPGC)"
+# )
