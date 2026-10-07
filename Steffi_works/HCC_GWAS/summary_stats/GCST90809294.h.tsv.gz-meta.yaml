@@ -1,0 +1,27 @@
+coordinate_system: 1-based
+data_file_md5sum: dc9a84ffd1d959b83def64db6f3c2f22
+data_file_name: GCST90809294.h.tsv.gz
+date_metadata_last_modified: 2026-03-20
+file_type: GWAS-SSF v1.0
+genome_assembly: GRCh38
+genotyping_technology:
+- Genome-wide genotyping array
+- Whole genome sequencing
+gwas_catalog_api: https://www.ebi.ac.uk/gwas/rest/api/studies/GCST90809294
+gwas_id: GCST90809294
+harmonisation_reference: ftp://ftp.ensembl.org/pub/release-95/fasta/homo_sapiens/dna/
+is_harmonised: true
+is_sorted: true
+ontology_mapping:
+- EFO_0000182
+samples:
+- case_control_study: true
+  sample_ancestry_category:
+  - East Asian
+  sample_size: 238015
+- case_control_study: true
+  sample_ancestry_category:
+  - European
+  sample_size: 1865284
+trait_description:
+- Hepatocellular carcinoma

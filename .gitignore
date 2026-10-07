@@ -512,3 +512,7 @@ Steffi_works/HCC_GWAS/GRCh37/hcc_ea_011123.txt
 Steffi_works/HCC_GWAS/GRCh37/hcc_eur_200324.txt
 **/*_SNP_by_cell_type/*.pdf
 *.tbi
+Steffi_works/HCC_GWAS/summary_stats/GCST90809294.h.tsv.gz
+Steffi_works/HCC_GWAS/summary_stats/GCST90809295.h.tsv.gz
+Steffi_works/HCC_GWAS/summary_stats/GCST90809296.h.tsv.gz
+Steffi_works/HCC_GWAS/summary_stats/GCST90809296.h.tsv.gz.1

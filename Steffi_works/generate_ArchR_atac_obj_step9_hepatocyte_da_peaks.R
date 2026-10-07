@@ -1016,6 +1016,7 @@ gviz_grobs <- foreach::foreach(
   .errorhandling = "pass"
 ) %dopar%
   {
+    cat("Processing row ", i, "\n")
     row <- df_2_plot[i, ]
     main_i <- sprintf(
       "%s, %s (%s:%s) +/- %s bp, %s bp bins (RPGC), \nHepatocyte fold vs others = %s",
