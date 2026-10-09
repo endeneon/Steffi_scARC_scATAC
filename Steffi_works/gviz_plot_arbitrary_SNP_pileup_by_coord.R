@@ -330,6 +330,7 @@ plot_snp_tracks <- function(
   snp_pos,
   gviz_window = 5000,
   gviz_bin_size = 50,
+  ymax = NULL,
   main = sprintf(
     "%s:%s +/- %s bp, %s bp bins (RPGC)",
     snp_chr,
@@ -459,12 +460,22 @@ plot_snp_tracks <- function(
     grp_levels
   )
 
-  # shared y-limit across all cell-type tracks, with headroom
-  y_max <- max(mat_grp, na.rm = TRUE)
-  if (!is.finite(y_max) || y_max <= 0) {
-    y_max <- 1
+  # shared y-limit across all cell-type tracks: user-supplied or auto with headroom
+  if (is.null(ymax)) {
+    y_max <- max(mat_grp, na.rm = TRUE)
+    if (!is.finite(y_max) || y_max <= 0) {
+      y_max <- 1
+    }
+    ylim_use <- c(0, y_max * 1.05)
+  } else {
+    stopifnot(
+      is.numeric(ymax),
+      length(ymax) == 1,
+      is.finite(ymax),
+      ymax > 0
+    )
+    ylim_use <- c(0, ymax)
   }
-  ylim_use <- c(0, y_max * 1.05)
 
   # one vertical track per cell type
   cov_tracks <- lapply(grp_levels, function(lv) {
@@ -685,4 +696,14 @@ plot_snp_tracks(
   gviz_window = 50000,
   gviz_bin_size = 50,
   main = "PICALM, rs10792832 (chr11:86156833) +/- 5 kb, 50 bp bins (RPGC)"
+)
+
+# rs3754884
+plot_snp_tracks(
+  snp_chr = "chr2",
+  snp_pos = 98508913,
+  gviz_window = 10000,
+  gviz_bin_size = 50,
+  ymax = 50,
+  main = "INPP4A, rs3754884 (chr2:98508913) +/- 10 kb, 50 bp bins (RPGC)"
 )

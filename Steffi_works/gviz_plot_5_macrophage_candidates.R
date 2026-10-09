@@ -330,6 +330,7 @@ plot_snp_tracks <- function(
   snp_pos,
   gviz_window = 5000,
   gviz_bin_size = 50,
+  ymax = NULL,
   main = sprintf(
     "%s:%s +/- %s bp, %s bp bins (RPGC)",
     snp_chr,
@@ -459,12 +460,31 @@ plot_snp_tracks <- function(
     grp_levels
   )
 
-  # shared y-limit across all cell-type tracks, with headroom
-  y_max <- max(mat_grp, na.rm = TRUE)
-  if (!is.finite(y_max) || y_max <= 0) {
-    y_max <- 1
+  # shared y-limit across all cell-type tracks: user-supplied or auto with headroom
+  if (is.null(ymax)) {
+    y_max <- max(mat_grp, na.rm = TRUE)
+    if (!is.finite(y_max) || y_max <= 0) {
+      y_max <- 1
+    }
+    ylim_use <- c(0, y_max * 1.05)
+  } else {
+    stopifnot(
+      is.numeric(ymax),
+      length(ymax) == 1,
+      is.finite(ymax),
+      ymax > 0
+    )
+    ylim_use <- c(0, ymax)
   }
-  ylim_use <- c(0, y_max * 1.05)
+
+  # Gviz centres axis-track titles at x = 0.075 of the title panel, which clips
+  # long horizontal labels on the left; leading spaces as wide as the label
+  # shift the visible text so it starts there instead (requires an open device)
+  pad_title <- function(x) {
+    w_txt <- graphics::strwidth(x, units = "inches", font = 2)
+    w_sp <- graphics::strwidth(" ", units = "inches", font = 2)
+    paste0(strrep(" ", ceiling(w_txt / w_sp)), x)
+  }
 
   # one vertical track per cell type
   cov_tracks <- lapply(grp_levels, function(lv) {
@@ -473,9 +493,9 @@ plot_snp_tracks <- function(
       data = matrix(mat_grp[, lv], nrow = 1),
       genome = "hg38",
       chromosome = snp_chr,
-      name = lv,
+      name = pad_title(lv),
       type = "polygon",
-      fill.mountain = rep(pal[[lv]], 2),
+      fill.mountain = rep(grDevices::adjustcolor(pal[[lv]], alpha.f = 0.75), 2),
       col.mountain = NA,
       ylim = ylim_use,
       showAxis = TRUE,
@@ -560,8 +580,9 @@ plot_snp_tracks <- function(
     start = snp_pos,
     end = snp_pos,
     chromosome = snp_chr,
-    col = "red",
+    col = grDevices::adjustcolor("black", alpha.f = 0.5),
     fill = "#FFE9E9",
+    lty = "dashed",
     inBackground = TRUE
   )
 
@@ -572,6 +593,25 @@ plot_snp_tracks <- function(
     if (!is.null(peak_track)) 1, # peaks
     2 # genes (squished)
   )
+
+  # title.width is a multiplier on Gviz's default panel width, which fits one
+  # rotated line of text (+0.15 in) plus the y-axis. Size the panel to the
+  # widest horizontal label instead: it starts at 7.5% of the panel (see
+  # pad_title) and must clear the y-axis on the right.
+  str_in <- function(x, fn, cex = 1, font = 1) {
+    max(as.numeric(grid::convertUnit(
+      fn(x) * cex,
+      "inches",
+      valueOnly = TRUE
+    )))
+  }
+  ax_in <- (str_in(as.character(pretty(ylim_use)), grid::stringWidth) + 0.18) *
+    0.6
+  grid::pushViewport(grid::viewport(gp = grid::gpar(fontface = "bold")))
+  label_in <- str_in(grp_levels, grid::stringWidth, cex = 0.7)
+  grid::popViewport()
+  default_in <- str_in("g_Tg_T", grid::stringHeight, cex = 0.7) + 0.15 + ax_in
+  title_width <- ((label_in + 0.1) / 0.925 + ax_in) / default_in
 
   Gviz::plotTracks(
     c(
@@ -592,6 +632,8 @@ plot_snp_tracks <- function(
     col.axis = "black",
     col.border.title = "transparent",
     cex.title = 0.7,
+    rotation.title = 0,
+    title.width = title_width,
     main = main,
     cex.main = 1.1,
     col.main = "black"
@@ -685,4 +727,23 @@ plot_snp_tracks(
   gviz_window = 50000,
   gviz_bin_size = 50,
   main = "PICALM, rs10792832 (chr11:86156833) +/- 5 kb, 50 bp bins (RPGC)"
+)
+
+# rs10792832
+plot_snp_tracks(
+  snp_chr = "chr11",
+  snp_pos = 86156833,
+  gviz_window = 50000,
+  gviz_bin_size = 50,
+  main = "PICALM, rs10792832 (chr11:86156833) +/- 5 kb, 50 bp bins (RPGC)"
+)
+
+# rs3754884
+plot_snp_tracks(
+  snp_chr = "chr2",
+  snp_pos = 98508913,
+  gviz_window = 10000,
+  gviz_bin_size = 50,
+  ymax = 50,
+  main = "INPP4A, rs3754884 (chr2:98508913) +/- 10 kb, 50 bp bins (RPGC)"
 )

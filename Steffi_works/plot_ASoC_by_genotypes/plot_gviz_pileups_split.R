@@ -1,0 +1,161 @@
+#! /usr/bin/env Rscript
+
+# Split the hepatocyte ASoC SNP table into N roughly-even parts for the
+# scatter/gather MPI pipeline (see plot_gviz_pileups_mpi_worker.R).
+#
+# Each part (except possibly the last) holds a MULTIPLE OF 4 SNPs so that every
+# chunk fills whole 2x2 pages when the panels are later combined 4-per-page.
+# The final part takes the remainder.
+#
+# Outputs, under <writeout_dir>/parts/:
+#   part_01.tsv ... part_NN.tsv   one SNP sub-table per job-array element
+#   manifest.txt                  single integer: the number of parts written
+#
+# Run standalone (the guardian script calls it for you):
+#   Rscript plot_gviz_pileups_split.R -i <input_tsv> -o <writeout_dir> \
+#     [-n <n_parts>] [-p <parts_dir>] [-l <panels_per_page>]
+
+setwd(
+  "/research_jude/rgs01_jude/groups/cab/projects/automapper/common/szhang37/pulled_git_repos/Multiome_main/Steffi_works"
+)
+
+# ---- parameters ------------------------------------------------------------
+suppressPackageStartupMessages(library(argparse))
+
+parser <- ArgumentParser(
+  description = "Split a SNP list into N parts for the scatter/gather MPI pipeline."
+)
+parser$add_argument(
+  "-n",
+  "--n-parts",
+  type = "integer",
+  default = 8L,
+  help = "Number of parts to aim for (default: %(default)s)"
+)
+parser$add_argument(
+  "-i",
+  "--input-tsv",
+  type = "character",
+  required = TRUE,
+  help = "Path to the input SNP list TSV"
+)
+parser$add_argument(
+  "-o",
+  "--writeout-dir",
+  type = "character",
+  required = TRUE,
+  help = "Output directory for PDFs/parts"
+)
+parser$add_argument(
+  "-p",
+  "--parts-dir",
+  type = "character",
+  default = "parts",
+  help = "Directory to write part_*.tsv and manifest.txt into; relative paths are joined onto --writeout-dir (default: %(default)s)"
+)
+parser$add_argument(
+  "-l",
+  "--panels-per-page",
+  type = "integer",
+  default = 4L,
+  help = "Chunk sizes are rounded up to a multiple of this (default: %(default)s)"
+)
+cli_args <- parser$parse_args()
+
+n_parts <- cli_args$n_parts
+stopifnot(is.finite(n_parts), n_parts >= 1L)
+
+input_tsv <- cli_args$input_tsv
+writeout_dir <- cli_args$writeout_dir
+# --parts-dir may be absolute or relative (to writeout_dir); file.path() does
+# not special-case an absolute second component, so resolve it explicitly.
+parts_dir <- if (grepl("^/", cli_args$parts_dir)) {
+  cli_args$parts_dir
+} else {
+  file.path(writeout_dir, cli_args$parts_dir)
+}
+panels_per_page <- cli_args$panels_per_page # keep chunk sizes a multiple of this
+
+# ---- read ------------------------------------------------------------------
+# quote = "" / comment.char = "": fields in the motif / TF columns contain
+# apostrophes and quotes; with R's default quoting those rows merge and only
+# ~148 of the 315 records parse. Disabling quote handling reads all 315.
+df_sig_snp_list <- read.table(
+  input_tsv,
+  sep = "\t",
+  header = TRUE,
+  stringsAsFactors = FALSE,
+  quote = "",
+  comment.char = ""
+)
+n_snps <- nrow(df_sig_snp_list)
+if (!n_snps) {
+  stop("No SNPs found in ", input_tsv)
+}
+
+# ---- chunk size: ceil(n / n_parts) rounded UP to a multiple of 4 -----------
+# Rounding the chunk (not the count) up to a multiple of 4 keeps every part but
+# the last aligned to whole 2x2 pages. The actual number of parts written is
+# then ceil(n_snps / chunk), which may be <= n_parts.
+base_chunk <- ceiling(n_snps / n_parts)
+chunk <- ceiling(base_chunk / panels_per_page) * panels_per_page
+chunk <- max(chunk, panels_per_page)
+
+starts <- seq(1L, n_snps, by = chunk)
+actual_parts <- length(starts)
+
+# ---- (re)create the parts directory ----------------------------------------
+# Regenerate only the part tables and manifest. Completed chunk_XX.pdf outputs
+# and their chunk_XX.done signatures are DELIBERATELY preserved so an
+# interrupted run can resume: the worker records each part's md5 in its
+# signature, and the array script / guardian re-run only parts whose part file
+# changed (md5 mismatch) or whose PDF is missing. write.table is deterministic,
+# so an unchanged input reproduces byte-identical parts and the signatures stay
+# valid across re-splits.
+if (dir.exists(parts_dir)) {
+  old <- list.files(
+    parts_dir,
+    pattern = "^(part_\\d+\\.tsv|manifest\\.txt)$",
+    full.names = TRUE
+  )
+  if (length(old)) {
+    file.remove(old)
+  }
+} else {
+  dir.create(parts_dir, recursive = TRUE)
+}
+
+# ---- write the parts -------------------------------------------------------
+for (p in seq_len(actual_parts)) {
+  i0 <- starts[[p]]
+  i1 <- min(i0 + chunk - 1L, n_snps)
+  part_df <- df_sig_snp_list[i0:i1, , drop = FALSE]
+  out_tsv <- file.path(parts_dir, sprintf("part_%02d.tsv", p))
+  write.table(
+    part_df,
+    file = out_tsv,
+    sep = "\t",
+    quote = FALSE,
+    row.names = FALSE,
+    col.names = TRUE
+  )
+  message(sprintf(
+    "part %02d: %d SNPs (rows %d-%d) -> %s",
+    p,
+    i1 - i0 + 1L,
+    i0,
+    i1,
+    out_tsv
+  ))
+}
+
+# ---- manifest (number of parts) so the array / guardian can size itself ----
+writeLines(as.character(actual_parts), file.path(parts_dir, "manifest.txt"))
+
+message(sprintf(
+  "Wrote %d part(s) of up to %d SNPs each (%d SNPs total) into %s",
+  actual_parts,
+  chunk,
+  n_snps,
+  parts_dir
+))

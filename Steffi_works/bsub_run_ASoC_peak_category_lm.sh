@@ -8,8 +8,8 @@ mkdir -p main_log
 #BSUB -R "span[hosts=1]"
 #BSUB -q "large_mem"
 #BSUB -J "run_ASoC_peak_category_lm_PICALM"
-#BSUB -o main_log/ASoC_peak_category_lm_%J_PICALM.out
-#BSUB -e main_log/ASoC_peak_category_lm_%J_PICALM.err
+#BSUB -o main_log/ASoC_peak_category_all_%J.out
+#BSUB -e main_log/ASoC_peak_category_all_%J.err
 
 # Compare per-sample peak RPGC between sample categories (Primary vs Resistant,
 # Resistant reference) with a linear model and a Wilcoxon test, and draw the

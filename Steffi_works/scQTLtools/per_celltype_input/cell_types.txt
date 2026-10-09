@@ -1,0 +1,5 @@
+Fibroblast/HSC
+Macrophage
+Hepatocyte
+Endothelial
+B/Plasma cell

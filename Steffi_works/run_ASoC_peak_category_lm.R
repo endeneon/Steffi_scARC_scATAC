@@ -102,12 +102,18 @@ print("All settings initialized successfully.")
 # writeout_dir <- "hepatocyte_ASoC_peak_category_lm"
 # plot_dir <- file.path(writeout_dir, "plots")
 
-snp_summary_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_GT_summary_min3.tsv"
-snp_genotype_file <- "test_ASoC_w_WASP/ASoC_Macrophage_genotyping_output/Macrophage_ASoC_genotypes_GT_only.tsv"
+snp_summary_file <- "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_summary.tsv"
+snp_genotype_file <- "scQTLtools/Macrophage_ASoC_genotypes_extended_GT_only.tsv"
 snp_annotation_file <-
   "sig_ASoC_by_celltype/sig_ASoC_in_Macrophage_annotated.tsv"
 archr_project_dir <- "ArchR_macrophages"
 
+# projHepatocytes@cellColData$category <- "Primary"
+# projHepatocytes@cellColData$category[str_detect(
+#   as.character(projHepatocytes@cellColData$Sample),
+#   "pre$"
+# )] <- "Resistant"
+# saveArchRProject(projHepatocytes, archr_project_dir, overwrite = TRUE)
 # Fail-fast: every required input must exist before we start. Report ALL
 # missing paths at once (files checked as files, the ArchR project as a dir),
 # resolved to absolute paths so it's obvious WHERE we looked, rather than dying
@@ -341,10 +347,12 @@ gt_key <- paste(df_genotypes$CHROM, df_genotypes$POS, sep = ":")
 snp_key <- paste(df_sig_snp_list$CHROM, df_sig_snp_list$POS, sep = ":")
 missing_gt <- setdiff(snp_key, gt_key)
 if (length(missing_gt)) {
-  stop(
-    length(missing_gt),
-    " SNP(s) from the summary table have no per-sample genotypes, e.g. ",
-    paste(head(missing_gt, 3), collapse = ", ")
+  print(
+    paste0(
+      length(missing_gt),
+      " SNP(s) from the summary table have no per-sample genotypes, e.g. ",
+      paste(head(missing_gt, 3), collapse = ", ")
+    )
   )
 }
 
